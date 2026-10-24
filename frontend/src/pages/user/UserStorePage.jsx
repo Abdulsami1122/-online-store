@@ -127,6 +127,8 @@ export default function UserStorePage({ defaultOpenCart = false, defaultSection 
     if (e) e.stopPropagation();
     addToCart(product, 1);
     setAddedId(product._id);
+    setCartDrawerOpen(true);
+    setCheckoutStep('cart');
     setTimeout(() => setAddedId(null), 1400);
   };
 
@@ -1392,56 +1394,6 @@ export default function UserStorePage({ defaultOpenCart = false, defaultSection 
           </Link>
         </div>
       </footer>
-
-      {/* Floating Bottom Cart Bar (Appears when items are in bag) */}
-      {itemsCount > 0 && !cartDrawerOpen && (
-        <div
-          onClick={() => {
-            setCartDrawerOpen(true);
-            setCheckoutStep('cart');
-          }}
-          style={{
-            position: 'fixed',
-            bottom: '24px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 45,
-            width: '92%',
-            maxWidth: '460px',
-            backgroundColor: '#0f172a',
-            color: '#ffffff',
-            padding: '0.85rem 1.25rem',
-            borderRadius: '9999px',
-            boxShadow: '0 10px 30px rgba(15, 23, 42, 0.45)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            cursor: 'pointer',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-          }}
-        >
-          <div>
-            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-              {itemsCount} {itemsCount === 1 ? 'item' : 'items'} in Bag
-            </div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>
-              {formatCurrency(totalPrice)}
-            </div>
-          </div>
-
-          <button
-            className="btn btn-primary btn-sm"
-            style={{
-              borderRadius: '9999px',
-              padding: '0.55rem 1.25rem',
-              fontWeight: 700,
-              gap: '0.35rem',
-            }}
-          >
-            Checkout Now <ArrowRight size={15} />
-          </button>
-        </div>
-      )}
 
       {/* Floating AI Assistant Trigger Button (Bottom Right) */}
       <button
