@@ -58,51 +58,55 @@ export const chatWithAssistant = async (req, res) => {
       }
     }
 
-    // 4. Try Gemini AI if API key is provided and looks valid
+    // 4. Call Gemini AI with strict store grounding using GEMINI_API_KEY & GEMINI_MODEL from .env
     let aiReply = null;
-    if (process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.startsWith('AQ.')) {
+    if (process.env.GEMINI_API_KEY) {
       try {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        // Models to try in order of availability
-        const modelNames = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
-        if (process.env.GEMINI_MODEL && !modelNames.includes(process.env.GEMINI_MODEL)) {
-          modelNames.unshift(process.env.GEMINI_MODEL);
-        }
+        const primaryModel = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
         
         const catalogContext = products
-          .map((p) => `- ${p.title} (${p.category}): Rs. ${p.price.toLocaleString()} | Stock: ${p.stock} | Details: ${p.description}`)
+          .map((p) => `- ${p.title} (${p.category}): Exact Price: Rs. ${p.price.toLocaleString()} | Stock: ${p.stock} units | Description: ${p.description}`)
           .join('\n');
 
-        const systemPrompt = `You are the friendly, helpful AI Order Assistant for "My Store", an online fashion & lifestyle brand in Pakistan.
+        let orderContext = 'No specific order searched.';
+        if (matchedOrder) {
+          orderContext = `Customer's Searched Order: Order #${matchedOrder.orderNumber} | Status: "${matchedOrder.status}" | Customer Name: ${matchedOrder.customerName} | Total Amount: Rs. ${matchedOrder.totalPrice.toLocaleString()} (Cash on Delivery) | Shipping Address: ${matchedOrder.shippingAddress}`;
+        }
 
-Store Catalog:
+        const systemPrompt = `You are the official, intelligent AI Order Assistant for "My Store", an e-commerce boutique in Pakistan.
+
+LIVE STORE INVENTORY:
 ${catalogContext}
 
-Store Policies:
-- Delivery: 3-5 working days all across Pakistan via Leopard Courier & TCS.
-- Delivery Charges: Standard Rs. 200 flat delivery charge nationwide.
-- Payment: 100% Cash on Delivery (COD) available nationwide. No advance payment required!
-- Returns & Exchanges: 7-day hassle-free return/exchange policy.
-- How to Order: Customers can click "Add to Bag" or "Buy Now" on the store landing page, or order directly via WhatsApp.
+${orderContext}
 
-Instructions:
-- Reply in polite, natural Roman Urdu (or English if the user asked in English).
-- Keep answers concise, helpful, and friendly (1-3 sentences max).
-- If customer asks about a product, mention its price, stock, and that its photo card is attached below.
-- Customer Question: "${query}"`;
+STORE POLICIES (STRICT FACTS):
+- Delivery Time: 3 to 5 working days all across Pakistan (Karachi, Lahore, Islamabad, Rawalpindi, and all cities) via Leopard Courier & TCS.
+- Delivery Charges: Standard flat Rs. 200 nationwide.
+- Payment Method: 100% Cash on Delivery (COD) available everywhere. Zero advance payment required. Customers pay only when the parcel arrives at their doorstep.
+- Returns & Exchanges: 7-day hassle-free return and size exchange guarantee.
+- How to Order: Customers can click "Add to Bag" or "Buy Now" on the website landing page, or contact our WhatsApp (+92 300 1234567).
 
-        for (const mName of modelNames) {
-          try {
-            const model = genAI.getGenerativeModel({ model: mName });
-            const result = await model.generateContent(systemPrompt);
-            aiReply = result.response.text();
-            if (aiReply) break;
-          } catch (modelErr) {
-            // try next model
-          }
-        }
+STRICT ANTI-HALLUCINATION RULES:
+1. ONLY provide 100% factual information based strictly on the Store Inventory and Policies above.
+2. NEVER guess or invent wrong prices, wrong discounts, or imaginary products.
+3. If customer asks about an item in the catalog (e.g. T-Shirt, Shoes, Handbag, Watch), state its exact price in Rs. and mention that its photo card is attached below.
+4. Reply in natural, friendly Roman Urdu (or English if the customer asked in English). Keep it concise (1 to 3 sentences).
+
+Customer Question: "${query}"`;
+
+        const model = genAI.getGenerativeModel({ model: primaryModel });
+        
+        // Race with a 7.5s timeout so high API spikes don't stall the user
+        const result = await Promise.race([
+          model.generateContent(systemPrompt),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Gemini API timeout')), 7500)),
+        ]);
+        
+        aiReply = result?.response?.text();
       } catch (geminiErr) {
-        console.warn('Gemini invocation error, using built-in NLP engine:', geminiErr.message);
+        console.warn('Gemini API note (falling back to database grounding):', geminiErr.message);
       }
     }
 
