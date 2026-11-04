@@ -1,0 +1,19 @@
+# Root-level gitignore (safety net)
+# Backend and frontend each have their own .gitignore too.
+
+# NEVER commit secrets
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Node
+**/node_modules/
+
+# Build output
+**/dist/
+**/build/
+
+# OS
+.DS_Store
+Thumbs.db
+

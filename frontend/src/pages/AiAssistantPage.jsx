@@ -1,24 +1,24 @@
 import { useState } from 'react';
-import { Bot, Send, Sparkles, MessageCircle, RefreshCw } from 'lucide-react';
+import { Bot, Send, RefreshCw } from 'lucide-react';
 import { sendChatMessage } from '../api/aiApi';
 
 export default function AiAssistantPage() {
   const [messages, setMessages] = useState([
     {
       sender: 'user',
-      text: 'is shirt ki price kya hai?',
+      text: 'What is the price of the shirt?',
     },
     {
       sender: 'assistant',
-      text: 'Yeh shirt ki price Rs. 1,200 hai.',
+      text: 'The shirt costs Rs. 1,200.',
     },
     {
       sender: 'user',
-      text: 'Delivery kitne din mein hogi?',
+      text: 'How long does delivery take?',
     },
     {
       sender: 'assistant',
-      text: 'Delivery usually 3-5 working days mein hoti hai. Aapka location ke hisab se time thoda kam ya zyada ho sakta hai.',
+      text: 'Delivery usually takes 3–5 working days across Pakistan.',
     },
   ]);
 
@@ -41,7 +41,7 @@ export default function AiAssistantPage() {
         ...prev,
         {
           sender: 'assistant',
-          text: 'Maazrat, abhi connection issue hai. Delivery usually 3-5 working days mein hoti hai.',
+          text: 'Sorry, I could not connect right now. Please try again.',
         },
       ]);
     } finally {
@@ -51,12 +51,12 @@ export default function AiAssistantPage() {
 
   const handleReset = () => {
     setMessages([
-      { sender: 'user', text: 'is shirt ki price kya hai?' },
-      { sender: 'assistant', text: 'Yeh shirt ki price Rs. 1,200 hai.' },
-      { sender: 'user', text: 'Delivery kitne din mein hogi?' },
+      { sender: 'user', text: 'What is the price of the shirt?' },
+      { sender: 'assistant', text: 'The shirt costs Rs. 1,200.' },
+      { sender: 'user', text: 'How long does delivery take?' },
       {
         sender: 'assistant',
-        text: 'Delivery usually 3-5 working days mein hoti hai. Aapka location ke hisab se time thoda kam ya zyada ho sakta hai.',
+        text: 'Delivery usually takes 3–5 working days across Pakistan.',
       },
     ]);
   };
@@ -118,7 +118,7 @@ export default function AiAssistantPage() {
               AI Assistant
             </h3>
             <p style={{ fontSize: '0.775rem', color: '#64748b' }}>
-              Ask anything about our products, delivery or orders.
+              Ask in English or Urdu and I will reply in the same language.
             </p>
           </div>
         </div>
@@ -250,11 +250,11 @@ export default function AiAssistantPage() {
         {/* Preset Chips */}
         <div style={{ padding: '0.75rem 1.25rem', backgroundColor: '#ffffff', borderTop: '1px solid #f1f5f9', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {[
-            'is shirt ki price kya hai?',
-            'Delivery kitne din mein hogi?',
-            'Delivery charges kitne hain?',
-            'Watch ki price kya hai?',
-            'Cash on delivery available hai?',
+            'What is the shirt price?',
+            'How long does delivery take?',
+            'What are the delivery charges?',
+            'What is the watch price?',
+            'Is Cash on Delivery available?',
           ].map((ch, idx) => (
             <button
               key={idx}

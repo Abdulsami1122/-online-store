@@ -294,3 +294,213 @@ input, select, textarea {
   background: var(--primary-light);
   color: var(--primary);
 }
+
+/* ==========================================================================
+   LUXURY STOREFRONT STYLES (Matching Mockup 100%)
+   ========================================================================== */
+
+.font-serif {
+  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+}
+
+.font-script {
+  font-family: 'Alex Brush', 'Playfair Display', cursive, serif;
+}
+
+.font-sans {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Smooth luxury shadows */
+.shadow-luxury {
+  box-shadow: 0 10px 35px -5px rgba(109, 14, 59, 0.08), 0 4px 12px -2px rgba(109, 14, 59, 0.04);
+}
+
+.shadow-luxury-hover:hover {
+  box-shadow: 0 20px 45px -8px rgba(109, 14, 59, 0.14), 0 8px 18px -4px rgba(109, 14, 59, 0.06);
+  transform: translateY(-4px);
+}
+
+.shadow-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+/* Luxury animations */
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-float {
+  animation: floatGentle 4s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 12px rgba(163, 31, 89, 0.4));
+  }
+}
+
+.animate-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* Category Card Styling */
+.category-card {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(109, 14, 59, 0.08);
+}
+
+.category-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(109, 14, 59, 0.25);
+  box-shadow: 0 14px 30px -6px rgba(109, 14, 59, 0.12);
+}
+
+.category-card:hover .cat-img {
+  transform: scale(1.08);
+}
+
+/* Product Card Styling */
+.luxury-product-card {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.luxury-product-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(109, 14, 59, 0.18);
+  box-shadow: 0 18px 40px -8px rgba(109, 14, 59, 0.12);
+}
+
+.luxury-product-card .product-img {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.luxury-product-card:hover .product-img {
+  transform: scale(1.06);
+}
+
+/* Arch mask for luxury hero photos */
+.arch-frame {
+  border-radius: 200px 200px 32px 32px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px -15px rgba(109, 14, 59, 0.2);
+  border: 4px solid #ffffff;
+}
+
+/* Backdrop Blur Drawer */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(20, 5, 12, 0.55);
+  backdrop-filter: blur(5px);
+  z-index: 1000;
+  transition: opacity 0.3s ease;
+}
+
+.drawer-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  z-index: 1001;
+  box-shadow: -10px 0 35px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 3, 9, 0.6);
+  backdrop-filter: blur(6px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  background: #ffffff;
+  border-radius: 24px;
+  max-width: 650px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+  animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Subtle botanical pattern overlay */
+.bg-botanical {
+  background-image: radial-gradient(rgba(109, 14, 59, 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+  .hero-split {
+    flex-direction: column !important;
+    text-align: center;
+  }
+  .arch-frame {
+    max-width: 320px;
+    margin: 0 auto;
+    border-radius: 120px 120px 24px 24px;
+  }
+  .grid-responsive-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+  .grid-responsive-5 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-responsive-4 {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+}

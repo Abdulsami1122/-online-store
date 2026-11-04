@@ -4,14 +4,14 @@ import { sendChatMessage } from '../../api/aiApi';
 import { useCart } from '../../context/CartContext';
 import { formatCurrency } from '../../utils/formatters';
 
-export default function AiAssistantModal({ onClose }) {
+export default function AiAssistantModal({ isOpen = true, onClose }) {
   const { addToCart } = useCart();
   const [addedProductId, setAddedProductId] = useState(null);
 
   const [messages, setMessages] = useState([
     {
       sender: 'assistant',
-      text: 'Assalam-o-Alaikum! Main aapka AI Store Assistant hoon. Main products ki price, photos, delivery time, Cash on Delivery ya order tracking ke baray mein aapki madad kar sakta hoon. Aap mujhse kya poochna chahein ge?',
+      text: 'Hello! I am your AI Store Assistant. Ask me about product prices, delivery, Cash on Delivery, or order tracking. I can reply in English or Urdu.',
     },
   ]);
 
@@ -21,16 +21,30 @@ export default function AiAssistantModal({ onClose }) {
 
   // Lock background body scroll when drawer is open
   useEffect(() => {
+    if (!isOpen) return;
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && onClose) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
     return () => {
       document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, typing]);
+    if (isOpen) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, typing, isOpen]);
+
+  if (!isOpen) return null;
 
   const handleSend = async (textToSend) => {
     const query = textToSend || input;
@@ -54,7 +68,7 @@ export default function AiAssistantModal({ onClose }) {
         ...prev,
         {
           sender: 'assistant',
-          text: 'Maazrat, thoda busy hoon! Delivery usually 3-5 working days mein hoti hai aur T-Shirt Rs. 1,200 ki hai.',
+          text: 'Sorry, I could not connect right now. Please try again.',
         },
       ]);
     } finally {
@@ -69,13 +83,12 @@ export default function AiAssistantModal({ onClose }) {
   };
 
   const quickChips = [
-    'is shirt ki price kya hai?',
-    'Delivery kitne din mein hogi?',
-    'Shoes dikhao',
-    'Watch ki details',
-    'Delivery charges kitne hain?',
-    'Cash on delivery available hai?',
-    'track #10024',
+    'What is the price of the shirt?',
+    'How long does delivery take?',
+    'Show me shoes',
+    'What are the delivery charges?',
+    'Is Cash on Delivery available?',
+    'Track order #10024',
   ];
 
   return (
@@ -137,7 +150,7 @@ export default function AiAssistantModal({ onClose }) {
                 AI Assistant
               </h3>
               <p style={{ fontSize: '0.775rem', color: '#64748b' }}>
-                Ask anything about our products, delivery or orders.
+                Ask in English or Urdu and I will reply in the same language.
               </p>
             </div>
           </div>
