@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, X, Check, Image as ImageIcon } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Edit2, Trash2, X, Check, Image as ImageIcon, Upload } from 'lucide-react';
 import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../api/productApi';
+import API from '../api/axios';
 import { formatCurrency } from '../utils/formatters';
 
 export default function ProductManagementPage() {
@@ -15,10 +16,13 @@ export default function ProductManagementPage() {
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
-  const [category, setCategory] = useState('Fashion');
+  const [category, setCategory] = useState('General');
   const [image, setImage] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState('');
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef(null);
 
   const loadProducts = async () => {
     try {
@@ -40,8 +44,9 @@ export default function ProductManagementPage() {
     setTitle('');
     setPrice('');
     setStock('10');
-    setCategory('Fashion');
-    setImage('https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600');
+    setCategory('General');
+    setImage('');
+    setImageError('');
     setDescription('High quality item with fast delivery.');
     setModalOpen(true);
   };
@@ -51,10 +56,59 @@ export default function ProductManagementPage() {
     setTitle(p.title);
     setPrice(p.price);
     setStock(p.stock);
-    setCategory(p.category || 'Fashion');
-    setImage(p.image);
+    setCategory(p.category || 'General');
+    setImage(p.image || '');
+    setImageError('');
     setDescription(p.description || '');
     setModalOpen(true);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImageError('');
+
+    if (!file.type.startsWith('image/')) {
+      setImageError('Please select a valid image file (PNG, JPG, JPEG, WEBP).');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setImageError('Image file is too large (maximum 10MB).');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result;
+      setImage(dataUrl);
+
+      // Try uploading to backend /api/upload (Cloudinary storage)
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+        const { data } = await API.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        if (data?.url) {
+          setImage(data.url);
+        }
+      } catch (err) {
+        console.warn('Backend upload fallback to local data:', err);
+      } finally {
+        setUploadingImage(false);
+      }
+    };
+
+    reader.onerror = () => {
+      setImageError('Failed to read image from device.');
+      setUploadingImage(false);
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const handleDelete = async (id) => {
@@ -70,6 +124,11 @@ export default function ProductManagementPage() {
 
   const handleSaveProduct = async (e) => {
     e.preventDefault();
+    if (!image) {
+      setImageError('Please select a product image from your gallery.');
+      return;
+    }
+
     setSaving(true);
     try {
       const payload = {
@@ -313,56 +372,162 @@ export default function ProductManagementPage() {
                   onChange={(e) => setCategory(e.target.value)}
                   className="form-control"
                 >
-                  <option value="Fashion">Fashion & Apparel</option>
-                  <option value="Footwear">Footwear</option>
-                  <option value="Accessories">Accessories & Bags</option>
-                  <option value="Watches">Watches & Jewelry</option>
-                  <option value="Cosmetics">Cosmetics & Beauty</option>
                   <option value="General">General</option>
+                  <option value="Honey & Organics">Honey & Organics</option>
+                  <option value="Car Accessories">Car Accessories</option>
+                  <option value="Footwear & Shoes">Footwear & Shoes</option>
+                  <option value="Fashion & Clothes">Fashion & Clothes</option>
+                  <option value="Bags & Accessories">Bags & Accessories</option>
                 </select>
               </div>
 
+              {/* Direct Gallery Image Upload (No URL needed) */}
               <div className="form-group">
-                <label className="form-label">Image URL</label>
+                <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>Product Image *</span>
+                  {image && (
+                    <span style={{ fontSize: '0.75rem', color: '#10B981', fontWeight: 600 }}>
+                      ✓ Image Attached
+                    </span>
+                  )}
+                </label>
+
+                {/* Hidden File Input for Device Gallery / Files */}
                 <input
-                  type="url"
-                  placeholder="https://..."
-                  value={image}
-                  onChange={(e) => setImage(e.target.value)}
-                  required
-                  className="form-control"
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  style={{ display: 'none' }}
                 />
-                {/* Preset image suggestions for convenience */}
-                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.4rem', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    onClick={() => setImage('https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600')}
-                    style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: '#f1f5f9', borderRadius: '4px' }}
+
+                {image ? (
+                  /* Image Preview Card */
+                  <div
+                    style={{
+                      border: '1.5px solid #E2D9DC',
+                      borderRadius: '12px',
+                      padding: '0.85rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      backgroundColor: '#FCF7F9',
+                    }}
                   >
-                    T-Shirt
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setImage('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600')}
-                    style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: '#f1f5f9', borderRadius: '4px' }}
+                    <img
+                      src={image}
+                      alt="Product preview"
+                      style={{
+                        width: '74px',
+                        height: '74px',
+                        borderRadius: '8px',
+                        objectFit: 'cover',
+                        border: '1px solid #EFEAEB',
+                        backgroundColor: '#ffffff',
+                      }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#260618', marginBottom: '0.2rem' }}>
+                        Image Loaded from Gallery
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: '#7E757A', display: 'block', marginBottom: '0.5rem' }}>
+                        {uploadingImage ? 'Processing & uploading image...' : 'Ready to save with product'}
+                      </span>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          style={{
+                            padding: '0.35rem 0.75rem',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            borderRadius: '6px',
+                            border: '1px solid #DCD5D8',
+                            backgroundColor: '#ffffff',
+                            color: '#332E38',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                          }}
+                        >
+                          <Upload size={13} />
+                          Change Photo
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImage('');
+                            if (fileInputRef.current) fileInputRef.current.value = '';
+                          }}
+                          style={{
+                            padding: '0.35rem 0.65rem',
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            borderRadius: '6px',
+                            border: '1px solid #FECACA',
+                            backgroundColor: '#FEF2F2',
+                            color: '#DC2626',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Empty Upload Dropzone */
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      border: '2px dashed #D5CCD0',
+                      borderRadius: '12px',
+                      padding: '1.6rem 1rem',
+                      textAlign: 'center',
+                      backgroundColor: '#FAF5F7',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#6D0E3B';
+                      e.currentTarget.style.backgroundColor = '#FDF2F5';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#D5CCD0';
+                      e.currentTarget.style.backgroundColor = '#FAF5F7';
+                    }}
                   >
-                    Shoes
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setImage('https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600')}
-                    style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: '#f1f5f9', borderRadius: '4px' }}
-                  >
-                    Handbag
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setImage('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600')}
-                    style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: '#f1f5f9', borderRadius: '4px' }}
-                  >
-                    Watch
-                  </button>
-                </div>
+                    <div
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '50%',
+                        backgroundColor: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto 0.65rem',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                        color: '#6D0E3B',
+                      }}
+                    >
+                      <Upload size={20} />
+                    </div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#260618', marginBottom: '0.2rem' }}>
+                      Click to Select Image from Gallery
+                    </div>
+                    <div style={{ fontSize: '0.76rem', color: '#7E757A' }}>
+                      Supports PNG, JPG, JPEG, WEBP from your phone or PC
+                    </div>
+                  </div>
+                )}
+
+                {imageError && (
+                  <div style={{ fontSize: '0.8rem', color: '#DC2626', marginTop: '0.4rem', fontWeight: 500 }}>
+                    {imageError}
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
