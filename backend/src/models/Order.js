@@ -29,8 +29,7 @@ const orderSchema = new mongoose.Schema(
     orderItems: [
       {
         product: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Product',
+          type: mongoose.Schema.Types.Mixed,
         },
         title: { type: String, required: true },
         qty: { type: Number, required: true, default: 1 },

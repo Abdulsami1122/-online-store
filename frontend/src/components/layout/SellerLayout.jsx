@@ -28,40 +28,44 @@ export default function SellerLayout() {
             zIndex: 10,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Public User Store Link:
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
+              Store Management Portal
             </span>
-            <Link
-              to="/"
-              target="_blank"
+            <span
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: 'var(--primary)',
-                backgroundColor: 'var(--primary-light)',
-                padding: '0.25rem 0.75rem',
-                borderRadius: 'var(--radius-full)',
+                backgroundColor: '#DCFCE7',
+                color: '#15803D',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                padding: '0.15rem 0.5rem',
+                borderRadius: '999px',
               }}
             >
-              mystore.shop/ahmad <Eye size={13} />
-            </Link>
+              Active
+            </span>
           </div>
 
           {/* Quick User-Side Switcher */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <Link
               to="/"
-              className="btn btn-secondary btn-sm"
-              style={{ gap: '0.4rem', fontWeight: 700 }}
+              className="btn btn-sm"
+              style={{
+                gap: '0.45rem',
+                fontWeight: 700,
+                backgroundColor: '#6D0E3B',
+                color: '#ffffff',
+                border: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                boxShadow: '0 2px 8px rgba(109, 14, 59, 0.2)',
+                textDecoration: 'none',
+              }}
             >
-              <ShoppingBag size={14} color="#4f46e5" /> Open User Storefront
-            </Link>
-            <Link to="/track" className="btn btn-secondary btn-sm">
-              User Order Tracking
+              <ShoppingBag size={14} /> <span>View Live Customer Store</span>
             </Link>
 
             {/* Admin Avatar */}
@@ -79,7 +83,7 @@ export default function SellerLayout() {
               />
               <div style={{ fontSize: '0.85rem' }}>
                 <p style={{ fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.1 }}>
-                  {user?.name || 'Ahmad'}
+                  {user?.name || 'Store Administrator'}
                 </p>
                 <p style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>Administrator</p>
               </div>

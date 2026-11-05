@@ -405,6 +405,8 @@ input, select, textarea {
   backdrop-filter: blur(5px);
   z-index: 1000;
   transition: opacity 0.3s ease;
+  overscroll-behavior: contain;
+  touch-action: none;
 }
 
 .drawer-panel {
@@ -420,6 +422,8 @@ input, select, textarea {
   display: flex;
   flex-direction: column;
   animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overscroll-behavior: contain;
+  touch-action: auto;
 }
 
 @keyframes slideInRight {
@@ -443,6 +447,8 @@ input, select, textarea {
   justify-content: center;
   padding: 1rem;
   animation: fadeIn 0.2s ease;
+  overscroll-behavior: contain;
+  touch-action: none;
 }
 
 .modal-content {
@@ -452,8 +458,10 @@ input, select, textarea {
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  overscroll-behavior: contain;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
   animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  touch-action: auto;
 }
 
 @keyframes fadeIn {
@@ -502,5 +510,243 @@ input, select, textarea {
 @media (max-width: 480px) {
   .grid-responsive-4 {
     grid-template-columns: repeat(1, 1fr) !important;
+  }
+}
+
+/* ==========================================================================
+   ADVERTISEMENT MARQUEE CAROUSEL (Text flowing continuously from right)
+   ========================================================================== */
+
+.advertisement-ticker-wrap {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  background: linear-gradient(90deg, #56092E 0%, #6D0E3B 50%, #56092E 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  user-select: none;
+}
+
+.advertisement-ticker-track {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  animation: advertisementTickerScroll 28s linear infinite;
+  will-change: transform;
+}
+
+.advertisement-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes advertisementTickerScroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.advertisement-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 2.5rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.advertisement-item .dot-divider {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #FBBF24;
+  margin-left: 2.5rem;
+  display: inline-block;
+  box-shadow: 0 0 8px #FBBF24;
+}
+
+/* ==========================================================================
+   3D CARD ANIMATIONS & PROFESSIONAL PHYSICS
+   ========================================================================== */
+
+.perspective-scene {
+  perspective: 1200px;
+}
+
+.card-3d {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.28s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform;
+}
+
+.card-3d:hover {
+  box-shadow: 0 24px 48px -12px rgba(109, 14, 59, 0.2), 0 0 25px -5px rgba(109, 14, 59, 0.08);
+  border-color: rgba(109, 14, 59, 0.25) !important;
+}
+
+/* 3D Specular Highlight on Card */
+.card-specular-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.05) 40%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  z-index: 6;
+}
+
+.card-3d:hover .card-specular-glow {
+  opacity: 1;
+}
+
+/* 3D Elements with Depth Pop */
+.depth-image {
+  transform: translateZ(24px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-3d:hover .depth-image {
+  transform: translateZ(38px) scale(1.05);
+}
+
+.depth-badge {
+  transform: translateZ(35px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  transition: transform 0.3s ease;
+}
+
+.card-3d:hover .depth-badge {
+  transform: translateZ(50px) scale(1.06);
+}
+
+.depth-content {
+  transform: translateZ(16px);
+  transition: transform 0.3s ease;
+}
+
+.card-3d:hover .depth-content {
+  transform: translateZ(25px);
+}
+
+.depth-button {
+  transform: translateZ(22px);
+  transition: all 0.25s ease;
+}
+
+.depth-button:hover {
+  transform: translateZ(36px) translateY(-2px);
+  box-shadow: 0 8px 20px rgba(109, 14, 59, 0.35);
+}
+
+/* Light sweep across cards */
+@keyframes sweep3D {
+  0% {
+    transform: translateX(-120%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(220%) rotate(25deg);
+  }
+}
+
+.sweep-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+.sweep-hover::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 220%;
+  height: 220%;
+  background: linear-gradient(
+    60deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 70%
+  );
+  transform: translateX(-120%) rotate(25deg);
+  pointer-events: none;
+  z-index: 8;
+}
+
+.sweep-hover:hover::after {
+  animation: sweep3D 1s ease forwards;
+}
+
+/* Floating 3D Pulse for Hero Image */
+@keyframes hero3DFloat {
+  0%, 100% {
+    transform: perspective(1000px) translateY(0px) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    transform: perspective(1000px) translateY(-10px) rotateX(2deg) rotateY(-2deg);
+  }
+}
+
+.hero-3d-frame {
+  animation: hero3DFloat 6s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+/* ==========================================================================
+   SCROLL REVEAL ANIMATIONS (Sections slide from Left & Right and stop in place)
+   ========================================================================== */
+
+.scroll-reveal-section {
+  transition: opacity 1.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+              transform 1.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform, opacity;
+}
+
+@keyframes fadeInHero {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-fade-in {
+  animation: fadeInHero 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal-section {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .advertisement-ticker-track {
+    animation: none !important;
   }
 }

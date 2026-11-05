@@ -13,7 +13,7 @@ import SellerDashboardPage from './pages/SellerDashboardPage';
 import ProductManagementPage from './pages/ProductManagementPage';
 import OrdersDashboardPage from './pages/OrdersDashboardPage';
 import AiAssistantPage from './pages/AiAssistantPage';
-import SubscriptionPlansPage from './pages/SubscriptionPlansPage';
+import AdminSettingsPage from './pages/SubscriptionPlansPage';
 
 // Admin Protected Route Component
 function AdminProtectedRoute({ children }) {
@@ -59,7 +59,7 @@ export default function App() {
           <Route path="products" element={<ProductManagementPage />} />
           <Route path="orders" element={<OrdersDashboardPage />} />
           <Route path="ai" element={<AiAssistantPage />} />
-          <Route path="settings" element={<SubscriptionPlansPage />} />
+          <Route path="settings" element={<AdminSettingsPage />} />
         </Route>
 
         {/* Backwards compatibility */}

@@ -11,6 +11,7 @@ export const createOrder = async (req, res) => {
       shippingAddress,
       orderItems,
       deliveryCharges = 200,
+      paymentMethod = 'Cash on Delivery',
       seller,
     } = req.body;
 
@@ -26,13 +27,13 @@ export const createOrder = async (req, res) => {
 
     const order = new Order({
       seller,
-      customerName,
-      customerPhone,
-      shippingAddress,
-      paymentMethod: 'Cash on Delivery',
+      customerName: customerName.trim(),
+      customerPhone: customerPhone.trim(),
+      shippingAddress: shippingAddress.trim(),
+      paymentMethod: paymentMethod || 'Cash on Delivery',
       orderItems,
       itemsPrice,
-      deliveryCharges,
+      deliveryCharges: Number(deliveryCharges),
       totalPrice,
       status: 'New',
     });

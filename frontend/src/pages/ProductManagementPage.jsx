@@ -116,7 +116,21 @@ export default function ProductManagementPage() {
           </p>
         </div>
 
-        <button onClick={handleOpenAdd} className="btn btn-primary">
+        <button
+          onClick={handleOpenAdd}
+          className="btn btn-primary"
+          style={{
+            backgroundColor: '#6D0E3B',
+            borderColor: '#6D0E3B',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.45rem',
+            padding: '0.65rem 1.15rem',
+            fontWeight: 700,
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(109, 14, 59, 0.2)',
+          }}
+        >
           <Plus size={18} /> Add Product
         </button>
       </div>
@@ -207,9 +221,11 @@ export default function ProductManagementPage() {
         )}
       </div>
 
-      <p style={{ marginTop: '2.5rem', fontSize: '0.85rem', color: '#64748b', fontStyle: 'italic' }}>
-        Yahan seller apne products add, edit, delete kar sakta hai. Image, price aur stock bhi yahan manage hota hai.
-      </p>
+      <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
+        <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748B' }}>
+          💡 <strong>Inventory Management:</strong> Manage your active storefront products, pricing, stock levels, and promotional images. Any changes update your customer storefront immediately.
+        </p>
+      </div>
 
       {/* Add / Edit Product Modal */}
       {modalOpen && (
@@ -371,6 +387,14 @@ export default function ProductManagementPage() {
                   type="submit"
                   disabled={saving}
                   className="btn btn-primary"
+                  style={{
+                    backgroundColor: '#6D0E3B',
+                    borderColor: '#6D0E3B',
+                    fontWeight: 700,
+                    padding: '0.65rem 1.25rem',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(109, 14, 59, 0.25)',
+                  }}
                 >
                   {saving ? 'Saving...' : editingProduct ? 'Save Changes' : 'Add Product'}
                 </button>

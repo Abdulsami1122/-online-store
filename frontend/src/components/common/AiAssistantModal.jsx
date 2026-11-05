@@ -22,8 +22,8 @@ export default function AiAssistantModal({ isOpen = true, onClose }) {
   // Lock background body scroll when drawer is open
   useEffect(() => {
     if (!isOpen) return;
-    const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && onClose) {
@@ -33,7 +33,8 @@ export default function AiAssistantModal({ isOpen = true, onClose }) {
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.body.style.overflow = originalOverflow;
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);

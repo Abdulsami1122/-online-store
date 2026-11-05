@@ -23,16 +23,28 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['seller', 'admin', 'customer'],
-      default: 'seller',
+      enum: ['seller', 'admin'],
+      default: 'admin',
+    },
+    phone: {
+      type: String,
+      default: '',
+    },
+    address: {
+      type: String,
+      default: '',
+    },
+    city: {
+      type: String,
+      default: '',
     },
     storeName: {
       type: String,
-      default: 'My Store',
+      default: 'TrendBazaar',
     },
     storeSlug: {
       type: String,
-      default: 'my-store',
+      default: 'trend-bazaar',
     },
     whatsapp: {
       type: String,

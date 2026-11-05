@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
 import {
   LayoutDashboard,
   Package,
@@ -22,9 +22,8 @@ export default function SellerSidebar() {
 
   const navItems = [
     { label: 'Dashboard', path: '/admin', icon: LayoutDashboard },
-    { label: 'Products', path: '/admin/products', icon: Package },
     { label: 'Orders', path: '/admin/orders', icon: ShoppingBag },
-    { label: 'AI Assistant', path: '/admin/ai', icon: Bot },
+    { label: 'Products', path: '/admin/products', icon: Package },
     { label: 'Settings', path: '/admin/settings', icon: Settings },
   ];
 
@@ -60,22 +59,22 @@ export default function SellerSidebar() {
               width: '36px',
               height: '36px',
               borderRadius: '10px',
-              backgroundColor: '#4f46e5',
+              backgroundColor: '#6D0E3B',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#ffffff',
-              boxShadow: '0 4px 10px rgba(79, 70, 229, 0.3)',
+              boxShadow: '0 4px 10px rgba(109, 14, 59, 0.3)',
             }}
           >
             <Store size={19} />
           </div>
           <div>
             <h2 style={{ fontSize: '0.98rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.1 }}>
-              AI Order Assistant
+              Store Admin
             </h2>
             <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 700 }}>
-              ADMIN PORTAL
+              VERIFIED PORTAL
             </span>
           </div>
         </div>
@@ -97,8 +96,8 @@ export default function SellerSidebar() {
                   borderRadius: 'var(--radius-md)',
                   fontSize: '0.9rem',
                   fontWeight: 600,
-                  color: isActive ? '#4f46e5' : '#475569',
-                  backgroundColor: isActive ? '#eef2ff' : 'transparent',
+                  color: isActive ? '#6D0E3B' : '#475569',
+                  backgroundColor: isActive ? '#FCF2F6' : 'transparent',
                   transition: 'var(--transition)',
                 })}
               >
@@ -112,10 +111,8 @@ export default function SellerSidebar() {
 
       {/* Bottom Section */}
       <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <a
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          to="/"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -124,16 +121,17 @@ export default function SellerSidebar() {
             borderRadius: 'var(--radius-md)',
             fontSize: '0.85rem',
             fontWeight: 700,
-            color: '#4f46e5',
-            backgroundColor: '#f5f3ff',
-            border: '1px solid #e0e7ff',
+            color: '#6D0E3B',
+            backgroundColor: '#FCF2F6',
+            border: '1px solid #F3D2DF',
+            textDecoration: 'none',
           }}
         >
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Store size={15} /> 👁 View User Store
+            <Store size={15} /> 👁 Switch to User Store
           </span>
           <ExternalLink size={13} />
-        </a>
+        </Link>
 
         <button
           onClick={handleLogout}

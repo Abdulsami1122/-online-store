@@ -1,26 +1,33 @@
 import User from '../models/User.js';
 import { generateToken } from '../utils/generateToken.js';
 
-// @desc    Register a new user
+// @desc    Register a new user (Customer or Admin)
 // @route   POST /api/auth/register
 // @access  Public
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone, address, city, role } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Please provide all required fields' });
+      return res.status(400).json({ message: 'Please provide all required fields (Name, Email, Password)' });
     }
 
-    const userExists = await User.findOne({ email });
+    const cleanEmail = email.toLowerCase().trim();
+    const userExists = await User.findOne({ email: cleanEmail });
     if (userExists) {
-      return res.status(400).json({ message: 'A user with this email already exists' });
+      return res.status(400).json({ message: 'An account with this email already exists. Please log in.' });
     }
+
+    const assignedRole = role && ['admin', 'seller', 'customer'].includes(role) ? role : 'customer';
 
     const user = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      email: cleanEmail,
       password,
+      role: assignedRole,
+      phone: phone ? phone.trim() : '',
+      address: address ? address.trim() : '',
+      city: city ? city.trim() : '',
     });
 
     if (user) {
@@ -29,7 +36,11 @@ export const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        phone: user.phone,
+        address: user.address,
+        city: user.city,
         avatar: user.avatar,
+        storeName: user.storeName,
         token: generateToken(user._id),
       });
     } else {
@@ -40,7 +51,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// @desc    Auth user & get token
+// @desc    Auth user & get token (Customer or Admin with hashed password verification)
 // @route   POST /api/auth/login
 // @access  Public
 export const loginUser = async (req, res) => {
@@ -51,7 +62,8 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Please provide email and password' });
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    const cleanEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: cleanEmail }).select('+password');
 
     if (user && (await user.matchPassword(password))) {
       res.json({
@@ -59,7 +71,13 @@ export const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        phone: user.phone,
+        address: user.address,
+        city: user.city,
         avatar: user.avatar,
+        storeName: user.storeName,
+        storeTagline: user.storeTagline,
+        whatsapp: user.whatsapp,
         token: generateToken(user._id),
       });
     } else {

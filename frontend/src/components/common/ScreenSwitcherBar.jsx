@@ -16,7 +16,7 @@ export default function ScreenSwitcherBar() {
     { label: '📦 Product Catalog', path: '/admin/products' },
     { label: '📋 Orders & Confirmation', path: '/admin/orders' },
     { label: '🤖 AI Assistant', path: '/admin/ai' },
-    { label: '💎 Subscription Plans', path: '/admin/settings' },
+    { label: '⚙️ Store Settings', path: '/admin/settings' },
     { label: '🔐 Login / Signup', path: '/admin/login' },
   ];
 

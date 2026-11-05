@@ -105,10 +105,10 @@ export default function OrdersDashboardPage() {
                   borderRadius: 'var(--radius-full)',
                   fontSize: '0.85rem',
                   fontWeight: 600,
-                  backgroundColor: isActive ? '#4f46e5' : '#ffffff',
+                  backgroundColor: isActive ? '#6D0E3B' : '#ffffff',
                   color: isActive ? '#ffffff' : '#64748b',
-                  border: isActive ? '1px solid #4f46e5' : '1px solid #e2e8f0',
-                  boxShadow: isActive ? '0 2px 6px rgba(79, 70, 229, 0.25)' : 'none',
+                  border: isActive ? '1px solid #6D0E3B' : '1px solid #e2e8f0',
+                  boxShadow: isActive ? '0 2px 6px rgba(109, 14, 59, 0.25)' : 'none',
                   transition: 'var(--transition)',
                 }}
               >
@@ -218,9 +218,9 @@ export default function OrdersDashboardPage() {
                         {formatDate(ord.createdAt)}
                       </td>
 
-                      {/* Action: Quick Confirm & View Details */}
+                      {/* Action: Quick Confirm, Ship, Complete & View Details */}
                       <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
                           {ord.status === 'New' && (
                             <button
                               onClick={() => handleUpdateStatus(ord._id, 'Confirmed')}
@@ -232,10 +232,50 @@ export default function OrdersDashboardPage() {
                                 padding: '0.35rem 0.65rem',
                                 fontSize: '0.775rem',
                                 fontWeight: 700,
+                                border: 'none',
+                                borderRadius: '6px',
                               }}
-                              title="Confirm this order"
+                              title="Verify and confirm order"
                             >
                               ✓ Confirm
+                            </button>
+                          )}
+                          {ord.status === 'Confirmed' && (
+                            <button
+                              onClick={() => handleUpdateStatus(ord._id, 'Shipped')}
+                              disabled={updating}
+                              className="btn btn-sm"
+                              style={{
+                                backgroundColor: '#2563eb',
+                                color: '#ffffff',
+                                padding: '0.35rem 0.65rem',
+                                fontSize: '0.775rem',
+                                fontWeight: 700,
+                                border: 'none',
+                                borderRadius: '6px',
+                              }}
+                              title="Dispatch order with courier"
+                            >
+                              🚚 Ship
+                            </button>
+                          )}
+                          {ord.status === 'Shipped' && (
+                            <button
+                              onClick={() => handleUpdateStatus(ord._id, 'Delivered')}
+                              disabled={updating}
+                              className="btn btn-sm"
+                              style={{
+                                backgroundColor: '#059669',
+                                color: '#ffffff',
+                                padding: '0.35rem 0.65rem',
+                                fontSize: '0.775rem',
+                                fontWeight: 700,
+                                border: 'none',
+                                borderRadius: '6px',
+                              }}
+                              title="Mark order as delivered & completed"
+                            >
+                              ✓ Complete
                             </button>
                           )}
                           <button
@@ -244,9 +284,10 @@ export default function OrdersDashboardPage() {
                             style={{
                               fontSize: '0.8rem',
                               padding: '0.35rem 0.75rem',
-                              color: '#4f46e5',
-                              borderColor: '#c7d2fe',
-                              backgroundColor: '#eef2ff',
+                              color: '#6D0E3B',
+                              borderColor: '#F3D2DF',
+                              backgroundColor: '#FCF2F6',
+                              borderRadius: '6px',
                             }}
                           >
                             View
@@ -262,9 +303,11 @@ export default function OrdersDashboardPage() {
         )}
       </div>
 
-      <p style={{ marginTop: '2.5rem', fontSize: '0.85rem', color: '#64748b', fontStyle: 'italic' }}>
-        Yahan seller tamam orders dekh sakta hai. Jab aap "Confirm" par click karenge to customer tracking par live status "Confirmed" ho jayega.
-      </p>
+      <div style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
+        <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+          💡 <strong>Order Management:</strong> All customer Cash on Delivery orders appear here in real-time. Verify customer phone numbers, update status to Confirmed, Shipped, or Delivered.
+        </p>
+      </div>
 
       {/* Order Detail & Status Update Modal */}
       {selectedOrder && (
@@ -311,7 +354,7 @@ export default function OrdersDashboardPage() {
             </div>
 
             {/* Quick Status Buttons: [New] [Confirmed] [Shipped] [Delivered] */}
-            <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
+            <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
               <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155', marginBottom: '0.6rem' }}>
                 Change Order Status (reflects on User Tracking):
               </p>
@@ -323,9 +366,9 @@ export default function OrdersDashboardPage() {
                     disabled={updating}
                     className="btn btn-sm"
                     style={{
-                      backgroundColor: selectedOrder.status === st ? '#4f46e5' : '#ffffff',
+                      backgroundColor: selectedOrder.status === st ? '#6D0E3B' : '#ffffff',
                       color: selectedOrder.status === st ? '#ffffff' : '#475569',
-                      border: '1px solid #cbd5e1',
+                      border: selectedOrder.status === st ? '1px solid #6D0E3B' : '1px solid #cbd5e1',
                       fontSize: '0.8rem',
                       fontWeight: 600,
                     }}
@@ -342,10 +385,32 @@ export default function OrdersDashboardPage() {
                 <span style={{ fontWeight: 700, width: '130px', color: '#64748b' }}>Customer:</span>
                 <span style={{ fontWeight: 600 }}>{selectedOrder.customerName}</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontWeight: 700, width: '130px', color: '#64748b' }}>Phone:</span>
-                <a href={`tel:${selectedOrder.customerPhone}`} style={{ color: '#4f46e5', fontWeight: 600 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span style={{ fontWeight: 700, width: '130px', color: '#64748b' }}>Phone / Contact:</span>
+                <a href={`tel:${selectedOrder.customerPhone}`} style={{ color: '#6D0E3B', fontWeight: 600 }}>
                   {selectedOrder.customerPhone}
+                </a>
+                <a
+                  href={`https://wa.me/${selectedOrder.customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                    `Hello ${selectedOrder.customerName}, this is regarding your order #${selectedOrder.orderNumber} for Rs. ${selectedOrder.totalPrice}. Please confirm your shipping address: ${selectedOrder.shippingAddress}`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    backgroundColor: '#25D366',
+                    color: '#ffffff',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    fontWeight: 700,
+                    fontSize: '0.78rem',
+                    padding: '0.25rem 0.65rem',
+                    borderRadius: '6px',
+                    textDecoration: 'none',
+                    marginLeft: '0.5rem',
+                  }}
+                >
+                  💬 Verify on WhatsApp
                 </a>
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
@@ -362,7 +427,7 @@ export default function OrdersDashboardPage() {
                   href={`/track/${selectedOrder.orderNumber}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: '#4f46e5', textDecoration: 'underline', fontWeight: 600 }}
+                  style={{ color: '#6D0E3B', textDecoration: 'underline', fontWeight: 600 }}
                 >
                   /track/{selectedOrder.orderNumber} ↗
                 </a>
@@ -415,7 +480,7 @@ export default function OrdersDashboardPage() {
               }}
             >
               <span>Total Amount:</span>
-              <span style={{ color: '#4f46e5' }}>{formatCurrency(selectedOrder.totalPrice)}</span>
+              <span style={{ color: '#6D0E3B' }}>{formatCurrency(selectedOrder.totalPrice)}</span>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.75rem' }}>

@@ -26,22 +26,24 @@ const seedData = async () => {
 
     console.log('🧹 Cleaned existing database collections...');
 
-    // 1. Create Seller Ahmad (matching "Welcome back, Ahmad!")
-    const seller = await User.create({
-      name: 'Ahmad',
-      email: 'ahmad@store.com',
-      password: 'password123',
-      role: 'seller',
-      storeName: 'My Store',
-      storeSlug: 'my-store',
+    // 1. Create Single Secure Store Administrator (Password automatically hashed with bcrypt by pre('save'))
+    const admin = await User.create({
+      name: 'Store Administrator',
+      email: 'admin@store.com',
+      password: 'adminpassword123',
+      role: 'admin',
+      storeName: 'TrendBazaar',
+      storeSlug: 'trend-bazaar',
       whatsapp: '+92 300 1234567',
-      instagram: '@mystore_official',
-      storeTagline: 'Trendy Styles For You — Quality Products • Best Prices • Fast Delivery',
-      plan: 'Starter',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      instagram: '@trendbazaar_official',
+      storeTagline: 'Quality Products • Best Prices • 100% Cash on Delivery',
+      plan: 'Pro',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     });
 
-    console.log('👤 Seller created: ahmad@store.com / password123');
+    const seller = admin; // Point products and store items to single store admin
+
+    console.log('👤 Single Store Administrator created: admin@store.com (Password hashed with bcrypt)');
 
     // 2. Create the 4 Exact Products shown on Screen 3 & 4
     const productsData = [

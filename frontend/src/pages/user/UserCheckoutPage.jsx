@@ -77,21 +77,6 @@ export default function UserCheckoutPage() {
           >
             <ArrowLeft size={16} /> Back to Store
           </Link>
-
-          <Link
-            to="/admin"
-            style={{
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              color: '#4f46e5',
-              padding: '0.35rem 0.75rem',
-              borderRadius: '6px',
-              border: '1px solid #c7d2fe',
-              backgroundColor: '#ffffff',
-            }}
-          >
-            Admin View →
-          </Link>
         </div>
 
         <h1 style={{ fontSize: '1.9rem', fontWeight: 800, color: '#0f172a', marginBottom: '2rem' }}>

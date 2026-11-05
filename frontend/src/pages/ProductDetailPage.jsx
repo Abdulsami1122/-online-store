@@ -128,7 +128,7 @@ export default function ProductDetailPage() {
             }}
           >
             <img
-              src={selectedImage || product.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800'}
+              src={selectedImage || product.image || product.images?.[0] || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800'}
               alt={product.title}
               style={{
                 width: '100%',

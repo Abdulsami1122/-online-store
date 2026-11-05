@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Clock, Truck, Package, Search, RefreshCw, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Clock, Truck, Package, Search, RefreshCw } from 'lucide-react';
 import { trackOrder } from '../../api/orderApi';
 import { formatCurrency, formatDateTime } from '../../utils/formatters';
 
@@ -106,24 +106,6 @@ export default function UserTrackingPage() {
             }}
           >
             <ArrowLeft size={16} /> Back to Store
-          </Link>
-
-          <Link
-            to="/admin/orders"
-            style={{
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              color: '#4f46e5',
-              padding: '0.35rem 0.75rem',
-              borderRadius: '6px',
-              border: '1px solid #c7d2fe',
-              backgroundColor: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-            }}
-          >
-            <ShieldCheck size={13} /> Admin Orders View →
           </Link>
         </div>
 

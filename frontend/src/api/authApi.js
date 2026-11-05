@@ -5,8 +5,12 @@ export const login = async (email, password) => {
   return data;
 };
 
-export const register = async (name, email, password) => {
-  const { data } = await API.post('/auth/register', { name, email, password });
+export const register = async (nameOrData, email, password, phone, address, city) => {
+  const payload =
+    typeof nameOrData === 'object'
+      ? nameOrData
+      : { name: nameOrData, email, password, phone, address, city };
+  const { data } = await API.post('/auth/register', payload);
   return data;
 };
 
