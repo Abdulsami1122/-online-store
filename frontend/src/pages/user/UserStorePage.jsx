@@ -268,7 +268,7 @@ export default function UserStorePage({
     try {
       const saved = localStorage.getItem('user_store_custom_info');
       if (saved) return JSON.parse(saved);
-    } catch { }
+    } catch {}
     return {
       storeName: 'TrendBazaar',
       storeTagline: 'Quality Products • Best Prices • 100% Cash on Delivery',
@@ -299,7 +299,7 @@ export default function UserStorePage({
           setStoreSettings((prev) => ({ ...prev, ...data }));
         }
       })
-      .catch(() => { });
+      .catch(() => {});
   }, []);
 
   // Color Theme (Deep luxury berry / wine matching the mockup)
@@ -676,10 +676,10 @@ export default function UserStorePage({
         paymentMethod === 'EasyPaisa'
           ? `EasyPaisa: ${storeSettings.easypaisaNumber} (${storeSettings.easypaisaTitle})`
           : paymentMethod === 'JazzCash'
-            ? `JazzCash: ${storeSettings.jazzcashNumber} (${storeSettings.jazzcashTitle})`
-            : paymentMethod === 'Online Bank Transfer'
-              ? `${storeSettings.bankName}: ${storeSettings.bankAccountNumber} (${storeSettings.bankAccountTitle})`
-              : '';
+          ? `JazzCash: ${storeSettings.jazzcashNumber} (${storeSettings.jazzcashTitle})`
+          : paymentMethod === 'Online Bank Transfer'
+          ? `${storeSettings.bankName}: ${storeSettings.bankAccountNumber} (${storeSettings.bankAccountTitle})`
+          : '';
 
       const payload = {
         customerName: customerName.trim(),
@@ -1588,443 +1588,443 @@ export default function UserStorePage({
             backgroundColor: '#FFFFFF',
           }}
         >
-          <div className="container">
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <h2
-                className="font-serif"
-                style={{
-                  fontSize: '2.2rem',
-                  fontWeight: 700,
-                  color: '#260618',
-                  marginBottom: '0.4rem',
-                }}
-              >
-                Featured Collection
-              </h2>
-              <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
-                Handpicked items ready for immediate dispatch across the country
-              </p>
-            </div>
-
-            {/* Dynamic Category Filter Pills */}
-            <div
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <h2
+              className="font-serif"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.65rem',
-                flexWrap: 'wrap',
-                marginBottom: '2.5rem',
+                fontSize: '2.2rem',
+                fontWeight: 700,
+                color: '#260618',
+                marginBottom: '0.4rem',
               }}
             >
-              {uniqueCategories.map((catName) => {
-                const isSelected = selectedCategory.toLowerCase() === catName.toLowerCase();
-                return (
-                  <button
-                    key={catName}
-                    onClick={() => setSelectedCategory(catName)}
+              Featured Collection
+            </h2>
+            <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+              Handpicked items ready for immediate dispatch across the country
+            </p>
+          </div>
+
+          {/* Dynamic Category Filter Pills */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.65rem',
+              flexWrap: 'wrap',
+              marginBottom: '2.5rem',
+            }}
+          >
+            {uniqueCategories.map((catName) => {
+              const isSelected = selectedCategory.toLowerCase() === catName.toLowerCase();
+              return (
+                <button
+                  key={catName}
+                  onClick={() => setSelectedCategory(catName)}
+                  style={{
+                    backgroundColor: isSelected ? theme.primary : '#F7F2F4',
+                    color: isSelected ? '#ffffff' : '#5E545A',
+                    border: 'none',
+                    borderRadius: '999px',
+                    padding: '0.5rem 1.25rem',
+                    fontSize: '0.88rem',
+                    fontWeight: isSelected ? 700 : 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {catName}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Products Grid */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '1.5rem',
+            }}
+            className="grid-responsive-4"
+          >
+            {filteredProducts.map((product) => {
+              const inWishlist = isWishlisted(product._id);
+              const isJustAdded = addedNoticeId === product._id;
+              const isLinkCopied = copyLinkNotice === product._id;
+
+              return (
+                <TiltCard
+                  key={product._id}
+                  className="luxury-product-card"
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    position: 'relative',
+                  }}
+                >
+                  {/* Product Image */}
+                  <div
+                    className="depth-image"
                     style={{
-                      backgroundColor: isSelected ? theme.primary : '#F7F2F4',
-                      color: isSelected ? '#ffffff' : '#5E545A',
+                      height: '270px',
+                      backgroundColor: '#F8F3F5',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      setQuickViewProduct(product);
+                      setQuickViewQty(1);
+                    }}
+                  >
+                    <img
+                      src={product.image}
+                      alt={product.title}
+                      className="product-img"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                    />
+
+                    {/* Badge */}
+                    {product.badge && (
+                      <span
+                        className="depth-badge"
+                        style={{
+                          position: 'absolute',
+                          top: '12px',
+                          left: '12px',
+                          backgroundColor: theme.badgeBg,
+                          color: '#ffffff',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          padding: '0.2rem 0.6rem',
+                          borderRadius: '6px',
+                        }}
+                      >
+                        {product.badge}
+                      </span>
+                    )}
+
+                    {/* Top Right Action Icons: Wishlist & Share Link */}
+                    <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <button
+                        onClick={(e) => toggleWishlist(product, e)}
+                        style={{
+                          backgroundColor: '#ffffff',
+                          border: 'none',
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: inWishlist ? '#DC2626' : '#6A6369',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          cursor: 'pointer',
+                        }}
+                        title={inWishlist ? 'Remove from Wishlist' : 'Save to Wishlist'}
+                      >
+                        <Heart size={16} fill={inWishlist ? '#DC2626' : 'none'} strokeWidth={2} />
+                      </button>
+
+                      {/* Copy Direct Link for Facebook Marketplace / Daraz posts */}
+                      <button
+                        onClick={(e) => handleCopyProductLink(product, e)}
+                        style={{
+                          backgroundColor: isLinkCopied ? '#10B981' : '#ffffff',
+                          border: 'none',
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: isLinkCopied ? '#ffffff' : '#6A6369',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          cursor: 'pointer',
+                        }}
+                        title="Copy direct product link for Facebook / Daraz post"
+                      >
+                        {isLinkCopied ? <Check size={14} /> : <Share2 size={14} />}
+                      </button>
+                    </div>
+
+                    {/* Quick View Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setQuickViewProduct(product);
+                        setQuickViewQty(1);
+                      }}
+                      style={{
+                        position: 'absolute',
+                        bottom: '12px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.94)',
+                        backdropFilter: 'blur(4px)',
+                        color: '#260618',
+                        border: 'none',
+                        padding: '0.35rem 0.85rem',
+                        borderRadius: '999px',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Eye size={13} />
+                      <span>Quick View</span>
+                    </button>
+                  </div>
+
+                  {/* Card Body */}
+                  <div
+                    className="depth-content"
+                    style={{
+                      padding: '1.25rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      flex: 1,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: '0.75rem',
+                        color: '#8A8287',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        marginBottom: '0.35rem',
+                      }}
+                    >
+                      {product.category || 'General'}
+                    </span>
+
+                    <h3
+                      className="font-serif"
+                      style={{
+                        fontSize: '1.05rem',
+                        fontWeight: 600,
+                        color: '#260618',
+                        marginBottom: '0.45rem',
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {product.title}
+                    </h3>
+
+                    {/* Rating & Stock */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '0.85rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <div style={{ display: 'flex', color: '#F59E0B' }}>
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={13} fill="#F59E0B" strokeWidth={0} />
+                          ))}
+                        </div>
+                        <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>{product.rating || 4.9}</span>
+                      </div>
+                      <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
+                        ✓ In Stock ({product.stock || 15})
+                      </span>
+                    </div>
+
+                    {/* Price */}
+                    <div style={{ marginBottom: '1rem' }}>
+                      <span
+                        style={{
+                          fontSize: '1.2rem',
+                          fontWeight: 700,
+                          color: theme.primary,
+                        }}
+                      >
+                        {formatPrice(product.price)}
+                      </span>
+                      {product.originalPrice && (
+                        <span
+                          style={{
+                            fontSize: '0.85rem',
+                            color: '#A89FA4',
+                            textDecoration: 'line-through',
+                            marginLeft: '0.5rem',
+                          }}
+                        >
+                          {formatPrice(product.originalPrice)}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* High Converting Action Buttons for Facebook / Daraz Shoppers */}
+                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                      {/* 1-Click Cash on Delivery Order */}
+                      <button
+                        onClick={(e) => handleBuyNowInstant(product, e)}
+                        className="depth-button"
+                        style={{
+                          backgroundColor: theme.primary,
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '0.6rem 0.85rem',
+                          borderRadius: '8px',
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.35rem',
+                          boxShadow: '0 4px 12px rgba(109, 14, 59, 0.2)',
+                        }}
+                      >
+                        <Lock size={13} />
+                        <span>⚡ Order via Cash on Delivery</span>
+                      </button>
+
+                      {/* WhatsApp Order & Add to Bag split */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
+                        <button
+                          onClick={(e) => openWhatsAppOrder(product, e)}
+                          style={{
+                            backgroundColor: '#25D366',
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '0.45rem 0.6rem',
+                            borderRadius: '6px',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.25rem',
+                          }}
+                          title="Order directly on WhatsApp"
+                        >
+                          <MessageCircle size={13} />
+                          <span>WhatsApp</span>
+                        </button>
+
+                        <button
+                          onClick={(e) => handleAddToCart(product, e)}
+                          style={{
+                            backgroundColor: isJustAdded ? '#10B981' : theme.primaryLight,
+                            color: isJustAdded ? '#ffffff' : theme.primary,
+                            border: 'none',
+                            padding: '0.45rem 0.6rem',
+                            borderRadius: '6px',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.25rem',
+                          }}
+                        >
+                          {isJustAdded ? <Check size={13} /> : <ShoppingBag size={13} />}
+                          <span>{isJustAdded ? 'Added' : 'Add Bag'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </TiltCard>
+              );
+            })}
+
+            {filteredProducts.length === 0 && (
+              <div
+                style={{
+                  gridColumn: '1 / -1',
+                  textAlign: 'center',
+                  padding: '4rem 1.5rem',
+                  backgroundColor: '#FAFAFA',
+                  borderRadius: '16px',
+                  border: '1.5px dashed #E5DCE0',
+                  margin: '1rem 0',
+                }}
+              >
+                <div
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    backgroundColor: '#F3E8EE',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '1rem',
+                    color: theme.primary,
+                  }}
+                >
+                  <ShoppingBag size={28} />
+                </div>
+                <h3
+                  className="font-serif"
+                  style={{
+                    fontSize: '1.25rem',
+                    fontWeight: 700,
+                    color: '#260618',
+                    marginBottom: '0.4rem',
+                  }}
+                >
+                  {selectedCategory === 'All'
+                    ? 'No products available yet'
+                    : `No products in "${selectedCategory}" yet`}
+                </h3>
+                <p
+                  style={{
+                    fontSize: '0.9rem',
+                    color: '#7E757A',
+                    maxWidth: '420px',
+                    margin: '0 auto 1.5rem',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {selectedCategory === 'All'
+                    ? 'Products added from the Admin Dashboard will appear here immediately.'
+                    : `There are currently no items under this category. Switch to "All" to browse all available items.`}
+                </p>
+                {selectedCategory !== 'All' && (
+                  <button
+                    onClick={() => setSelectedCategory('All')}
+                    style={{
+                      backgroundColor: theme.primary,
+                      color: '#ffffff',
                       border: 'none',
+                      padding: '0.65rem 1.6rem',
                       borderRadius: '999px',
-                      padding: '0.5rem 1.25rem',
+                      fontWeight: 600,
                       fontSize: '0.88rem',
-                      fontWeight: isSelected ? 700 : 500,
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
                     }}
                   >
-                    {catName}
+                    View All Products
                   </button>
-                );
-              })}
-            </div>
-
-            {/* Products Grid */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '1.5rem',
-              }}
-              className="grid-responsive-4"
-            >
-              {filteredProducts.map((product) => {
-                const inWishlist = isWishlisted(product._id);
-                const isJustAdded = addedNoticeId === product._id;
-                const isLinkCopied = copyLinkNotice === product._id;
-
-                return (
-                  <TiltCard
-                    key={product._id}
-                    className="luxury-product-card"
-                    style={{
-                      backgroundColor: '#FFFFFF',
-                      borderRadius: '16px',
-                      overflow: 'hidden',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      position: 'relative',
-                    }}
-                  >
-                    {/* Product Image */}
-                    <div
-                      className="depth-image"
-                      style={{
-                        height: '270px',
-                        backgroundColor: '#F8F3F5',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => {
-                        setQuickViewProduct(product);
-                        setQuickViewQty(1);
-                      }}
-                    >
-                      <img
-                        src={product.image}
-                        alt={product.title}
-                        className="product-img"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                        }}
-                      />
-
-                      {/* Badge */}
-                      {product.badge && (
-                        <span
-                          className="depth-badge"
-                          style={{
-                            position: 'absolute',
-                            top: '12px',
-                            left: '12px',
-                            backgroundColor: theme.badgeBg,
-                            color: '#ffffff',
-                            fontSize: '0.7rem',
-                            fontWeight: 700,
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '6px',
-                          }}
-                        >
-                          {product.badge}
-                        </span>
-                      )}
-
-                      {/* Top Right Action Icons: Wishlist & Share Link */}
-                      <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <button
-                          onClick={(e) => toggleWishlist(product, e)}
-                          style={{
-                            backgroundColor: '#ffffff',
-                            border: 'none',
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: inWishlist ? '#DC2626' : '#6A6369',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                            cursor: 'pointer',
-                          }}
-                          title={inWishlist ? 'Remove from Wishlist' : 'Save to Wishlist'}
-                        >
-                          <Heart size={16} fill={inWishlist ? '#DC2626' : 'none'} strokeWidth={2} />
-                        </button>
-
-                        {/* Copy Direct Link for Facebook Marketplace / Daraz posts */}
-                        <button
-                          onClick={(e) => handleCopyProductLink(product, e)}
-                          style={{
-                            backgroundColor: isLinkCopied ? '#10B981' : '#ffffff',
-                            border: 'none',
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: isLinkCopied ? '#ffffff' : '#6A6369',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                            cursor: 'pointer',
-                          }}
-                          title="Copy direct product link for Facebook / Daraz post"
-                        >
-                          {isLinkCopied ? <Check size={14} /> : <Share2 size={14} />}
-                        </button>
-                      </div>
-
-                      {/* Quick View Button */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setQuickViewProduct(product);
-                          setQuickViewQty(1);
-                        }}
-                        style={{
-                          position: 'absolute',
-                          bottom: '12px',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.94)',
-                          backdropFilter: 'blur(4px)',
-                          color: '#260618',
-                          border: 'none',
-                          padding: '0.35rem 0.85rem',
-                          borderRadius: '999px',
-                          fontSize: '0.78rem',
-                          fontWeight: 600,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.3rem',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <Eye size={13} />
-                        <span>Quick View</span>
-                      </button>
-                    </div>
-
-                    {/* Card Body */}
-                    <div
-                      className="depth-content"
-                      style={{
-                        padding: '1.25rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        flex: 1,
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: '0.75rem',
-                          color: '#8A8287',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          marginBottom: '0.35rem',
-                        }}
-                      >
-                        {product.category || 'General'}
-                      </span>
-
-                      <h3
-                        className="font-serif"
-                        style={{
-                          fontSize: '1.05rem',
-                          fontWeight: 600,
-                          color: '#260618',
-                          marginBottom: '0.45rem',
-                          lineHeight: 1.3,
-                        }}
-                      >
-                        {product.title}
-                      </h3>
-
-                      {/* Rating & Stock */}
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          marginBottom: '0.85rem',
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                          <div style={{ display: 'flex', color: '#F59E0B' }}>
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} size={13} fill="#F59E0B" strokeWidth={0} />
-                            ))}
-                          </div>
-                          <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>{product.rating || 4.9}</span>
-                        </div>
-                        <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
-                          ✓ In Stock ({product.stock || 15})
-                        </span>
-                      </div>
-
-                      {/* Price */}
-                      <div style={{ marginBottom: '1rem' }}>
-                        <span
-                          style={{
-                            fontSize: '1.2rem',
-                            fontWeight: 700,
-                            color: theme.primary,
-                          }}
-                        >
-                          {formatPrice(product.price)}
-                        </span>
-                        {product.originalPrice && (
-                          <span
-                            style={{
-                              fontSize: '0.85rem',
-                              color: '#A89FA4',
-                              textDecoration: 'line-through',
-                              marginLeft: '0.5rem',
-                            }}
-                          >
-                            {formatPrice(product.originalPrice)}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* High Converting Action Buttons for Facebook / Daraz Shoppers */}
-                      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                        {/* 1-Click Cash on Delivery Order */}
-                        <button
-                          onClick={(e) => handleBuyNowInstant(product, e)}
-                          className="depth-button"
-                          style={{
-                            backgroundColor: theme.primary,
-                            color: '#ffffff',
-                            border: 'none',
-                            padding: '0.6rem 0.85rem',
-                            borderRadius: '8px',
-                            fontSize: '0.82rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.35rem',
-                            boxShadow: '0 4px 12px rgba(109, 14, 59, 0.2)',
-                          }}
-                        >
-                          <Lock size={13} />
-                          <span>⚡ Order via Cash on Delivery</span>
-                        </button>
-
-                        {/* WhatsApp Order & Add to Bag split */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
-                          <button
-                            onClick={(e) => openWhatsAppOrder(product, e)}
-                            style={{
-                              backgroundColor: '#25D366',
-                              color: '#ffffff',
-                              border: 'none',
-                              padding: '0.45rem 0.6rem',
-                              borderRadius: '6px',
-                              fontSize: '0.75rem',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '0.25rem',
-                            }}
-                            title="Order directly on WhatsApp"
-                          >
-                            <MessageCircle size={13} />
-                            <span>WhatsApp</span>
-                          </button>
-
-                          <button
-                            onClick={(e) => handleAddToCart(product, e)}
-                            style={{
-                              backgroundColor: isJustAdded ? '#10B981' : theme.primaryLight,
-                              color: isJustAdded ? '#ffffff' : theme.primary,
-                              border: 'none',
-                              padding: '0.45rem 0.6rem',
-                              borderRadius: '6px',
-                              fontSize: '0.75rem',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '0.25rem',
-                            }}
-                          >
-                            {isJustAdded ? <Check size={13} /> : <ShoppingBag size={13} />}
-                            <span>{isJustAdded ? 'Added' : 'Add Bag'}</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </TiltCard>
-                );
-              })}
-
-              {filteredProducts.length === 0 && (
-                <div
-                  style={{
-                    gridColumn: '1 / -1',
-                    textAlign: 'center',
-                    padding: '4rem 1.5rem',
-                    backgroundColor: '#FAFAFA',
-                    borderRadius: '16px',
-                    border: '1.5px dashed #E5DCE0',
-                    margin: '1rem 0',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: '60px',
-                      height: '60px',
-                      borderRadius: '50%',
-                      backgroundColor: '#F3E8EE',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginBottom: '1rem',
-                      color: theme.primary,
-                    }}
-                  >
-                    <ShoppingBag size={28} />
-                  </div>
-                  <h3
-                    className="font-serif"
-                    style={{
-                      fontSize: '1.25rem',
-                      fontWeight: 700,
-                      color: '#260618',
-                      marginBottom: '0.4rem',
-                    }}
-                  >
-                    {selectedCategory === 'All'
-                      ? 'No products available yet'
-                      : `No products in "${selectedCategory}" yet`}
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: '0.9rem',
-                      color: '#7E757A',
-                      maxWidth: '420px',
-                      margin: '0 auto 1.5rem',
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {selectedCategory === 'All'
-                      ? 'Products added from the Admin Dashboard will appear here immediately.'
-                      : `There are currently no items under this category. Switch to "All" to browse all available items.`}
-                  </p>
-                  {selectedCategory !== 'All' && (
-                    <button
-                      onClick={() => setSelectedCategory('All')}
-                      style={{
-                        backgroundColor: theme.primary,
-                        color: '#ffffff',
-                        border: 'none',
-                        padding: '0.65rem 1.6rem',
-                        borderRadius: '999px',
-                        fontWeight: 600,
-                        fontSize: '0.88rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                      }}
-                    >
-                      View All Products
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
-        </section>
+        </div>
+      </section>
       </ScrollRevealSection>
 
       {/* ================================================================= */}
@@ -2041,111 +2041,111 @@ export default function UserStorePage({
                 border: '1px solid rgba(0, 0, 0, 0.04)',
               }}
             >
-              <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                <h2
-                  className="font-serif"
+            <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+              <h2
+                className="font-serif"
+                style={{
+                  fontSize: '2.2rem',
+                  fontWeight: 700,
+                  color: '#260618',
+                  marginBottom: '0.4rem',
+                }}
+              >
+                Why Order From Us?
+              </h2>
+              <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+                Complete peace of mind for online buyers across Facebook Marketplace, Daraz, and social platforms
+              </p>
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '1.75rem',
+              }}
+              className="grid-responsive-4"
+            >
+              {[
+                {
+                  title: '100% Genuine Items',
+                  desc: 'Every single parcel is inspected and verified by the seller before courier dispatch.',
+                  icon: 'shield',
+                },
+                {
+                  title: 'Cash on Delivery',
+                  desc: 'Pay cash safely at your doorstep with open parcel inspection available.',
+                  icon: 'truck',
+                },
+                {
+                  title: '7-Day Easy Return',
+                  desc: 'Wrong size or changed your mind? Fast exchange and full refund guarantee.',
+                  icon: 'rotate',
+                },
+                {
+                  title: 'WhatsApp Assistance',
+                  desc: 'Direct seller communication on WhatsApp for tracking and immediate help.',
+                  icon: 'headset',
+                },
+              ].map((p, idx) => (
+                <TiltCard
+                  key={idx}
                   style={{
-                    fontSize: '2.2rem',
-                    fontWeight: 700,
-                    color: '#260618',
-                    marginBottom: '0.4rem',
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '16px',
+                    padding: '1.75rem 1.25rem',
+                    textAlign: 'center',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.03)',
                   }}
                 >
-                  Why Order From Us?
-                </h2>
-                <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
-                  Complete peace of mind for online buyers across Facebook Marketplace, Daraz, and social platforms
-                </p>
-              </div>
-
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: '1.75rem',
-                }}
-                className="grid-responsive-4"
-              >
-                {[
-                  {
-                    title: '100% Genuine Items',
-                    desc: 'Every single parcel is inspected and verified by the seller before courier dispatch.',
-                    icon: 'shield',
-                  },
-                  {
-                    title: 'Cash on Delivery',
-                    desc: 'Pay cash safely at your doorstep with open parcel inspection available.',
-                    icon: 'truck',
-                  },
-                  {
-                    title: '7-Day Easy Return',
-                    desc: 'Wrong size or changed your mind? Fast exchange and full refund guarantee.',
-                    icon: 'rotate',
-                  },
-                  {
-                    title: 'WhatsApp Assistance',
-                    desc: 'Direct seller communication on WhatsApp for tracking and immediate help.',
-                    icon: 'headset',
-                  },
-                ].map((p, idx) => (
-                  <TiltCard
-                    key={idx}
+                  <div
+                    className="depth-image"
                     style={{
-                      backgroundColor: '#FFFFFF',
-                      borderRadius: '16px',
-                      padding: '1.75rem 1.25rem',
-                      textAlign: 'center',
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.03)',
+                      width: '52px',
+                      height: '52px',
+                      borderRadius: '50%',
+                      backgroundColor: theme.primaryLight,
+                      color: theme.primary,
+                      margin: '0 auto 1.2rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
-                    <div
-                      className="depth-image"
+                    {p.icon === 'shield' ? (
+                      <ShieldCheck size={26} />
+                    ) : p.icon === 'truck' ? (
+                      <Truck size={26} />
+                    ) : p.icon === 'rotate' ? (
+                      <RotateCcw size={26} />
+                    ) : (
+                      <Headphones size={26} />
+                    )}
+                  </div>
+
+                  <div className="depth-content">
+                    <h3
+                      className="font-serif"
                       style={{
-                        width: '52px',
-                        height: '52px',
-                        borderRadius: '50%',
-                        backgroundColor: theme.primaryLight,
-                        color: theme.primary,
-                        margin: '0 auto 1.2rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        fontSize: '1.1rem',
+                        fontWeight: 600,
+                        color: '#260618',
+                        marginBottom: '0.5rem',
                       }}
                     >
-                      {p.icon === 'shield' ? (
-                        <ShieldCheck size={26} />
-                      ) : p.icon === 'truck' ? (
-                        <Truck size={26} />
-                      ) : p.icon === 'rotate' ? (
-                        <RotateCcw size={26} />
-                      ) : (
-                        <Headphones size={26} />
-                      )}
-                    </div>
+                      {p.title}
+                    </h3>
 
-                    <div className="depth-content">
-                      <h3
-                        className="font-serif"
-                        style={{
-                          fontSize: '1.1rem',
-                          fontWeight: 600,
-                          color: '#260618',
-                          marginBottom: '0.5rem',
-                        }}
-                      >
-                        {p.title}
-                      </h3>
-
-                      <p style={{ fontSize: '0.85rem', color: '#786E75', lineHeight: 1.5 }}>
-                        {p.desc}
-                      </p>
-                    </div>
-                  </TiltCard>
-                ))}
-              </div>
+                    <p style={{ fontSize: '0.85rem', color: '#786E75', lineHeight: 1.5 }}>
+                      {p.desc}
+                    </p>
+                  </div>
+                </TiltCard>
+              ))}
             </div>
           </div>
-        </section>
+        </div>
+      </section>
       </ScrollRevealSection>
 
       {/* ================================================================= */}
@@ -2160,135 +2160,135 @@ export default function UserStorePage({
               backgroundColor: '#FFFFFF',
             }}
           >
-            <div className="container">
-              <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                <h2
-                  className="font-serif"
-                  style={{
-                    fontSize: '2.2rem',
-                    fontWeight: 700,
-                    color: '#260618',
-                    marginBottom: '0.4rem',
-                  }}
-                >
-                  Best Sellers
-                </h2>
-                <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
-                  Most loved products ordered by thousands of happy buyers this month
-                </p>
-              </div>
-
-              <div
+          <div className="container">
+            <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+              <h2
+                className="font-serif"
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: '1.5rem',
+                  fontSize: '2.2rem',
+                  fontWeight: 700,
+                  color: '#260618',
+                  marginBottom: '0.4rem',
                 }}
-                className="grid-responsive-4"
               >
-                {bestSellers.map((item) => {
-                  const inWishlist = isWishlisted(item._id);
-                  const isJustAdded = addedNoticeId === item._id;
+                Best Sellers
+              </h2>
+              <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+                Most loved products ordered by thousands of happy buyers this month
+              </p>
+            </div>
 
-                  return (
-                    <TiltCard
-                      key={item._id}
-                      className="luxury-product-card"
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '1.5rem',
+              }}
+              className="grid-responsive-4"
+            >
+              {bestSellers.map((item) => {
+                const inWishlist = isWishlisted(item._id);
+                const isJustAdded = addedNoticeId === item._id;
+
+                return (
+                  <TiltCard
+                    key={item._id}
+                    className="luxury-product-card"
+                    style={{
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      position: 'relative',
+                    }}
+                  >
+                    <div
+                      className="depth-image"
                       style={{
-                        backgroundColor: '#FFFFFF',
-                        borderRadius: '16px',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        flexDirection: 'column',
+                        height: '260px',
+                        backgroundColor: '#F8F3F5',
                         position: 'relative',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => {
+                        setQuickViewProduct(item);
+                        setQuickViewQty(1);
                       }}
                     >
-                      <div
-                        className="depth-image"
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="product-img"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                      <button
+                        onClick={(e) => toggleWishlist(item, e)}
                         style={{
-                          height: '260px',
-                          backgroundColor: '#F8F3F5',
-                          position: 'relative',
-                          overflow: 'hidden',
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          backgroundColor: '#ffffff',
+                          border: 'none',
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: inWishlist ? '#DC2626' : '#6A6369',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                           cursor: 'pointer',
                         }}
-                        onClick={() => {
-                          setQuickViewProduct(item);
-                          setQuickViewQty(1);
+                      >
+                        <Heart size={16} fill={inWishlist ? '#DC2626' : 'none'} strokeWidth={2} />
+                      </button>
+                    </div>
+
+                    <div className="depth-content" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                      <span style={{ fontSize: '0.72rem', color: '#888', textTransform: 'uppercase' }}>
+                        {item.category}
+                      </span>
+                      <h3
+                        className="font-serif"
+                        style={{ fontSize: '1.05rem', fontWeight: 600, color: '#260618', margin: '0.3rem 0' }}
+                      >
+                        {item.title}
+                      </h3>
+                      <div style={{ fontSize: '1.15rem', fontWeight: 700, color: theme.primary, marginBottom: '0.75rem' }}>
+                        {formatPrice(item.price)}
+                      </div>
+
+                      <button
+                        onClick={(e) => handleBuyNowInstant(item, e)}
+                        className="depth-button"
+                        style={{
+                          marginTop: 'auto',
+                          backgroundColor: theme.primary,
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '0.6rem',
+                          borderRadius: '8px',
+                          fontWeight: 700,
+                          fontSize: '0.82rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.35rem',
                         }}
                       >
-                        <img
-                          src={item.image}
-                          alt={item.title}
-                          className="product-img"
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                        <button
-                          onClick={(e) => toggleWishlist(item, e)}
-                          style={{
-                            position: 'absolute',
-                            top: '12px',
-                            right: '12px',
-                            backgroundColor: '#ffffff',
-                            border: 'none',
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: inWishlist ? '#DC2626' : '#6A6369',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          <Heart size={16} fill={inWishlist ? '#DC2626' : 'none'} strokeWidth={2} />
-                        </button>
-                      </div>
-
-                      <div className="depth-content" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                        <span style={{ fontSize: '0.72rem', color: '#888', textTransform: 'uppercase' }}>
-                          {item.category}
-                        </span>
-                        <h3
-                          className="font-serif"
-                          style={{ fontSize: '1.05rem', fontWeight: 600, color: '#260618', margin: '0.3rem 0' }}
-                        >
-                          {item.title}
-                        </h3>
-                        <div style={{ fontSize: '1.15rem', fontWeight: 700, color: theme.primary, marginBottom: '0.75rem' }}>
-                          {formatPrice(item.price)}
-                        </div>
-
-                        <button
-                          onClick={(e) => handleBuyNowInstant(item, e)}
-                          className="depth-button"
-                          style={{
-                            marginTop: 'auto',
-                            backgroundColor: theme.primary,
-                            color: '#ffffff',
-                            border: 'none',
-                            padding: '0.6rem',
-                            borderRadius: '8px',
-                            fontWeight: 700,
-                            fontSize: '0.82rem',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.35rem',
-                          }}
-                        >
-                          <Lock size={13} />
-                          <span>Order via Cash on Delivery</span>
-                        </button>
-                      </div>
-                    </TiltCard>
-                  );
-                })}
-              </div>
+                        <Lock size={13} />
+                        <span>Order via Cash on Delivery</span>
+                      </button>
+                    </div>
+                  </TiltCard>
+                );
+              })}
             </div>
-          </section>
+          </div>
+        </section>
         </ScrollRevealSection>
       )}
 
@@ -2406,362 +2406,362 @@ export default function UserStorePage({
             backgroundColor: '#FFFFFF',
           }}
         >
-          <div className="container">
-            <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-              <h2
-                className="font-serif"
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <h2
+              className="font-serif"
+              style={{
+                fontSize: '2.2rem',
+                fontWeight: 700,
+                color: '#260618',
+                marginBottom: '0.4rem',
+              }}
+            >
+              What Our Customers Say
+            </h2>
+            <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+              Verified reviews from Facebook Marketplace, Daraz & direct store buyers
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '1.75rem',
+            }}
+            className="grid-responsive-4"
+          >
+            {[
+              {
+                name: 'Hamza Tariq',
+                role: 'Verified Buyer (Lahore)',
+                text: 'Saw the post on Facebook Marketplace and ordered through this website. Arrived in 2 days, courier let me open the box first, exactly as described!',
+                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+              },
+              {
+                name: 'Ayesha Siddiqui',
+                role: 'Verified Buyer (Karachi)',
+                text: 'Outstanding quality and very responsive on WhatsApp. The raw Sidr honey is 100% genuine and the ambient LED kit looks phenomenal in my car.',
+                avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
+              },
+              {
+                name: 'Usman Ali',
+                role: 'Verified Buyer (Islamabad)',
+                text: 'Smooth 1-click Cash on Delivery order. No complicated sign-up. The sneakers fit comfortably and stitching is top quality.',
+                avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
+              },
+            ].map((test, idx) => (
+              <TiltCard
+                key={idx}
                 style={{
-                  fontSize: '2.2rem',
-                  fontWeight: 700,
-                  color: '#260618',
-                  marginBottom: '0.4rem',
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '20px',
+                  padding: '2rem 1.75rem',
+                  border: '1px solid rgba(109, 14, 59, 0.08)',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.03)',
+                  display: 'flex',
+                  flexDirection: 'column',
                 }}
               >
-                What Our Customers Say
-              </h2>
-              <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
-                Verified reviews from Facebook Marketplace, Daraz & direct store buyers
-              </p>
-            </div>
+                <div className="depth-content" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                  <div style={{ display: 'flex', color: '#F59E0B', marginBottom: '1.25rem' }}>
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={16} fill="#F59E0B" strokeWidth={0} />
+                    ))}
+                  </div>
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '1.75rem',
-              }}
-              className="grid-responsive-4"
-            >
-              {[
-                {
-                  name: 'Hamza Tariq',
-                  role: 'Verified Buyer (Lahore)',
-                  text: 'Saw the post on Facebook Marketplace and ordered through this website. Arrived in 2 days, courier let me open the box first, exactly as described!',
-                  avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-                },
-                {
-                  name: 'Ayesha Siddiqui',
-                  role: 'Verified Buyer (Karachi)',
-                  text: 'Outstanding quality and very responsive on WhatsApp. The raw Sidr honey is 100% genuine and the ambient LED kit looks phenomenal in my car.',
-                  avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
-                },
-                {
-                  name: 'Usman Ali',
-                  role: 'Verified Buyer (Islamabad)',
-                  text: 'Smooth 1-click Cash on Delivery order. No complicated sign-up. The sneakers fit comfortably and stitching is top quality.',
-                  avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
-                },
-              ].map((test, idx) => (
-                <TiltCard
-                  key={idx}
-                  style={{
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: '20px',
-                    padding: '2rem 1.75rem',
-                    border: '1px solid rgba(109, 14, 59, 0.08)',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.03)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <div className="depth-content" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <div style={{ display: 'flex', color: '#F59E0B', marginBottom: '1.25rem' }}>
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={16} fill="#F59E0B" strokeWidth={0} />
-                      ))}
-                    </div>
+                  <p
+                    style={{
+                      fontSize: '0.95rem',
+                      color: '#4A4248',
+                      lineHeight: 1.65,
+                      fontStyle: 'italic',
+                      marginBottom: '1.75rem',
+                      flex: 1,
+                    }}
+                  >
+                    "{test.text}"
+                  </p>
 
-                    <p
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                    <img
+                      src={test.avatar}
+                      alt={test.name}
                       style={{
-                        fontSize: '0.95rem',
-                        color: '#4A4248',
-                        lineHeight: 1.65,
-                        fontStyle: 'italic',
-                        marginBottom: '1.75rem',
-                        flex: 1,
+                        width: '46px',
+                        height: '46px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
                       }}
-                    >
-                      "{test.text}"
-                    </p>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                      <img
-                        src={test.avatar}
-                        alt={test.name}
+                    />
+                    <div>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#260618', margin: 0 }}>
+                        {test.name}
+                      </h4>
+                      <span
                         style={{
-                          width: '46px',
-                          height: '46px',
-                          borderRadius: '50%',
-                          objectFit: 'cover',
+                          fontSize: '0.75rem',
+                          color: '#10B981',
+                          fontWeight: 600,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.2rem',
                         }}
-                      />
-                      <div>
-                        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#260618', margin: 0 }}>
-                          {test.name}
-                        </h4>
-                        <span
-                          style={{
-                            fontSize: '0.75rem',
-                            color: '#10B981',
-                            fontWeight: 600,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.2rem',
-                          }}
-                        >
-                          <CheckCircle2 size={12} />
-                          {test.role}
-                        </span>
-                      </div>
+                      >
+                        <CheckCircle2 size={12} />
+                        {test.role}
+                      </span>
                     </div>
                   </div>
-                </TiltCard>
-              ))}
-            </div>
+                </div>
+              </TiltCard>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
       </ScrollRevealSection>
 
       {/* ================================================================= */}
       {/* 11. LUXURY DARK WINE FOOTER                                       */}
       {/* ================================================================= */}
       <ScrollRevealSection direction="up">
-        <footer
-          ref={footerRef}
-          style={{
-            backgroundColor: theme.footerBg,
-            color: '#E8DDE3',
-            padding: '4.5rem 1.25rem 2rem',
-            marginTop: 'auto',
-          }}
-        >
-          <div className="container">
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1.6fr 1fr 1.2fr 1.2fr',
-                gap: '3rem',
-                marginBottom: '3.5rem',
-              }}
-              className="grid-responsive-4"
-            >
-              {/* Column 1: Store Brand Info */}
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem' }}>
-                  <div
-                    style={{
-                      width: '38px',
-                      height: '38px',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Store size={20} />
-                  </div>
-                  <span
-                    className="font-serif"
-                    style={{
-                      fontSize: '1.35rem',
-                      fontWeight: 700,
-                      color: '#ffffff',
-                    }}
-                  >
-                    {storeSettings.storeName}
-                  </span>
-                </div>
-
-                <p
+      <footer
+        ref={footerRef}
+        style={{
+          backgroundColor: theme.footerBg,
+          color: '#E8DDE3',
+          padding: '4.5rem 1.25rem 2rem',
+          marginTop: 'auto',
+        }}
+      >
+        <div className="container">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1.6fr 1fr 1.2fr 1.2fr',
+              gap: '3rem',
+              marginBottom: '3.5rem',
+            }}
+            className="grid-responsive-4"
+          >
+            {/* Column 1: Store Brand Info */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem' }}>
+                <div
                   style={{
-                    fontSize: '0.88rem',
-                    lineHeight: 1.65,
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    marginBottom: '1.5rem',
-                  }}
-                >
-                  {storeSettings.storeTagline}. Connecting customers directly with verified online sellers across Pakistan.
-                </p>
-
-                {/* Direct WhatsApp Action in Footer */}
-                <a
-                  href={`https://wa.me/${(storeSettings.whatsapp || '+923001234567').replace(/[^0-9]/g, '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    backgroundColor: '#25D366',
-                    color: '#ffffff',
-                    padding: '0.55rem 1.1rem',
+                    width: '38px',
+                    height: '38px',
                     borderRadius: '8px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Store size={20} />
+                </div>
+                <span
+                  className="font-serif"
+                  style={{
+                    fontSize: '1.35rem',
                     fontWeight: 700,
-                    fontSize: '0.85rem',
+                    color: '#ffffff',
                   }}
                 >
-                  <MessageCircle size={16} />
-                  <span>Chat on WhatsApp</span>
-                </a>
+                  {storeSettings.storeName}
+                </span>
               </div>
 
-              {/* Column 2: Quick Links */}
-              <div>
-                <h4
-                  className="font-serif"
-                  style={{
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    color: '#ffffff',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  Quick Links
-                </h4>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                  {[
-                    { label: 'Home', ref: heroRef },
-                    { label: 'Shop All Products', ref: productsRef },
-                    { label: 'Categories', ref: categoriesRef },
-                    { label: 'Best Sellers', ref: bestSellersRef },
-                    { label: 'Why Order From Us', ref: whyUsRef },
-                    { label: 'Customer Reviews', ref: reviewsRef },
-                  ].map((item, idx) => (
-                    <li key={idx}>
-                      <button
-                        onClick={() => scrollTo(item.ref)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: 'rgba(255, 255, 255, 0.75)',
-                          fontSize: '0.88rem',
-                          cursor: 'pointer',
-                          padding: 0,
-                        }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.75)')}
-                      >
-                        {item.label}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <p
+                style={{
+                  fontSize: '0.88rem',
+                  lineHeight: 1.65,
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  marginBottom: '1.5rem',
+                }}
+              >
+                {storeSettings.storeTagline}. Connecting customers directly with verified online sellers across Pakistan.
+              </p>
 
-              {/* Column 3: Customer Care & Order Tracking */}
-              <div>
-                <h4
-                  className="font-serif"
-                  style={{
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    color: '#ffffff',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  Customer Service
-                </h4>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                  <li>
+              {/* Direct WhatsApp Action in Footer */}
+              <a
+                href={`https://wa.me/${(storeSettings.whatsapp || '+923001234567').replace(/[^0-9]/g, '')}`}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  backgroundColor: '#25D366',
+                  color: '#ffffff',
+                  padding: '0.55rem 1.1rem',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                }}
+              >
+                <MessageCircle size={16} />
+                <span>Chat on WhatsApp</span>
+              </a>
+            </div>
+
+            {/* Column 2: Quick Links */}
+            <div>
+              <h4
+                className="font-serif"
+                style={{
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: '#ffffff',
+                  marginBottom: '1.25rem',
+                }}
+              >
+                Quick Links
+              </h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                {[
+                  { label: 'Home', ref: heroRef },
+                  { label: 'Shop All Products', ref: productsRef },
+                  { label: 'Categories', ref: categoriesRef },
+                  { label: 'Best Sellers', ref: bestSellersRef },
+                  { label: 'Why Order From Us', ref: whyUsRef },
+                  { label: 'Customer Reviews', ref: reviewsRef },
+                ].map((item, idx) => (
+                  <li key={idx}>
                     <button
-                      onClick={() => setTrackingModalOpen(true)}
+                      onClick={() => scrollTo(item.ref)}
                       style={{
                         background: 'none',
                         border: 'none',
-                        color: '#38BDF8',
-                        fontWeight: 600,
+                        color: 'rgba(255, 255, 255, 0.75)',
                         fontSize: '0.88rem',
                         cursor: 'pointer',
                         padding: 0,
                       }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.75)')}
                     >
-                      🔍 Track Your Order Status
+                      {item.label}
                     </button>
                   </li>
-                  {['Cash on Delivery Policy', 'Open Parcel Rules', 'Return & Replacement (7 Days)', 'Shipping Charges', 'Privacy Policy'].map(
-                    (text, idx) => (
-                      <li key={idx}>
-                        <span style={{ color: 'rgba(255, 255, 255, 0.75)', fontSize: '0.88rem' }}>
-                          {text}
-                        </span>
-                      </li>
-                    )
-                  )}
-                </ul>
-              </div>
+                ))}
+              </ul>
+            </div>
 
-              {/* Column 4: Contact Info */}
-              <div>
-                <h4
-                  className="font-serif"
-                  style={{
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    color: '#ffffff',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  Contact Seller
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', fontSize: '0.88rem', color: 'rgba(255, 255, 255, 0.75)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Phone size={15} style={{ color: '#ffffff' }} />
-                    <span>{storeSettings.phone || storeSettings.whatsapp}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <HelpCircle size={15} style={{ color: '#ffffff' }} />
-                    <span>{storeSettings.email}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-                    <MapPin size={15} style={{ color: '#ffffff', flexShrink: 0, marginTop: '2px' }} />
-                    <span>{storeSettings.address}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Clock size={15} style={{ color: '#ffffff' }} />
-                    <span>Delivery in 2 - 4 business days nationwide</span>
-                  </div>
+            {/* Column 3: Customer Care & Order Tracking */}
+            <div>
+              <h4
+                className="font-serif"
+                style={{
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: '#ffffff',
+                  marginBottom: '1.25rem',
+                }}
+              >
+                Customer Service
+              </h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                <li>
+                  <button
+                    onClick={() => setTrackingModalOpen(true)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#38BDF8',
+                      fontWeight: 600,
+                      fontSize: '0.88rem',
+                      cursor: 'pointer',
+                      padding: 0,
+                    }}
+                  >
+                    🔍 Track Your Order Status
+                  </button>
+                </li>
+                {['Cash on Delivery Policy', 'Open Parcel Rules', 'Return & Replacement (7 Days)', 'Shipping Charges', 'Privacy Policy'].map(
+                  (text, idx) => (
+                    <li key={idx}>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.75)', fontSize: '0.88rem' }}>
+                        {text}
+                      </span>
+                    </li>
+                  )
+                )}
+              </ul>
+            </div>
+
+            {/* Column 4: Contact Info */}
+            <div>
+              <h4
+                className="font-serif"
+                style={{
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: '#ffffff',
+                  marginBottom: '1.25rem',
+                }}
+              >
+                Contact Seller
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', fontSize: '0.88rem', color: 'rgba(255, 255, 255, 0.75)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Phone size={15} style={{ color: '#ffffff' }} />
+                  <span>{storeSettings.phone || storeSettings.whatsapp}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <HelpCircle size={15} style={{ color: '#ffffff' }} />
+                  <span>{storeSettings.email}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                  <MapPin size={15} style={{ color: '#ffffff', flexShrink: 0, marginTop: '2px' }} />
+                  <span>{storeSettings.address}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Clock size={15} style={{ color: '#ffffff' }} />
+                  <span>Delivery in 2 - 4 business days nationwide</span>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div
-              style={{
-                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                paddingTop: '1.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '1rem',
-                fontSize: '0.82rem',
-                color: 'rgba(255, 255, 255, 0.6)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
-                <span>© 2026 {storeSettings.storeName}. All rights reserved.</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                {['Cash on Delivery', 'EasyPaisa', 'JazzCash', 'Bank Transfer'].map((pay, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                      color: '#ffffff',
-                      padding: '0.2rem 0.55rem',
-                      borderRadius: '4px',
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {pay}
-                  </span>
-                ))}
-              </div>
+          <div
+            style={{
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              paddingTop: '1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '1rem',
+              fontSize: '0.82rem',
+              color: 'rgba(255, 255, 255, 0.6)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+              <span>© 2026 {storeSettings.storeName}. All rights reserved.</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              {['Cash on Delivery', 'EasyPaisa', 'JazzCash', 'Bank Transfer'].map((pay, i) => (
+                <span
+                  key={i}
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                    color: '#ffffff',
+                    padding: '0.2rem 0.55rem',
+                    borderRadius: '4px',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                  }}
+                >
+                  {pay}
+                </span>
+              ))}
             </div>
           </div>
-        </footer>
+        </div>
+      </footer>
       </ScrollRevealSection>
 
       {/* ================================================================= */}
@@ -2800,8 +2800,8 @@ export default function UserStorePage({
                   {checkoutStep === 'cart'
                     ? `Shopping Bag (${itemsCount})`
                     : checkoutStep === 'checkout'
-                      ? '⚡ Fast Cash on Delivery Order'
-                      : 'Order Placed Successfully!'}
+                    ? '⚡ Fast Cash on Delivery Order'
+                    : 'Order Placed Successfully!'}
                 </h3>
               </div>
 
@@ -3691,10 +3691,10 @@ export default function UserStorePage({
                         {placingOrder
                           ? 'Submitting Order...'
                           : paymentMethod === 'Cash on Delivery'
-                            ? 'Submit Order (Cash on Delivery)'
-                            : paymentScreenshot
-                              ? '✓ Submit Order (Proof Attached)'
-                              : '📷 Select Screenshot to Submit'}
+                          ? 'Submit Order (Cash on Delivery)'
+                          : paymentScreenshot
+                          ? '✓ Submit Order (Proof Attached)'
+                          : '📷 Select Screenshot to Submit'}
                       </span>
                     </button>
                   </div>
@@ -4121,18 +4121,18 @@ export default function UserStorePage({
                           trackingOrder.status === 'Delivered'
                             ? '#DCFCE7'
                             : trackingOrder.status === 'Shipped'
-                              ? '#DBEAFE'
-                              : trackingOrder.status === 'Confirmed'
-                                ? '#E0E7FF'
-                                : '#FEF3C7',
+                            ? '#DBEAFE'
+                            : trackingOrder.status === 'Confirmed'
+                            ? '#E0E7FF'
+                            : '#FEF3C7',
                         color:
                           trackingOrder.status === 'Delivered'
                             ? '#166534'
                             : trackingOrder.status === 'Shipped'
-                              ? '#1E40AF'
-                              : trackingOrder.status === 'Confirmed'
-                                ? '#3730A3'
-                                : '#92400E',
+                            ? '#1E40AF'
+                            : trackingOrder.status === 'Confirmed'
+                            ? '#3730A3'
+                            : '#92400E',
                         padding: '0.25rem 0.75rem',
                         borderRadius: '999px',
                         fontSize: '0.75rem',
