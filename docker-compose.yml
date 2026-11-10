@@ -1,0 +1,40 @@
+services:
+  # ============================================================================
+  # 1. Backend API Service (Node.js + Express + MongoDB)
+  # ============================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: online-store-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+    networks:
+      - store-network
+
+  # ============================================================================
+  # 2. Frontend Client Service (React Vite + Nginx Reverse Proxy)
+  # ============================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: online-store-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - store-network
+
+networks:
+  store-network:
+    driver: bridge
+

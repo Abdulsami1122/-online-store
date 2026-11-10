@@ -38,114 +38,27 @@ import { useAuth } from '../../context/AuthContext';
 import { formatDateTime } from '../../utils/formatters';
 import AiAssistantModal from '../../components/common/AiAssistantModal';
 
-// Default multi-product catalog covering Honey, Car Accessories, Shoes, Fashion, Bags & Tech
-// If admin adds products from backend, those products automatically appear at the TOP!
-const DEFAULT_PRODUCTS = [
-  {
-    _id: 'prod-honey-1',
-    title: 'Pure Mountain Sidr Honey (500g)',
-    category: 'Honey & Organics',
-    price: 2400,
-    originalPrice: 3200,
-    rating: 5.0,
-    reviewsCount: 184,
-    badge: '100% PURE RAW',
-    stock: 25,
-    image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=600&q=80',
-    description: '100% pure raw unpasteurized Sidr honey harvested from pristine wild mountain apiaries. Rich in natural live enzymes, antibacterial properties, and deep caramel sweetness.',
-  },
-  {
-    _id: 'prod-car-1',
-    title: '64-Color App-Controlled Car Ambient LED Kit',
-    category: 'Car Accessories',
-    price: 3500,
-    originalPrice: 4800,
-    rating: 4.9,
-    reviewsCount: 142,
-    badge: 'TOP SELLER',
-    stock: 18,
-    image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=600&q=80',
-    description: 'Universal plug-and-play fiber optic ambient lighting kit for all car models. 64 RGB colors, sound-reactive music sync, and wireless Bluetooth smartphone app control.',
-  },
-  {
-    _id: 'prod-shoes-1',
-    title: 'Aero-Glide Breathable Urban Sneakers',
-    category: 'Footwear & Shoes',
-    price: 2800,
-    originalPrice: 3800,
-    rating: 4.9,
-    reviewsCount: 210,
-    badge: 'BESTSELLER',
-    stock: 14,
-    image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=600&q=80',
-    description: 'Ultra-lightweight shock-absorbing memory foam sneakers with breathable knit mesh. Designed for all-day comfort, walking, gym, and smart-casual wear.',
-  },
-  {
-    _id: 'prod-clothes-1',
-    title: 'Classic Combed Cotton Casual T-Shirt',
-    category: 'Fashion & Clothes',
-    price: 1200,
-    originalPrice: 1800,
-    rating: 4.8,
-    reviewsCount: 96,
-    badge: 'PREMIUM COTTON',
-    stock: 30,
-    image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80',
-    description: '100% combed ringspun cotton crew neck t-shirt. Pre-shrunk, breathable, super soft texture that maintains shape and deep color after repeated washing.',
-  },
-  {
-    _id: 'prod-clothes-2',
-    title: 'Chic Floral Chiffon Maxi Dress',
-    category: 'Fashion & Clothes',
-    price: 3200,
-    originalPrice: 4500,
-    rating: 4.9,
-    reviewsCount: 118,
-    badge: 'TRENDING',
-    stock: 12,
-    image: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=600&q=80',
-    description: 'Flowing romantic chiffon dress with an elasticated smocked waist and delicate floral prints. Lightweight, elegant, and perfect for daywear or festive outings.',
-  },
-  {
-    _id: 'prod-car-2',
-    title: 'Solar Powered Dual-Ring Car Aroma Diffuser',
-    category: 'Car Accessories',
-    price: 1450,
-    originalPrice: 2200,
-    rating: 4.7,
-    reviewsCount: 88,
-    badge: 'HOT ITEM',
-    stock: 22,
-    image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80',
-    description: 'Aerospace-grade alloy rotating diffuser that spins automatically in sunlight. Dispenses natural alcohol-free botanical fragrance rings into your car cabin.',
-  },
-  {
-    _id: 'prod-honey-2',
-    title: 'Fresh Wild Cut Honeycomb Box (400g)',
-    category: 'Honey & Organics',
-    price: 1950,
-    originalPrice: 2600,
-    rating: 5.0,
-    reviewsCount: 130,
-    badge: '100% NATURAL',
-    stock: 15,
-    image: 'https://images.unsplash.com/photo-1471193945509-9ad0617afabf?auto=format&fit=crop&w=600&q=80',
-    description: 'Fresh cut natural beeswax comb straight from the hive frames. Chewy, delectable, and loaded with pure raw wildflower nectar and live propolis.',
-  },
-  {
-    _id: 'prod-acc-1',
-    title: 'Luxury Tan Structured Leather Handbag',
-    category: 'Bags & Accessories',
-    price: 2500,
-    originalPrice: 3500,
-    rating: 4.9,
-    reviewsCount: 74,
-    badge: 'ELEGANT',
-    stock: 9,
-    image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80',
-    description: 'Structured premium vegan leather bag with gold hardware, dual top handles, and a detachable shoulder strap. Ample compartments for phone, wallet, and essentials.',
-  },
+// Curated Standard Categories for the Store
+const STORE_CATEGORIES = [
+  'Car Accessories',
+  'General',
+  'Honey & Organics',
+  'Footwear & Shoes',
+  'Fashion & Clothes',
+  'Bags & Accessories',
 ];
+
+// 100% FIXED Category Pictures for "Shop by Category"
+// These NEVER change when products are added or edited by admin!
+// Product images uploaded by admin only appear on the product cards in the collection/shop below.
+const FIXED_CATEGORY_IMAGES = {
+  'Car Accessories': 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=500&q=80',
+  'General': 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=500&q=80',
+  'Honey & Organics': '/honey-category.jpg',
+  'Footwear & Shoes': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=500&q=80',
+  'Fashion & Clothes': 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=500&q=80',
+  'Bags & Accessories': 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=500&q=80',
+};
 
 // Social Brand Icons (Instagram & Facebook)
 function InstagramIcon({ size = 20, color = 'currentColor', ...props }) {
@@ -499,30 +412,36 @@ export default function UserStorePage({
     localStorage.setItem('user_store_wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
-  // Combined product list: DB products (at the very top) + default catalog
-  const allProducts = [
-    ...dbProducts,
-    ...DEFAULT_PRODUCTS.filter(
-      (def) => !dbProducts.some((db) => db.title?.toLowerCase() === def.title?.toLowerCase())
-    ),
+  // Store products: ONLY real products added by Admin from backend DB (no auto/default items)
+  const allProducts = dbProducts;
+
+  // Categories list: Standard curated categories + any custom categories added by admin
+  const uniqueCategories = [
+    'All',
+    ...new Set([
+      ...STORE_CATEGORIES,
+      ...allProducts.map((p) => p.category).filter(Boolean),
+    ]),
   ];
 
-  // Dynamic Categories from all products
-  const uniqueCategories = ['All', ...new Set(allProducts.map((p) => p.category || 'General'))];
-
   // Map category images for "Shop by Category"
+  // 100% FIXED permanent pictures - NEVER replaced by uploaded product images
   const getCategoryImage = (catName) => {
-    const found = allProducts.find((p) => p.category === catName);
-    if (found && found.image) return found.image;
-    if (catName.toLowerCase().includes('honey'))
-      return 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=400&q=80';
-    if (catName.toLowerCase().includes('car'))
-      return 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=400&q=80';
-    if (catName.toLowerCase().includes('shoe') || catName.toLowerCase().includes('footwear'))
-      return 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=400&q=80';
-    if (catName.toLowerCase().includes('cloth') || catName.toLowerCase().includes('fashion'))
-      return 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80';
-    return 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80';
+    if (FIXED_CATEGORY_IMAGES[catName]) return FIXED_CATEGORY_IMAGES[catName];
+    const lower = (catName || '').toLowerCase();
+    if (lower.includes('honey') || lower.includes('organic'))
+      return FIXED_CATEGORY_IMAGES['Honey & Organics'];
+    if (lower.includes('car') || lower.includes('auto'))
+      return FIXED_CATEGORY_IMAGES['Car Accessories'];
+    if (lower.includes('shoe') || lower.includes('footwear'))
+      return FIXED_CATEGORY_IMAGES['Footwear & Shoes'];
+    if (lower.includes('bag') || lower.includes('handbag'))
+      return FIXED_CATEGORY_IMAGES['Bags & Accessories'];
+    if (lower.includes('cloth') || lower.includes('fashion') || lower.includes('apparel'))
+      return FIXED_CATEGORY_IMAGES['Fashion & Clothes'];
+    if (lower.includes('general'))
+      return FIXED_CATEGORY_IMAGES['General'];
+    return FIXED_CATEGORY_IMAGES['General'];
   };
 
   // ----------------------------------------------------------------------
@@ -1307,7 +1226,9 @@ export default function UserStorePage({
               {uniqueCategories
                 .filter((c) => c !== 'All')
                 .map((catName, idx) => {
-                  const count = allProducts.filter((p) => p.category === catName).length;
+                  const count = allProducts.filter(
+                    (p) => (p.category || 'General').toLowerCase() === catName.toLowerCase()
+                  ).length;
                   const catImg = getCategoryImage(catName);
 
                   return (
@@ -1367,7 +1288,7 @@ export default function UserStorePage({
                         </h3>
 
                         <span style={{ fontSize: '0.78rem', color: '#8F868C', marginBottom: '0.5rem', display: 'block' }}>
-                          {count} items
+                          {count} {count === 1 ? 'item' : 'items'}
                         </span>
 
                         <span
@@ -1904,6 +1825,80 @@ export default function UserStorePage({
                 </TiltCard>
               );
             })}
+
+            {filteredProducts.length === 0 && (
+              <div
+                style={{
+                  gridColumn: '1 / -1',
+                  textAlign: 'center',
+                  padding: '4rem 1.5rem',
+                  backgroundColor: '#FAFAFA',
+                  borderRadius: '16px',
+                  border: '1.5px dashed #E5DCE0',
+                  margin: '1rem 0',
+                }}
+              >
+                <div
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    backgroundColor: '#F3E8EE',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '1rem',
+                    color: theme.primary,
+                  }}
+                >
+                  <ShoppingBag size={28} />
+                </div>
+                <h3
+                  className="font-serif"
+                  style={{
+                    fontSize: '1.25rem',
+                    fontWeight: 700,
+                    color: '#260618',
+                    marginBottom: '0.4rem',
+                  }}
+                >
+                  {selectedCategory === 'All'
+                    ? 'No products available yet'
+                    : `No products in "${selectedCategory}" yet`}
+                </h3>
+                <p
+                  style={{
+                    fontSize: '0.9rem',
+                    color: '#7E757A',
+                    maxWidth: '420px',
+                    margin: '0 auto 1.5rem',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {selectedCategory === 'All'
+                    ? 'Products added from the Admin Dashboard will appear here immediately.'
+                    : `There are currently no items under this category. Switch to "All" to browse all available items.`}
+                </p>
+                {selectedCategory !== 'All' && (
+                  <button
+                    onClick={() => setSelectedCategory('All')}
+                    style={{
+                      backgroundColor: theme.primary,
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '0.65rem 1.6rem',
+                      borderRadius: '999px',
+                      fontWeight: 600,
+                      fontSize: '0.88rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    View All Products
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -2031,146 +2026,148 @@ export default function UserStorePage({
       </ScrollRevealSection>
 
       {/* ================================================================= */}
-      {/* 8. BEST SELLERS SECTION (Top 4 Products)                           */}
+      {/* 8. BEST SELLERS SECTION (Top 4 Products - only when products exist) */}
       {/* ================================================================= */}
-      <ScrollRevealSection direction="left">
-        <section
-          ref={bestSellersRef}
-          style={{
-            padding: '3rem 1.25rem 4rem',
-            backgroundColor: '#FFFFFF',
-          }}
-        >
-        <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <h2
-              className="font-serif"
-              style={{
-                fontSize: '2.2rem',
-                fontWeight: 700,
-                color: '#260618',
-                marginBottom: '0.4rem',
-              }}
-            >
-              Best Sellers
-            </h2>
-            <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
-              Most loved products ordered by thousands of happy buyers this month
-            </p>
-          </div>
-
-          <div
+      {bestSellers.length > 0 && (
+        <ScrollRevealSection direction="left">
+          <section
+            ref={bestSellersRef}
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '1.5rem',
+              padding: '3rem 1.25rem 4rem',
+              backgroundColor: '#FFFFFF',
             }}
-            className="grid-responsive-4"
           >
-            {bestSellers.map((item) => {
-              const inWishlist = isWishlisted(item._id);
-              const isJustAdded = addedNoticeId === item._id;
+          <div className="container">
+            <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+              <h2
+                className="font-serif"
+                style={{
+                  fontSize: '2.2rem',
+                  fontWeight: 700,
+                  color: '#260618',
+                  marginBottom: '0.4rem',
+                }}
+              >
+                Best Sellers
+              </h2>
+              <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+                Most loved products ordered by thousands of happy buyers this month
+              </p>
+            </div>
 
-              return (
-                <TiltCard
-                  key={item._id}
-                  className="luxury-product-card"
-                  style={{
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: '16px',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    position: 'relative',
-                  }}
-                >
-                  <div
-                    className="depth-image"
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '1.5rem',
+              }}
+              className="grid-responsive-4"
+            >
+              {bestSellers.map((item) => {
+                const inWishlist = isWishlisted(item._id);
+                const isJustAdded = addedNoticeId === item._id;
+
+                return (
+                  <TiltCard
+                    key={item._id}
+                    className="luxury-product-card"
                     style={{
-                      height: '260px',
-                      backgroundColor: '#F8F3F5',
-                      position: 'relative',
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '16px',
                       overflow: 'hidden',
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => {
-                      setQuickViewProduct(item);
-                      setQuickViewQty(1);
+                      display: 'flex',
+                      flexDirection: 'column',
+                      position: 'relative',
                     }}
                   >
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="product-img"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                    <button
-                      onClick={(e) => toggleWishlist(item, e)}
+                    <div
+                      className="depth-image"
                       style={{
-                        position: 'absolute',
-                        top: '12px',
-                        right: '12px',
-                        backgroundColor: '#ffffff',
-                        border: 'none',
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: inWishlist ? '#DC2626' : '#6A6369',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        height: '260px',
+                        backgroundColor: '#F8F3F5',
+                        position: 'relative',
+                        overflow: 'hidden',
                         cursor: 'pointer',
                       }}
+                      onClick={() => {
+                        setQuickViewProduct(item);
+                        setQuickViewQty(1);
+                      }}
                     >
-                      <Heart size={16} fill={inWishlist ? '#DC2626' : 'none'} strokeWidth={2} />
-                    </button>
-                  </div>
-
-                  <div className="depth-content" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                    <span style={{ fontSize: '0.72rem', color: '#888', textTransform: 'uppercase' }}>
-                      {item.category}
-                    </span>
-                    <h3
-                      className="font-serif"
-                      style={{ fontSize: '1.05rem', fontWeight: 600, color: '#260618', margin: '0.3rem 0' }}
-                    >
-                      {item.title}
-                    </h3>
-                    <div style={{ fontSize: '1.15rem', fontWeight: 700, color: theme.primary, marginBottom: '0.75rem' }}>
-                      {formatPrice(item.price)}
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="product-img"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                      <button
+                        onClick={(e) => toggleWishlist(item, e)}
+                        style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          backgroundColor: '#ffffff',
+                          border: 'none',
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: inWishlist ? '#DC2626' : '#6A6369',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Heart size={16} fill={inWishlist ? '#DC2626' : 'none'} strokeWidth={2} />
+                      </button>
                     </div>
 
-                    <button
-                      onClick={(e) => handleBuyNowInstant(item, e)}
-                      className="depth-button"
-                      style={{
-                        marginTop: 'auto',
-                        backgroundColor: theme.primary,
-                        color: '#ffffff',
-                        border: 'none',
-                        padding: '0.6rem',
-                        borderRadius: '8px',
-                        fontWeight: 700,
-                        fontSize: '0.82rem',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.35rem',
-                      }}
-                    >
-                      <Lock size={13} />
-                      <span>Order via Cash on Delivery</span>
-                    </button>
-                  </div>
-                </TiltCard>
-              );
-            })}
+                    <div className="depth-content" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                      <span style={{ fontSize: '0.72rem', color: '#888', textTransform: 'uppercase' }}>
+                        {item.category}
+                      </span>
+                      <h3
+                        className="font-serif"
+                        style={{ fontSize: '1.05rem', fontWeight: 600, color: '#260618', margin: '0.3rem 0' }}
+                      >
+                        {item.title}
+                      </h3>
+                      <div style={{ fontSize: '1.15rem', fontWeight: 700, color: theme.primary, marginBottom: '0.75rem' }}>
+                        {formatPrice(item.price)}
+                      </div>
+
+                      <button
+                        onClick={(e) => handleBuyNowInstant(item, e)}
+                        className="depth-button"
+                        style={{
+                          marginTop: 'auto',
+                          backgroundColor: theme.primary,
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '0.6rem',
+                          borderRadius: '8px',
+                          fontWeight: 700,
+                          fontSize: '0.82rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.35rem',
+                        }}
+                      >
+                        <Lock size={13} />
+                        <span>Order via Cash on Delivery</span>
+                      </button>
+                    </div>
+                  </TiltCard>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
-      </ScrollRevealSection>
+        </section>
+        </ScrollRevealSection>
+      )}
 
       {/* ================================================================= */}
       {/* 9. HUGE DISCOUNT / FLASH SALE SPLIT BANNER                         */}
