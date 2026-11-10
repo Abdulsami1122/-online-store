@@ -5,11 +5,13 @@ import {
   getUserProfile,
   updateUserProfile,
   getUsers,
+  getStoreSettings,
 } from '../controllers/authController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+router.get('/store-settings', getStoreSettings);
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router

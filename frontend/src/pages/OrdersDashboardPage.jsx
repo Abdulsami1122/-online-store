@@ -13,6 +13,7 @@ export default function OrdersDashboardPage() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [updating, setUpdating] = useState(false);
   const [actionSuccessMsg, setActionSuccessMsg] = useState('');
+  const [proofModalUrl, setProofModalUrl] = useState(null);
 
   const loadOrders = async () => {
     try {
@@ -44,6 +45,23 @@ export default function OrdersDashboardPage() {
       setTimeout(() => setActionSuccessMsg(''), 4000);
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update order status');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleUpdatePaymentStatus = async (orderId, newPaymentStatus) => {
+    setUpdating(true);
+    try {
+      const updated = await updateOrderStatus(orderId, { paymentStatus: newPaymentStatus });
+      setOrders((prev) => prev.map((o) => (o._id === orderId ? updated : o)));
+      if (selectedOrder && selectedOrder._id === orderId) {
+        setSelectedOrder(updated);
+      }
+      setActionSuccessMsg(`Order #${updated.orderNumber} payment marked as "${newPaymentStatus}"!`);
+      setTimeout(() => setActionSuccessMsg(''), 4000);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update payment status');
     } finally {
       setUpdating(false);
     }
@@ -164,6 +182,7 @@ export default function OrdersDashboardPage() {
                   <th>#</th>
                   <th>Customer</th>
                   <th>Amount</th>
+                  <th>Payment</th>
                   <th>Status</th>
                   <th>Date</th>
                   <th>Action</th>
@@ -179,6 +198,8 @@ export default function OrdersDashboardPage() {
                       : ord.status === 'Shipped'
                       ? 'status-shipped'
                       : 'status-delivered';
+
+                  const isOnline = ord.paymentMethod && ord.paymentMethod !== 'Cash on Delivery';
 
                   return (
                     <tr key={ord._id}>
@@ -204,6 +225,78 @@ export default function OrdersDashboardPage() {
                         <strong style={{ color: '#1e293b' }}>
                           {formatCurrency(ord.totalPrice)}
                         </strong>
+                      </td>
+
+                      {/* Payment Method & Proof */}
+                      <td>
+                        <div>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.25rem',
+                              padding: '0.2rem 0.55rem',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              backgroundColor:
+                                ord.paymentMethod === 'EasyPaisa'
+                                  ? '#ecfdf5'
+                                  : ord.paymentMethod === 'JazzCash'
+                                  ? '#fef2f2'
+                                  : ord.paymentMethod === 'Online Bank Transfer'
+                                  ? '#eff6ff'
+                                  : '#f1f5f9',
+                              color:
+                                ord.paymentMethod === 'EasyPaisa'
+                                  ? '#047857'
+                                  : ord.paymentMethod === 'JazzCash'
+                                  ? '#b91c1c'
+                                  : ord.paymentMethod === 'Online Bank Transfer'
+                                  ? '#1d4ed8'
+                                  : '#475569',
+                            }}
+                          >
+                            {ord.paymentMethod === 'EasyPaisa' && '🟢'}
+                            {ord.paymentMethod === 'JazzCash' && '🔴'}
+                            {ord.paymentMethod === 'Online Bank Transfer' && '🏦'}
+                            {!isOnline && '💵'}
+                            {ord.paymentMethod || 'COD'}
+                          </span>
+
+                          {isOnline && (
+                            <div style={{ marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                              {ord.paymentStatus === 'Verified' ? (
+                                <span style={{ fontSize: '0.7rem', color: '#16a34a', fontWeight: 700 }}>
+                                  ✓ Verified
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: '0.7rem', color: '#d97706', fontWeight: 700 }}>
+                                  ⏳ Verify Needed
+                                </span>
+                              )}
+                              {ord.paymentProof && (
+                                <button
+                                  type="button"
+                                  onClick={() => setProofModalUrl(ord.paymentProof)}
+                                  style={{
+                                    background: '#f8fafc',
+                                    border: '1px solid #cbd5e1',
+                                    borderRadius: '4px',
+                                    padding: '0.1rem 0.35rem',
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700,
+                                    color: '#2563eb',
+                                    cursor: 'pointer',
+                                  }}
+                                  title="Click to view customer payment slip"
+                                >
+                                  📎 Slip
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </td>
 
                       {/* Status */}
@@ -418,10 +511,6 @@ export default function OrdersDashboardPage() {
                 <span>{selectedOrder.shippingAddress}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontWeight: 700, width: '130px', color: '#64748b' }}>Payment:</span>
-                <span>{selectedOrder.paymentMethod}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ fontWeight: 700, width: '130px', color: '#64748b' }}>Tracking Link:</span>
                 <a
                   href={`/track/${selectedOrder.orderNumber}`}
@@ -431,6 +520,146 @@ export default function OrdersDashboardPage() {
                 >
                   /track/{selectedOrder.orderNumber} ↗
                 </a>
+              </div>
+            </div>
+
+            {/* Dedicated Payment Verification Card */}
+            <div
+              style={{
+                marginBottom: '1.5rem',
+                padding: '1rem',
+                backgroundColor:
+                  selectedOrder.paymentMethod === 'Cash on Delivery'
+                    ? '#f8fafc'
+                    : selectedOrder.paymentStatus === 'Verified'
+                    ? '#f0fdf4'
+                    : '#fffbeb',
+                borderRadius: '12px',
+                border: `1.5px solid ${
+                  selectedOrder.paymentMethod === 'Cash on Delivery'
+                    ? '#E2E8F0'
+                    : selectedOrder.paymentStatus === 'Verified'
+                    ? '#86efac'
+                    : '#fde68a'
+                }`,
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b' }}>
+                  💳 Payment Information & Verification
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '999px',
+                    backgroundColor:
+                      selectedOrder.paymentStatus === 'Verified'
+                        ? '#dcfce7'
+                        : selectedOrder.paymentStatus === 'Pending Verification'
+                        ? '#fef3c7'
+                        : '#f1f5f9',
+                    color:
+                      selectedOrder.paymentStatus === 'Verified'
+                        ? '#15803d'
+                        : selectedOrder.paymentStatus === 'Pending Verification'
+                        ? '#b45309'
+                        : '#475569',
+                  }}
+                >
+                  {selectedOrder.paymentStatus || (selectedOrder.paymentMethod === 'Cash on Delivery' ? 'COD' : 'Pending')}
+                </span>
+              </div>
+
+              <div style={{ fontSize: '0.85rem', color: '#334155', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <div>
+                  <span style={{ color: '#64748b', fontWeight: 600 }}>Payment Method: </span>
+                  <strong>{selectedOrder.paymentMethod || 'Cash on Delivery'}</strong>
+                </div>
+
+                {selectedOrder.accountDetailsUsed && (
+                  <div>
+                    <span style={{ color: '#64748b', fontWeight: 600 }}>Destination Account: </span>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#0f172a' }}>
+                      {selectedOrder.accountDetailsUsed}
+                    </span>
+                  </div>
+                )}
+
+                {/* Customer Uploaded Proof Screenshot */}
+                {selectedOrder.paymentProof && (
+                  <div style={{ marginTop: '0.6rem', paddingTop: '0.6rem', borderTop: '1px dashed #cbd5e1' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>
+                        Customer Submitted Payment Screenshot:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setProofModalUrl(selectedOrder.paymentProof)}
+                        style={{
+                          fontSize: '0.75rem',
+                          color: '#2563eb',
+                          fontWeight: 700,
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                        }}
+                      >
+                        Enlarge Screenshot ↗
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <img
+                        src={selectedOrder.paymentProof}
+                        alt="Customer Payment Screenshot"
+                        onClick={() => setProofModalUrl(selectedOrder.paymentProof)}
+                        style={{
+                          width: '96px',
+                          height: '96px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          border: '1px solid #cbd5e1',
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+                        }}
+                        title="Click to view full screenshot"
+                      />
+                      <div style={{ flex: 1, minWidth: '180px' }}>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>
+                          Customer uploaded this payment receipt during checkout.
+                        </p>
+                        {selectedOrder.paymentStatus !== 'Verified' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleUpdatePaymentStatus(selectedOrder._id, 'Verified')}
+                            disabled={updating}
+                            className="btn btn-sm"
+                            style={{
+                              marginTop: '0.45rem',
+                              backgroundColor: '#10b981',
+                              color: '#ffffff',
+                              fontSize: '0.8rem',
+                              fontWeight: 700,
+                              padding: '0.35rem 0.8rem',
+                              borderRadius: '6px',
+                              border: 'none',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            ✓ Mark Payment as Verified
+                          </button>
+                        ) : (
+                          <div style={{ marginTop: '0.45rem', display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#16a34a', fontWeight: 700, fontSize: '0.82rem' }}>
+                            <Check size={16} /> Payment Verified & Approved
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -487,6 +716,76 @@ export default function OrdersDashboardPage() {
               <button
                 onClick={() => setSelectedOrder(null)}
                 className="btn btn-secondary"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FULL-SIZE PAYMENT PROOF RECEIPT MODAL */}
+      {proofModalUrl && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.75)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000,
+            padding: '1.5rem',
+          }}
+          onClick={() => setProofModalUrl(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              padding: '1.5rem',
+              maxWidth: '650px',
+              width: '100%',
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.25)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>
+                Customer Payment Proof Receipt
+              </h3>
+              <button
+                onClick={() => setProofModalUrl(null)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+              >
+                <X size={22} />
+              </button>
+            </div>
+            <div style={{ flex: 1, overflow: 'auto', textAlign: 'center', backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <img
+                src={proofModalUrl}
+                alt="Full Payment Proof"
+                style={{ maxWidth: '100%', maxHeight: '65vh', objectFit: 'contain', borderRadius: '8px' }}
+              />
+            </div>
+            <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <a
+                href={proofModalUrl}
+                download="payment-proof.png"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-secondary btn-sm"
+                style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+              >
+                ⬇ Download Slip
+              </a>
+              <button
+                onClick={() => setProofModalUrl(null)}
+                className="btn btn-primary btn-sm"
               >
                 Close
               </button>

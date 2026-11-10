@@ -67,6 +67,42 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     },
+    bankName: {
+      type: String,
+      default: 'Meezan Bank',
+    },
+    bankAccountTitle: {
+      type: String,
+      default: 'Abdul Sami',
+    },
+    bankAccountNumber: {
+      type: String,
+      default: '01020304050607',
+    },
+    bankIban: {
+      type: String,
+      default: '',
+    },
+    easypaisaTitle: {
+      type: String,
+      default: 'Abdul Sami',
+    },
+    easypaisaNumber: {
+      type: String,
+      default: '0306 5779097',
+    },
+    jazzcashTitle: {
+      type: String,
+      default: 'Abdul Sami',
+    },
+    jazzcashNumber: {
+      type: String,
+      default: '0306 5779097',
+    },
+    onlinePaymentInstructions: {
+      type: String,
+      default: 'Please send payment to the account above and attach your payment screenshot or transaction receipt.',
+    },
   },
   {
     timestamps: true,

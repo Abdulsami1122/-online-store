@@ -12,6 +12,9 @@ export const createOrder = async (req, res) => {
       orderItems,
       deliveryCharges = 200,
       paymentMethod = 'Cash on Delivery',
+      paymentProof = '',
+      transactionId = '',
+      accountDetailsUsed = '',
       seller,
     } = req.body;
 
@@ -25,12 +28,21 @@ export const createOrder = async (req, res) => {
     const itemsPrice = orderItems.reduce((acc, item) => acc + item.price * (item.qty || 1), 0);
     const totalPrice = itemsPrice + Number(deliveryCharges);
 
+    const isOnlinePayment = paymentMethod && !paymentMethod.toLowerCase().includes('cash on delivery');
+    const paymentStatus = isOnlinePayment
+      ? (paymentProof ? 'Pending Verification' : 'Pending Payment')
+      : 'COD';
+
     const order = new Order({
       seller,
       customerName: customerName.trim(),
       customerPhone: customerPhone.trim(),
       shippingAddress: shippingAddress.trim(),
       paymentMethod: paymentMethod || 'Cash on Delivery',
+      paymentProof: paymentProof || '',
+      paymentStatus,
+      transactionId: transactionId || '',
+      accountDetailsUsed: accountDetailsUsed || '',
       orderItems,
       itemsPrice,
       deliveryCharges: Number(deliveryCharges),
@@ -63,7 +75,55 @@ export const trackOrder = async (req, res) => {
     }
 
     if (order) {
-      res.json(order);
+      const statusOrder = ['New', 'Confirmed', 'Shipped', 'Delivered'];
+      const activeIdx = statusOrder.indexOf(order.status) >= 0 ? statusOrder.indexOf(order.status) : 0;
+
+      const isCOD = !order.paymentMethod || order.paymentMethod.toLowerCase().includes('cash on delivery');
+      const step1Title = isCOD ? 'Order Placed (Cash on Delivery)' : `Order Placed (${order.paymentMethod})`;
+
+      const findTimelineDate = (st) => {
+        const item = order.timeline?.find((t) => t.status === st);
+        return item ? item.date : null;
+      };
+
+      const trackingSteps = [
+        {
+          step: 1,
+          key: 'New',
+          title: step1Title,
+          done: activeIdx >= 0,
+          current: activeIdx === 0,
+          time: findTimelineDate('New') || order.createdAt,
+        },
+        {
+          step: 2,
+          key: 'Confirmed',
+          title: 'Confirmed',
+          done: activeIdx >= 1,
+          current: activeIdx === 1,
+          time: findTimelineDate('Confirmed'),
+        },
+        {
+          step: 3,
+          key: 'Shipped',
+          title: 'In Transit with Courier',
+          done: activeIdx >= 2,
+          current: activeIdx === 2,
+          time: findTimelineDate('Shipped'),
+        },
+        {
+          step: 4,
+          key: 'Delivered',
+          title: 'Delivered to Doorstep',
+          done: activeIdx >= 3,
+          current: activeIdx === 3,
+          time: findTimelineDate('Delivered'),
+        },
+      ];
+
+      const orderObj = order.toObject();
+      orderObj.trackingSteps = trackingSteps;
+      res.json(orderObj);
     } else {
       res.status(404).json({ message: 'Order not found. Please check your order number.' });
     }
@@ -96,16 +156,23 @@ export const getSellerOrders = async (req, res) => {
   }
 };
 
-// @desc    Update order status (New, Confirmed, Shipped, Delivered)
+// @desc    Update order status (New, Confirmed, Shipped, Delivered) and payment details
 // @route   PUT /api/orders/:id/status
 // @access  Private
 export const updateOrderStatus = async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, paymentStatus, paymentProof } = req.body;
     const order = await Order.findById(req.params.id);
 
     if (order) {
-      order.status = status || order.status;
+      if (status) order.status = status;
+      if (paymentStatus) order.paymentStatus = paymentStatus;
+      if (paymentProof !== undefined) {
+        order.paymentProof = paymentProof;
+        if (!paymentStatus && order.paymentStatus === 'Pending Payment') {
+          order.paymentStatus = 'Pending Verification';
+        }
+      }
       const updatedOrder = await order.save();
       res.json(updatedOrder);
     } else {

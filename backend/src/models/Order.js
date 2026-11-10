@@ -26,6 +26,23 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: 'Cash on Delivery',
     },
+    paymentProof: {
+      type: String,
+      default: '',
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['COD', 'Pending Verification', 'Pending Payment', 'Verified', 'Paid', 'Failed'],
+      default: 'COD',
+    },
+    transactionId: {
+      type: String,
+      default: '',
+    },
+    accountDetailsUsed: {
+      type: String,
+      default: '',
+    },
     orderItems: [
       {
         product: {

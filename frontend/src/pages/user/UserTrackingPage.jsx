@@ -45,47 +45,58 @@ export default function UserTrackingPage() {
     }
   };
 
-  // Status progression mapping
-  const getStepState = (stepName) => {
-    if (!order) return { completed: false, active: false };
-    const statusOrder = ['New', 'Confirmed', 'Shipped', 'Delivered'];
-    const currentIdx = statusOrder.indexOf(order.status);
-    const stepIdx = statusOrder.indexOf(stepName);
+  const statusOrder = ['New', 'Confirmed', 'Shipped', 'Delivered'];
+  const currentIdx = order ? statusOrder.indexOf(order.status) : -1;
+  const activeIdx = currentIdx >= 0 ? currentIdx : 0;
 
-    return {
-      completed: currentIdx >= stepIdx,
-      active: currentIdx === stepIdx,
-    };
+  const isCOD = !order?.paymentMethod || order.paymentMethod.toLowerCase().includes('cash on delivery');
+  const step1Title = isCOD ? 'Order Placed (Cash on Delivery)' : `Order Placed (${order?.paymentMethod || 'Online Payment'})`;
+
+  const findTimelineDate = (st) => {
+    const item = order?.timeline?.find((t) => t.status === st);
+    return item ? item.date : null;
   };
 
   const steps = [
     {
+      step: 1,
       key: 'New',
-      title: 'Order Placed',
-      time: order?.createdAt ? formatDateTime(order.createdAt) : 'Pending',
+      title: step1Title,
+      done: activeIdx >= 0,
+      current: activeIdx === 0,
+      desc: isCOD ? 'Order received. Payment to be collected upon delivery.' : 'Order received with online payment verification.',
+      time: findTimelineDate('New') || order?.createdAt,
       icon: Clock,
-      color: '#4f46e5',
     },
     {
+      step: 2,
       key: 'Confirmed',
-      title: 'Confirmed by Seller',
-      time: order?.status !== 'New' ? 'Order confirmed by store' : 'Waiting for seller confirmation...',
+      title: 'Confirmed',
+      done: activeIdx >= 1,
+      current: activeIdx === 1,
+      desc: activeIdx >= 1 ? 'Order verified and packed by store.' : 'Waiting for store confirmation...',
+      time: findTimelineDate('Confirmed'),
       icon: CheckCircle2,
-      color: '#0284c7',
     },
     {
+      step: 3,
       key: 'Shipped',
-      title: 'Shipped (In Transit)',
-      time: order?.status === 'Shipped' || order?.status === 'Delivered' ? 'Dispatched via Courier' : 'Pending dispatch',
+      title: 'In Transit with Courier',
+      done: activeIdx >= 2,
+      current: activeIdx === 2,
+      desc: activeIdx >= 2 ? 'Dispatched with courier for doorstep delivery.' : 'Pending courier dispatch...',
+      time: findTimelineDate('Shipped'),
       icon: Truck,
-      color: '#2563eb',
     },
     {
+      step: 4,
       key: 'Delivered',
-      title: 'Delivered',
-      time: order?.status === 'Delivered' ? 'Parcel delivered successfully' : 'Estimated in 2-4 days',
+      title: 'Delivered to Doorstep',
+      done: activeIdx >= 3,
+      current: activeIdx === 3,
+      desc: activeIdx >= 3 ? 'Package successfully delivered to customer address.' : 'Estimated in 2-3 business days.',
+      time: findTimelineDate('Delivered'),
       icon: Package,
-      color: '#16a34a',
     },
   ];
 
@@ -186,79 +197,177 @@ export default function UserTrackingPage() {
               Fetching live order tracking...
             </p>
           ) : order ? (
-            <div style={{ position: 'relative', paddingLeft: '2.5rem' }}>
-              {/* Vertical connector line */}
-              <div
-                style={{
-                  position: 'absolute',
-                  left: '12px',
-                  top: '18px',
-                  bottom: '24px',
-                  width: '3px',
-                  backgroundColor: '#e2e8f0',
-                  zIndex: 1,
-                }}
-              />
+            <div>
+              {/* Horizontal Progress Bar connecting nodes 1 -> 2 -> 3 -> 4 */}
+              <div style={{ marginBottom: '2rem', padding: '1rem 0.5rem', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+                  {steps.map((st, sIdx) => {
+                    const isDone = st.done;
+                    const isNextDone = steps[sIdx + 1]?.done;
 
-              {steps.map((st, idx) => {
-                const state = getStepState(st.key);
-                const isDone = state.completed;
-                const isCurrent = state.active;
-
-                return (
-                  <div
-                    key={st.key}
-                    style={{
-                      position: 'relative',
-                      marginBottom: idx === steps.length - 1 ? 0 : '2.25rem',
-                    }}
-                  >
-                    {/* Circle badge */}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        left: '-2.5rem',
-                        top: '2px',
-                        width: '26px',
-                        height: '26px',
-                        borderRadius: '50%',
-                        backgroundColor: isDone ? st.color : '#e2e8f0',
-                        border: isCurrent ? '3px solid #e0e7ff' : 'none',
-                        color: '#ffffff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 2,
-                        boxShadow: isDone ? `0 0 10px ${st.color}40` : 'none',
-                      }}
-                    >
-                      {isDone ? (
-                        <CheckCircle2 size={15} />
-                      ) : (
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#94a3b8' }} />
-                      )}
-                    </div>
-
-                    {/* Title & Time */}
-                    <div>
-                      <h3
+                    return (
+                      <div
+                        key={st.step}
                         style={{
-                          fontSize: '1rem',
-                          fontWeight: isDone ? 700 : 500,
-                          color: isDone ? '#0f172a' : '#94a3b8',
-                          lineHeight: 1.2,
-                          marginBottom: '0.2rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          flex: sIdx === steps.length - 1 ? '0 0 auto' : 1,
+                          position: 'relative',
                         }}
                       >
-                        {st.title}
-                      </h3>
-                      <p style={{ fontSize: '0.8rem', color: isDone ? '#64748b' : '#cbd5e1' }}>
-                        {st.time}
-                      </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
+                          <div
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '50%',
+                              backgroundColor: isDone ? '#10b981' : '#f1f5f9',
+                              border: isDone ? '2px solid #10b981' : '2px solid #cbd5e1',
+                              color: isDone ? '#ffffff' : '#94a3b8',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 800,
+                              fontSize: '0.8rem',
+                              boxShadow: isDone ? '0 0 10px rgba(16, 185, 129, 0.35)' : 'none',
+                              transition: 'all 0.3s ease',
+                            }}
+                          >
+                            {isDone ? <CheckCircle2 size={18} /> : st.step}
+                          </div>
+                          <span
+                            style={{
+                              fontSize: '0.68rem',
+                              fontWeight: isDone ? 700 : 500,
+                              color: isDone ? '#0f172a' : '#94a3b8',
+                              marginTop: '0.4rem',
+                              textAlign: 'center',
+                              maxWidth: '70px',
+                              lineHeight: 1.1,
+                            }}
+                          >
+                            {st.step === 1 ? 'Placed' : st.step === 2 ? 'Confirmed' : st.step === 3 ? 'In Transit' : 'Delivered'}
+                          </span>
+                        </div>
+
+                        {/* Connecting line between nodes */}
+                        {sIdx < steps.length - 1 && (
+                          <div
+                            style={{
+                              flex: 1,
+                              height: '4px',
+                              backgroundColor: isNextDone ? '#10b981' : '#e2e8f0',
+                              margin: '0 4px',
+                              marginBottom: '1.2rem',
+                              borderRadius: '999px',
+                              transition: 'background-color 0.4s ease',
+                            }}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Step-by-Step Vertical Connected Timeline */}
+              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                {steps.map((st, idx) => {
+                  const isDone = st.done;
+                  const isNextDone = steps[idx + 1]?.done;
+                  const isLast = idx === steps.length - 1;
+
+                  return (
+                    <div
+                      key={st.step}
+                      style={{
+                        display: 'flex',
+                        gap: '1.25rem',
+                        position: 'relative',
+                        paddingBottom: isLast ? 0 : '2rem',
+                      }}
+                    >
+                      {/* Vertical Connector Column */}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', width: '32px', flexShrink: 0 }}>
+                        <div
+                          style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            backgroundColor: isDone ? '#10b981' : '#f1f5f9',
+                            border: isDone ? '2px solid #10b981' : '2px solid #cbd5e1',
+                            color: isDone ? '#ffffff' : '#94a3b8',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 800,
+                            fontSize: '0.85rem',
+                            zIndex: 2,
+                            boxShadow: isDone ? '0 0 10px rgba(16, 185, 129, 0.35)' : 'none',
+                            transition: 'all 0.3s ease',
+                          }}
+                        >
+                          {isDone ? <CheckCircle2 size={18} /> : idx + 1}
+                        </div>
+
+                        {/* Vertical line connecting to next step: Green when next step is reached! */}
+                        {!isLast && (
+                          <div
+                            style={{
+                              position: 'absolute',
+                              top: '32px',
+                              bottom: 0,
+                              width: '3px',
+                              backgroundColor: isNextDone ? '#10b981' : '#e2e8f0',
+                              zIndex: 1,
+                              transition: 'background-color 0.4s ease',
+                            }}
+                          />
+                        )}
+                      </div>
+
+                      {/* Step Details Column */}
+                      <div style={{ flex: 1, paddingTop: '3px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          <h3
+                            style={{
+                              fontSize: '0.98rem',
+                              fontWeight: isDone ? 800 : 600,
+                              color: isDone ? '#0f172a' : '#94a3b8',
+                              lineHeight: 1.2,
+                              margin: 0,
+                            }}
+                          >
+                            {st.title}
+                          </h3>
+                          {st.current && (
+                            <span
+                              style={{
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                                backgroundColor: '#dcfce7',
+                                color: '#15803d',
+                                padding: '0.15rem 0.5rem',
+                                borderRadius: '999px',
+                              }}
+                            >
+                              ● Current Step
+                            </span>
+                          )}
+                        </div>
+                        <p style={{ fontSize: '0.82rem', color: isDone ? '#475569' : '#94a3b8', margin: '0.25rem 0 0.15rem' }}>
+                          {st.desc}
+                        </p>
+                        {st.time && (
+                          <p style={{ fontSize: '0.75rem', color: isDone ? '#64748b' : '#cbd5e1', margin: 0, fontWeight: 500 }}>
+                            {typeof st.time === 'string' && st.time.includes('T') ? formatDateTime(st.time) : st.time}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           ) : null}
         </div>

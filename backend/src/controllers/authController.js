@@ -78,6 +78,15 @@ export const loginUser = async (req, res) => {
         storeName: user.storeName,
         storeTagline: user.storeTagline,
         whatsapp: user.whatsapp,
+        bankName: user.bankName,
+        bankAccountTitle: user.bankAccountTitle,
+        bankAccountNumber: user.bankAccountNumber,
+        bankIban: user.bankIban,
+        easypaisaTitle: user.easypaisaTitle,
+        easypaisaNumber: user.easypaisaNumber,
+        jazzcashTitle: user.jazzcashTitle,
+        jazzcashNumber: user.jazzcashNumber,
+        onlinePaymentInstructions: user.onlinePaymentInstructions,
         token: generateToken(user._id),
       });
     } else {
@@ -124,6 +133,24 @@ export const updateUserProfile = async (req, res) => {
       user.email = req.body.email || user.email;
       user.phone = req.body.phone !== undefined ? req.body.phone : user.phone;
       user.avatar = req.body.avatar || user.avatar;
+      if (req.body.storeName) user.storeName = req.body.storeName;
+      if (req.body.storeTagline) user.storeTagline = req.body.storeTagline;
+      if (req.body.whatsapp) user.whatsapp = req.body.whatsapp;
+      if (req.body.address) user.address = req.body.address;
+      if (req.body.city) user.city = req.body.city;
+
+      // Online Payment & Bank Configuration
+      if (req.body.bankName !== undefined) user.bankName = req.body.bankName;
+      if (req.body.bankAccountTitle !== undefined) user.bankAccountTitle = req.body.bankAccountTitle;
+      if (req.body.bankAccountNumber !== undefined) user.bankAccountNumber = req.body.bankAccountNumber;
+      if (req.body.bankIban !== undefined) user.bankIban = req.body.bankIban;
+      if (req.body.easypaisaTitle !== undefined) user.easypaisaTitle = req.body.easypaisaTitle;
+      if (req.body.easypaisaNumber !== undefined) user.easypaisaNumber = req.body.easypaisaNumber;
+      if (req.body.jazzcashTitle !== undefined) user.jazzcashTitle = req.body.jazzcashTitle;
+      if (req.body.jazzcashNumber !== undefined) user.jazzcashNumber = req.body.jazzcashNumber;
+      if (req.body.onlinePaymentInstructions !== undefined)
+        user.onlinePaymentInstructions = req.body.onlinePaymentInstructions;
+
       if (req.body.shippingAddress) {
         user.shippingAddress = {
           ...user.shippingAddress,
@@ -142,6 +169,18 @@ export const updateUserProfile = async (req, res) => {
         role: updatedUser.role,
         avatar: updatedUser.avatar,
         phone: updatedUser.phone,
+        storeName: updatedUser.storeName,
+        storeTagline: updatedUser.storeTagline,
+        whatsapp: updatedUser.whatsapp,
+        bankName: updatedUser.bankName,
+        bankAccountTitle: updatedUser.bankAccountTitle,
+        bankAccountNumber: updatedUser.bankAccountNumber,
+        bankIban: updatedUser.bankIban,
+        easypaisaTitle: updatedUser.easypaisaTitle,
+        easypaisaNumber: updatedUser.easypaisaNumber,
+        jazzcashTitle: updatedUser.jazzcashTitle,
+        jazzcashNumber: updatedUser.jazzcashNumber,
+        onlinePaymentInstructions: updatedUser.onlinePaymentInstructions,
         shippingAddress: updatedUser.shippingAddress,
         token: generateToken(updatedUser._id),
       });
@@ -160,6 +199,56 @@ export const getUsers = async (req, res) => {
   try {
     const users = await User.find({}).select('-password');
     res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get public store settings & online payment details (For customer storefront)
+// @route   GET /api/auth/store-settings
+// @access  Public
+export const getStoreSettings = async (req, res) => {
+  try {
+    const adminUser = await User.findOne({ role: 'admin' });
+    if (!adminUser) {
+      return res.json({
+        storeName: 'TrendBazaar',
+        storeTagline: 'Quality Products • Best Prices • 100% Cash on Delivery',
+        whatsapp: '+92 306 5779097',
+        phone: '+92 306 5779097',
+        email: 'admin@store.com',
+        address: 'Shop #12, Commercial Plaza, Main Boulevard, Lahore',
+        bankName: 'Meezan Bank',
+        bankAccountTitle: 'Abdul Sami',
+        bankAccountNumber: '01020304050607',
+        bankIban: '',
+        easypaisaTitle: 'Abdul Sami',
+        easypaisaNumber: '0306 5779097',
+        jazzcashTitle: 'Abdul Sami',
+        jazzcashNumber: '0306 5779097',
+        onlinePaymentInstructions: 'Please transfer the exact total amount and attach your payment screenshot below.',
+      });
+    }
+
+    res.json({
+      storeName: adminUser.storeName || 'TrendBazaar',
+      storeTagline: adminUser.storeTagline || '',
+      whatsapp: adminUser.whatsapp || '+92 306 5779097',
+      phone: adminUser.phone || '+92 306 5779097',
+      email: adminUser.email || '',
+      address: adminUser.address || '',
+      bankName: adminUser.bankName || 'Meezan Bank',
+      bankAccountTitle: adminUser.bankAccountTitle || adminUser.name || 'Abdul Sami',
+      bankAccountNumber: adminUser.bankAccountNumber || '01020304050607',
+      bankIban: adminUser.bankIban || '',
+      easypaisaTitle: adminUser.easypaisaTitle || adminUser.name || 'Abdul Sami',
+      easypaisaNumber: adminUser.easypaisaNumber || '0306 5779097',
+      jazzcashTitle: adminUser.jazzcashTitle || adminUser.name || 'Abdul Sami',
+      jazzcashNumber: adminUser.jazzcashNumber || '0306 5779097',
+      onlinePaymentInstructions:
+        adminUser.onlinePaymentInstructions ||
+        'Please transfer the exact total amount and attach your payment screenshot below.',
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

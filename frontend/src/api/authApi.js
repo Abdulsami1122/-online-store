@@ -23,3 +23,8 @@ export const updateProfile = async (userData) => {
   const { data } = await API.put('/auth/profile', userData);
   return data;
 };
+
+export const fetchStoreSettings = async () => {
+  const { data } = await API.get('/auth/store-settings');
+  return data;
+};

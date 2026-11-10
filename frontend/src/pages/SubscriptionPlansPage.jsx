@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Store, Phone, MapPin, Mail, DollarSign, Truck, Check, Save, Lock, ShieldCheck } from 'lucide-react';
+import { Store, Phone, MapPin, Mail, DollarSign, Truck, Check, Save, Lock, ShieldCheck, CreditCard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile } from '../api/authApi';
 
@@ -14,12 +14,23 @@ export default function AdminSettingsPage() {
     return {
       storeName: user?.storeName || 'TrendBazaar',
       storeTagline: user?.storeTagline || 'Quality Products • Best Prices • 100% Cash on Delivery',
-      whatsapp: user?.whatsapp || '+92 300 1234567',
+      whatsapp: user?.whatsapp || '+92 306 5779097',
       currency: 'Rs.',
-      phone: '+92 (300) 123-4567',
+      phone: user?.phone || '+92 306 5779097',
       email: user?.email || 'admin@store.com',
-      address: 'Shop #12, Commercial Plaza, Main Boulevard, Lahore',
+      address: user?.address || 'Shop #12, Commercial Plaza, Main Boulevard, Lahore',
       deliveryCharges: 199,
+      bankName: user?.bankName || 'Meezan Bank',
+      bankAccountTitle: user?.bankAccountTitle || user?.name || 'Abdul Sami',
+      bankAccountNumber: user?.bankAccountNumber || '01020304050607',
+      bankIban: user?.bankIban || '',
+      easypaisaTitle: user?.easypaisaTitle || user?.name || 'Abdul Sami',
+      easypaisaNumber: user?.easypaisaNumber || '0306 5779097',
+      jazzcashTitle: user?.jazzcashTitle || user?.name || 'Abdul Sami',
+      jazzcashNumber: user?.jazzcashNumber || '0306 5779097',
+      onlinePaymentInstructions:
+        user?.onlinePaymentInstructions ||
+        'Please transfer the exact total amount and attach your payment screenshot below.',
     };
   });
 
@@ -52,6 +63,20 @@ export default function AdminSettingsPage() {
       const profilePayload = {
         name: user?.name || 'Store Administrator',
         email: settings.email || user?.email,
+        phone: settings.phone,
+        address: settings.address,
+        storeName: settings.storeName,
+        storeTagline: settings.storeTagline,
+        whatsapp: settings.whatsapp,
+        bankName: settings.bankName,
+        bankAccountTitle: settings.bankAccountTitle,
+        bankAccountNumber: settings.bankAccountNumber,
+        bankIban: settings.bankIban,
+        easypaisaTitle: settings.easypaisaTitle,
+        easypaisaNumber: settings.easypaisaNumber,
+        jazzcashTitle: settings.jazzcashTitle,
+        jazzcashNumber: settings.jazzcashNumber,
+        onlinePaymentInstructions: settings.onlinePaymentInstructions,
       };
 
       if (newPassword) {
@@ -66,10 +91,7 @@ export default function AdminSettingsPage() {
 
       if (updateUser) {
         updateUser({
-          storeName: settings.storeName,
-          storeTagline: settings.storeTagline,
-          whatsapp: settings.whatsapp,
-          email: settings.email,
+          ...profilePayload,
         });
       }
 
@@ -258,6 +280,148 @@ export default function AdminSettingsPage() {
               value={settings.address}
               onChange={(e) => setSettings({ ...settings, address: e.target.value })}
               placeholder="Shop #12, Commercial Plaza, Main Boulevard, Lahore"
+              style={{ padding: '0.65rem 0.85rem' }}
+            />
+          </div>
+        </div>
+
+        <hr style={{ border: 'none', borderTop: '1px solid #E2E8F0', margin: 0 }} />
+
+        {/* Section: Online Payment Accounts (EasyPaisa, JazzCash, Bank Transfer) */}
+        <div>
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0F172A', marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <CreditCard size={18} color="#2563EB" />
+            Online Payment Accounts (Bank Transfer, EasyPaisa, JazzCash)
+          </h3>
+          <p style={{ fontSize: '0.84rem', color: '#64748B', marginBottom: '1.25rem' }}>
+            When a customer selects online payment at checkout, these account numbers are shown on the website and customers will upload their payment screenshot.
+          </p>
+
+          {/* EasyPaisa Box */}
+          <div style={{ backgroundColor: '#F0FDF4', padding: '1.25rem', borderRadius: '12px', border: '1px solid #BBF7D0', marginBottom: '1.25rem' }}>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#166534', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span>🟢</span> EasyPaisa Account
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 600, fontSize: '0.82rem', color: '#166534' }}>EasyPaisa Account Title (Name) *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={settings.easypaisaTitle || ''}
+                  onChange={(e) => setSettings({ ...settings, easypaisaTitle: e.target.value })}
+                  placeholder="e.g. Abdul Sami"
+                  style={{ padding: '0.6rem 0.85rem' }}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 600, fontSize: '0.82rem', color: '#166534' }}>EasyPaisa Mobile / Account Number *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={settings.easypaisaNumber || ''}
+                  onChange={(e) => setSettings({ ...settings, easypaisaNumber: e.target.value })}
+                  placeholder="e.g. 0306 5779097"
+                  style={{ padding: '0.6rem 0.85rem' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* JazzCash Box */}
+          <div style={{ backgroundColor: '#FEF2F2', padding: '1.25rem', borderRadius: '12px', border: '1px solid #FECACA', marginBottom: '1.25rem' }}>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#991B1B', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span>🔴</span> JazzCash Account
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 600, fontSize: '0.82rem', color: '#991B1B' }}>JazzCash Account Title (Name) *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={settings.jazzcashTitle || ''}
+                  onChange={(e) => setSettings({ ...settings, jazzcashTitle: e.target.value })}
+                  placeholder="e.g. Abdul Sami"
+                  style={{ padding: '0.6rem 0.85rem' }}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 600, fontSize: '0.82rem', color: '#991B1B' }}>JazzCash Mobile / Account Number *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={settings.jazzcashNumber || ''}
+                  onChange={(e) => setSettings({ ...settings, jazzcashNumber: e.target.value })}
+                  placeholder="e.g. 0306 5779097"
+                  style={{ padding: '0.6rem 0.85rem' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Bank Transfer Box */}
+          <div style={{ backgroundColor: '#F8FAFC', padding: '1.25rem', borderRadius: '12px', border: '1px solid #CBD5E1', marginBottom: '1.25rem' }}>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1E293B', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span>🏦</span> Bank Transfer (Meezan, HBL, etc.)
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 600, fontSize: '0.82rem' }}>Bank Name *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={settings.bankName || ''}
+                  onChange={(e) => setSettings({ ...settings, bankName: e.target.value })}
+                  placeholder="e.g. Meezan Bank / HBL / Bank Alfalah"
+                  style={{ padding: '0.6rem 0.85rem' }}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 600, fontSize: '0.82rem' }}>Bank Account Title *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={settings.bankAccountTitle || ''}
+                  onChange={(e) => setSettings({ ...settings, bankAccountTitle: e.target.value })}
+                  placeholder="e.g. Abdul Sami"
+                  style={{ padding: '0.6rem 0.85rem' }}
+                />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.85rem' }}>
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 600, fontSize: '0.82rem' }}>Account / IBAN Number *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={settings.bankAccountNumber || ''}
+                  onChange={(e) => setSettings({ ...settings, bankAccountNumber: e.target.value })}
+                  placeholder="e.g. 01020304050607 / PK36MEZN..."
+                  style={{ padding: '0.6rem 0.85rem' }}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 600, fontSize: '0.82rem' }}>Branch / Swift Code (Optional)</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={settings.bankIban || ''}
+                  onChange={(e) => setSettings({ ...settings, bankIban: e.target.value })}
+                  placeholder="e.g. Main Branch Lahore"
+                  style={{ padding: '0.6rem 0.85rem' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" style={{ fontWeight: 600, fontSize: '0.84rem' }}>Payment Instructions for Customer</label>
+            <input
+              type="text"
+              className="form-control"
+              value={settings.onlinePaymentInstructions || ''}
+              onChange={(e) => setSettings({ ...settings, onlinePaymentInstructions: e.target.value })}
+              placeholder="e.g. Please transfer the total amount and attach your payment screenshot below."
               style={{ padding: '0.65rem 0.85rem' }}
             />
           </div>

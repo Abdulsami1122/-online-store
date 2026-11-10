@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
 import {
   ShoppingBag,
   Heart,
@@ -30,9 +30,14 @@ import {
   Store,
   SlidersHorizontal,
   Bot,
+  Copy,
+  Upload,
+  Image as ImageIcon,
+  CreditCard,
 } from 'lucide-react';
 import { fetchProducts } from '../../api/productApi';
 import { createOrder, trackOrder } from '../../api/orderApi';
+import { fetchStoreSettings } from '../../api/authApi';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { formatDateTime } from '../../utils/formatters';
@@ -206,6 +211,37 @@ function ScrollRevealSection({
   );
 }
 
+// Client-side auto-compression utility: scales phone camera photos down to crisp lightweight JPEG (<300KB)
+export const compressImageFile = (file, maxWidth = 1200, quality = 0.85) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
 export default function UserStorePage({
   defaultOpenCart = false,
   defaultSection = null,
@@ -223,6 +259,7 @@ export default function UserStorePage({
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { orderId: routeOrderId } = useParams();
 
   // ----------------------------------------------------------------------
   // Store Settings (Persistent configuration managed via /admin/settings)
@@ -231,19 +268,39 @@ export default function UserStorePage({
     try {
       const saved = localStorage.getItem('user_store_custom_info');
       if (saved) return JSON.parse(saved);
-    } catch {}
+    } catch { }
     return {
       storeName: 'TrendBazaar',
       storeTagline: 'Quality Products • Best Prices • 100% Cash on Delivery',
-      whatsapp: '+92 300 1234567',
+      whatsapp: '+92 306 5779097',
       currency: 'Rs.',
-      phone: '+92 (300) 123-4567',
+      phone: '+92 306 5779097',
       email: 'orders@trendbazaar.pk',
       address: 'Shop #12, Commercial Plaza, Main Boulevard, Lahore',
       instagram: 'https://instagram.com',
       facebook: 'https://facebook.com',
+      bankName: 'Meezan Bank',
+      bankAccountTitle: 'Abdul Sami',
+      bankAccountNumber: '01020304050607',
+      bankIban: '',
+      easypaisaTitle: 'Abdul Sami',
+      easypaisaNumber: '0306 5779097',
+      jazzcashTitle: 'Abdul Sami',
+      jazzcashNumber: '0306 5779097',
+      onlinePaymentInstructions: 'Please transfer the exact total amount and attach your payment screenshot below.',
     };
   });
+
+  // Fetch live store & bank settings from backend
+  useEffect(() => {
+    fetchStoreSettings()
+      .then((data) => {
+        if (data) {
+          setStoreSettings((prev) => ({ ...prev, ...data }));
+        }
+      })
+      .catch(() => { });
+  }, []);
 
   // Color Theme (Deep luxury berry / wine matching the mockup)
   const theme = {
@@ -305,9 +362,49 @@ export default function UserStorePage({
     }
   }, [user]);
   const [paymentMethod, setPaymentMethod] = useState('Cash on Delivery');
+  const [paymentScreenshot, setPaymentScreenshot] = useState('');
+  const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
+  const [screenshotFileName, setScreenshotFileName] = useState('');
+  const screenshotInputRef = useRef(null);
+  const [copiedField, setCopiedField] = useState('');
   const [orderNotes, setOrderNotes] = useState('');
   const [placingOrder, setPlacingOrder] = useState(false);
   const [orderError, setOrderError] = useState(null);
+
+  const handleCopy = (text, fieldName) => {
+    if (navigator.clipboard && text) {
+      navigator.clipboard.writeText(text);
+      setCopiedField(fieldName);
+      setTimeout(() => setCopiedField(''), 2500);
+    }
+  };
+
+  const handleScreenshotUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingScreenshot(true);
+    setOrderError(null);
+
+    try {
+      const dataUrl = await compressImageFile(file, 1200, 0.85);
+      setPaymentScreenshot(dataUrl);
+      setScreenshotFileName(file.name || 'Payment-receipt.jpg');
+    } catch (err) {
+      console.warn('Canvas compression fallback:', err);
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        setPaymentScreenshot(uploadEvent.target.result);
+        setScreenshotFileName(file.name || 'Payment-receipt.jpg');
+      };
+      reader.onerror = () => {
+        setOrderError('Failed to read image file. Please try another image.');
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setUploadingScreenshot(false);
+    }
+  };
   const [placedOrderData, setPlacedOrderData] = useState(null);
 
   // Tracking
@@ -559,15 +656,38 @@ export default function UserStorePage({
       return;
     }
 
+    // MANDATORY PROOF CHECK FOR ONLINE PAYMENTS (EasyPaisa, JazzCash, Bank Transfer)
+    if (paymentMethod !== 'Cash on Delivery') {
+      if (uploadingScreenshot) {
+        setOrderError('Please wait, processing your receipt image...');
+        return;
+      }
+      if (!paymentScreenshot) {
+        setOrderError(`⚠️ Please attach your ${paymentMethod} payment receipt screenshot before submitting your order.`);
+        return;
+      }
+    }
+
     setPlacingOrder(true);
     setOrderError(null);
 
     try {
+      const accountDetailsUsed =
+        paymentMethod === 'EasyPaisa'
+          ? `EasyPaisa: ${storeSettings.easypaisaNumber} (${storeSettings.easypaisaTitle})`
+          : paymentMethod === 'JazzCash'
+            ? `JazzCash: ${storeSettings.jazzcashNumber} (${storeSettings.jazzcashTitle})`
+            : paymentMethod === 'Online Bank Transfer'
+              ? `${storeSettings.bankName}: ${storeSettings.bankAccountNumber} (${storeSettings.bankAccountTitle})`
+              : '';
+
       const payload = {
         customerName: customerName.trim(),
         customerPhone: customerPhone.trim(),
         shippingAddress: `${shippingAddress.trim()}, ${city}${orderNotes ? ' (Note: ' + orderNotes + ')' : ''}`,
         paymentMethod,
+        paymentProof: paymentScreenshot || '',
+        accountDetailsUsed,
         deliveryCharges: 199,
         orderItems: cartItems.map((item) => ({
           product: item._id,
@@ -593,32 +713,35 @@ export default function UserStorePage({
 
   // Order Tracking
   const handleTrackOrder = async (idToSearch) => {
-    const id = idToSearch || trackSearchId;
-    if (!id || !id.trim()) return;
+    const id = (idToSearch || trackSearchId || '').trim();
+    if (!id) return;
 
     setTrackingLoading(true);
     setTrackingError(null);
 
     try {
-      const data = await trackOrder(id.trim());
+      const data = await trackOrder(id);
       setTrackingOrder(data);
-    } catch {
-      setTrackingOrder({
-        orderNumber: id.trim(),
-        status: 'Shipped',
-        createdAt: new Date().toISOString(),
-        customerName: customerName || 'Valued Buyer',
-        trackingSteps: [
-          { status: 'Order Placed (Cash on Delivery)', done: true, time: 'Today, 10:30 AM' },
-          { status: 'Packed & Verified by Seller', done: true, time: 'Today, 01:15 PM' },
-          { status: 'In Transit with Courier (TCS / Leopard)', done: true, time: 'Today, 04:45 PM' },
-          { status: 'Delivered to Doorstep', done: false, time: 'Estimated within 24-48 hrs' },
-        ],
-      });
+    } catch (err) {
+      setTrackingError(err.response?.data?.message || 'Order not found. Please verify your 5-digit order number.');
+      setTrackingOrder(null);
     } finally {
       setTrackingLoading(false);
     }
   };
+
+  // Auto-open tracking modal if URL contains /track or /track/:orderId or defaultSection is 'track'
+  useEffect(() => {
+    const pathTrackId = location.pathname.includes('/track/') ? location.pathname.split('/track/')[1] : null;
+    const targetId = routeOrderId || pathTrackId;
+    if (defaultSection === 'track' || location.pathname.startsWith('/track') || targetId) {
+      setTrackingModalOpen(true);
+      if (targetId) {
+        setTrackSearchId(targetId);
+        handleTrackOrder(targetId);
+      }
+    }
+  }, [routeOrderId, defaultSection, location.pathname]);
 
   return (
     <div
@@ -1465,443 +1588,443 @@ export default function UserStorePage({
             backgroundColor: '#FFFFFF',
           }}
         >
-        <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <h2
-              className="font-serif"
-              style={{
-                fontSize: '2.2rem',
-                fontWeight: 700,
-                color: '#260618',
-                marginBottom: '0.4rem',
-              }}
-            >
-              Featured Collection
-            </h2>
-            <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
-              Handpicked items ready for immediate dispatch across the country
-            </p>
-          </div>
-
-          {/* Dynamic Category Filter Pills */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.65rem',
-              flexWrap: 'wrap',
-              marginBottom: '2.5rem',
-            }}
-          >
-            {uniqueCategories.map((catName) => {
-              const isSelected = selectedCategory.toLowerCase() === catName.toLowerCase();
-              return (
-                <button
-                  key={catName}
-                  onClick={() => setSelectedCategory(catName)}
-                  style={{
-                    backgroundColor: isSelected ? theme.primary : '#F7F2F4',
-                    color: isSelected ? '#ffffff' : '#5E545A',
-                    border: 'none',
-                    borderRadius: '999px',
-                    padding: '0.5rem 1.25rem',
-                    fontSize: '0.88rem',
-                    fontWeight: isSelected ? 700 : 500,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  {catName}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Products Grid */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '1.5rem',
-            }}
-            className="grid-responsive-4"
-          >
-            {filteredProducts.map((product) => {
-              const inWishlist = isWishlisted(product._id);
-              const isJustAdded = addedNoticeId === product._id;
-              const isLinkCopied = copyLinkNotice === product._id;
-
-              return (
-                <TiltCard
-                  key={product._id}
-                  className="luxury-product-card"
-                  style={{
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: '16px',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    position: 'relative',
-                  }}
-                >
-                  {/* Product Image */}
-                  <div
-                    className="depth-image"
-                    style={{
-                      height: '270px',
-                      backgroundColor: '#F8F3F5',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => {
-                      setQuickViewProduct(product);
-                      setQuickViewQty(1);
-                    }}
-                  >
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      className="product-img"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      }}
-                    />
-
-                    {/* Badge */}
-                    {product.badge && (
-                      <span
-                        className="depth-badge"
-                        style={{
-                          position: 'absolute',
-                          top: '12px',
-                          left: '12px',
-                          backgroundColor: theme.badgeBg,
-                          color: '#ffffff',
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                          padding: '0.2rem 0.6rem',
-                          borderRadius: '6px',
-                        }}
-                      >
-                        {product.badge}
-                      </span>
-                    )}
-
-                    {/* Top Right Action Icons: Wishlist & Share Link */}
-                    <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <button
-                        onClick={(e) => toggleWishlist(product, e)}
-                        style={{
-                          backgroundColor: '#ffffff',
-                          border: 'none',
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: inWishlist ? '#DC2626' : '#6A6369',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                          cursor: 'pointer',
-                        }}
-                        title={inWishlist ? 'Remove from Wishlist' : 'Save to Wishlist'}
-                      >
-                        <Heart size={16} fill={inWishlist ? '#DC2626' : 'none'} strokeWidth={2} />
-                      </button>
-
-                      {/* Copy Direct Link for Facebook Marketplace / Daraz posts */}
-                      <button
-                        onClick={(e) => handleCopyProductLink(product, e)}
-                        style={{
-                          backgroundColor: isLinkCopied ? '#10B981' : '#ffffff',
-                          border: 'none',
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: isLinkCopied ? '#ffffff' : '#6A6369',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                          cursor: 'pointer',
-                        }}
-                        title="Copy direct product link for Facebook / Daraz post"
-                      >
-                        {isLinkCopied ? <Check size={14} /> : <Share2 size={14} />}
-                      </button>
-                    </div>
-
-                    {/* Quick View Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setQuickViewProduct(product);
-                        setQuickViewQty(1);
-                      }}
-                      style={{
-                        position: 'absolute',
-                        bottom: '12px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        backgroundColor: 'rgba(255, 255, 255, 0.94)',
-                        backdropFilter: 'blur(4px)',
-                        color: '#260618',
-                        border: 'none',
-                        padding: '0.35rem 0.85rem',
-                        borderRadius: '999px',
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.3rem',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <Eye size={13} />
-                      <span>Quick View</span>
-                    </button>
-                  </div>
-
-                  {/* Card Body */}
-                  <div
-                    className="depth-content"
-                    style={{
-                      padding: '1.25rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      flex: 1,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: '0.75rem',
-                        color: '#8A8287',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        marginBottom: '0.35rem',
-                      }}
-                    >
-                      {product.category || 'General'}
-                    </span>
-
-                    <h3
-                      className="font-serif"
-                      style={{
-                        fontSize: '1.05rem',
-                        fontWeight: 600,
-                        color: '#260618',
-                        marginBottom: '0.45rem',
-                        lineHeight: 1.3,
-                      }}
-                    >
-                      {product.title}
-                    </h3>
-
-                    {/* Rating & Stock */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginBottom: '0.85rem',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                        <div style={{ display: 'flex', color: '#F59E0B' }}>
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={13} fill="#F59E0B" strokeWidth={0} />
-                          ))}
-                        </div>
-                        <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>{product.rating || 4.9}</span>
-                      </div>
-                      <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
-                        ✓ In Stock ({product.stock || 15})
-                      </span>
-                    </div>
-
-                    {/* Price */}
-                    <div style={{ marginBottom: '1rem' }}>
-                      <span
-                        style={{
-                          fontSize: '1.2rem',
-                          fontWeight: 700,
-                          color: theme.primary,
-                        }}
-                      >
-                        {formatPrice(product.price)}
-                      </span>
-                      {product.originalPrice && (
-                        <span
-                          style={{
-                            fontSize: '0.85rem',
-                            color: '#A89FA4',
-                            textDecoration: 'line-through',
-                            marginLeft: '0.5rem',
-                          }}
-                        >
-                          {formatPrice(product.originalPrice)}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* High Converting Action Buttons for Facebook / Daraz Shoppers */}
-                    <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                      {/* 1-Click Cash on Delivery Order */}
-                      <button
-                        onClick={(e) => handleBuyNowInstant(product, e)}
-                        className="depth-button"
-                        style={{
-                          backgroundColor: theme.primary,
-                          color: '#ffffff',
-                          border: 'none',
-                          padding: '0.6rem 0.85rem',
-                          borderRadius: '8px',
-                          fontSize: '0.82rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.35rem',
-                          boxShadow: '0 4px 12px rgba(109, 14, 59, 0.2)',
-                        }}
-                      >
-                        <Lock size={13} />
-                        <span>⚡ Order via Cash on Delivery</span>
-                      </button>
-
-                      {/* WhatsApp Order & Add to Bag split */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
-                        <button
-                          onClick={(e) => openWhatsAppOrder(product, e)}
-                          style={{
-                            backgroundColor: '#25D366',
-                            color: '#ffffff',
-                            border: 'none',
-                            padding: '0.45rem 0.6rem',
-                            borderRadius: '6px',
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.25rem',
-                          }}
-                          title="Order directly on WhatsApp"
-                        >
-                          <MessageCircle size={13} />
-                          <span>WhatsApp</span>
-                        </button>
-
-                        <button
-                          onClick={(e) => handleAddToCart(product, e)}
-                          style={{
-                            backgroundColor: isJustAdded ? '#10B981' : theme.primaryLight,
-                            color: isJustAdded ? '#ffffff' : theme.primary,
-                            border: 'none',
-                            padding: '0.45rem 0.6rem',
-                            borderRadius: '6px',
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.25rem',
-                          }}
-                        >
-                          {isJustAdded ? <Check size={13} /> : <ShoppingBag size={13} />}
-                          <span>{isJustAdded ? 'Added' : 'Add Bag'}</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </TiltCard>
-              );
-            })}
-
-            {filteredProducts.length === 0 && (
-              <div
+          <div className="container">
+            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+              <h2
+                className="font-serif"
                 style={{
-                  gridColumn: '1 / -1',
-                  textAlign: 'center',
-                  padding: '4rem 1.5rem',
-                  backgroundColor: '#FAFAFA',
-                  borderRadius: '16px',
-                  border: '1.5px dashed #E5DCE0',
-                  margin: '1rem 0',
+                  fontSize: '2.2rem',
+                  fontWeight: 700,
+                  color: '#260618',
+                  marginBottom: '0.4rem',
                 }}
               >
-                <div
-                  style={{
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    backgroundColor: '#F3E8EE',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '1rem',
-                    color: theme.primary,
-                  }}
-                >
-                  <ShoppingBag size={28} />
-                </div>
-                <h3
-                  className="font-serif"
-                  style={{
-                    fontSize: '1.25rem',
-                    fontWeight: 700,
-                    color: '#260618',
-                    marginBottom: '0.4rem',
-                  }}
-                >
-                  {selectedCategory === 'All'
-                    ? 'No products available yet'
-                    : `No products in "${selectedCategory}" yet`}
-                </h3>
-                <p
-                  style={{
-                    fontSize: '0.9rem',
-                    color: '#7E757A',
-                    maxWidth: '420px',
-                    margin: '0 auto 1.5rem',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {selectedCategory === 'All'
-                    ? 'Products added from the Admin Dashboard will appear here immediately.'
-                    : `There are currently no items under this category. Switch to "All" to browse all available items.`}
-                </p>
-                {selectedCategory !== 'All' && (
+                Featured Collection
+              </h2>
+              <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+                Handpicked items ready for immediate dispatch across the country
+              </p>
+            </div>
+
+            {/* Dynamic Category Filter Pills */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.65rem',
+                flexWrap: 'wrap',
+                marginBottom: '2.5rem',
+              }}
+            >
+              {uniqueCategories.map((catName) => {
+                const isSelected = selectedCategory.toLowerCase() === catName.toLowerCase();
+                return (
                   <button
-                    onClick={() => setSelectedCategory('All')}
+                    key={catName}
+                    onClick={() => setSelectedCategory(catName)}
                     style={{
-                      backgroundColor: theme.primary,
-                      color: '#ffffff',
+                      backgroundColor: isSelected ? theme.primary : '#F7F2F4',
+                      color: isSelected ? '#ffffff' : '#5E545A',
                       border: 'none',
-                      padding: '0.65rem 1.6rem',
                       borderRadius: '999px',
-                      fontWeight: 600,
+                      padding: '0.5rem 1.25rem',
                       fontSize: '0.88rem',
+                      fontWeight: isSelected ? 700 : 500,
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
                     }}
                   >
-                    View All Products
+                    {catName}
                   </button>
-                )}
-              </div>
-            )}
+                );
+              })}
+            </div>
+
+            {/* Products Grid */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '1.5rem',
+              }}
+              className="grid-responsive-4"
+            >
+              {filteredProducts.map((product) => {
+                const inWishlist = isWishlisted(product._id);
+                const isJustAdded = addedNoticeId === product._id;
+                const isLinkCopied = copyLinkNotice === product._id;
+
+                return (
+                  <TiltCard
+                    key={product._id}
+                    className="luxury-product-card"
+                    style={{
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      position: 'relative',
+                    }}
+                  >
+                    {/* Product Image */}
+                    <div
+                      className="depth-image"
+                      style={{
+                        height: '270px',
+                        backgroundColor: '#F8F3F5',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => {
+                        setQuickViewProduct(product);
+                        setQuickViewQty(1);
+                      }}
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.title}
+                        className="product-img"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
+
+                      {/* Badge */}
+                      {product.badge && (
+                        <span
+                          className="depth-badge"
+                          style={{
+                            position: 'absolute',
+                            top: '12px',
+                            left: '12px',
+                            backgroundColor: theme.badgeBg,
+                            color: '#ffffff',
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            padding: '0.2rem 0.6rem',
+                            borderRadius: '6px',
+                          }}
+                        >
+                          {product.badge}
+                        </span>
+                      )}
+
+                      {/* Top Right Action Icons: Wishlist & Share Link */}
+                      <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <button
+                          onClick={(e) => toggleWishlist(product, e)}
+                          style={{
+                            backgroundColor: '#ffffff',
+                            border: 'none',
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: inWishlist ? '#DC2626' : '#6A6369',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            cursor: 'pointer',
+                          }}
+                          title={inWishlist ? 'Remove from Wishlist' : 'Save to Wishlist'}
+                        >
+                          <Heart size={16} fill={inWishlist ? '#DC2626' : 'none'} strokeWidth={2} />
+                        </button>
+
+                        {/* Copy Direct Link for Facebook Marketplace / Daraz posts */}
+                        <button
+                          onClick={(e) => handleCopyProductLink(product, e)}
+                          style={{
+                            backgroundColor: isLinkCopied ? '#10B981' : '#ffffff',
+                            border: 'none',
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: isLinkCopied ? '#ffffff' : '#6A6369',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            cursor: 'pointer',
+                          }}
+                          title="Copy direct product link for Facebook / Daraz post"
+                        >
+                          {isLinkCopied ? <Check size={14} /> : <Share2 size={14} />}
+                        </button>
+                      </div>
+
+                      {/* Quick View Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setQuickViewProduct(product);
+                          setQuickViewQty(1);
+                        }}
+                        style={{
+                          position: 'absolute',
+                          bottom: '12px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.94)',
+                          backdropFilter: 'blur(4px)',
+                          color: '#260618',
+                          border: 'none',
+                          padding: '0.35rem 0.85rem',
+                          borderRadius: '999px',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Eye size={13} />
+                        <span>Quick View</span>
+                      </button>
+                    </div>
+
+                    {/* Card Body */}
+                    <div
+                      className="depth-content"
+                      style={{
+                        padding: '1.25rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        flex: 1,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: '0.75rem',
+                          color: '#8A8287',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          marginBottom: '0.35rem',
+                        }}
+                      >
+                        {product.category || 'General'}
+                      </span>
+
+                      <h3
+                        className="font-serif"
+                        style={{
+                          fontSize: '1.05rem',
+                          fontWeight: 600,
+                          color: '#260618',
+                          marginBottom: '0.45rem',
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {product.title}
+                      </h3>
+
+                      {/* Rating & Stock */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginBottom: '0.85rem',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <div style={{ display: 'flex', color: '#F59E0B' }}>
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} size={13} fill="#F59E0B" strokeWidth={0} />
+                            ))}
+                          </div>
+                          <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>{product.rating || 4.9}</span>
+                        </div>
+                        <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
+                          ✓ In Stock ({product.stock || 15})
+                        </span>
+                      </div>
+
+                      {/* Price */}
+                      <div style={{ marginBottom: '1rem' }}>
+                        <span
+                          style={{
+                            fontSize: '1.2rem',
+                            fontWeight: 700,
+                            color: theme.primary,
+                          }}
+                        >
+                          {formatPrice(product.price)}
+                        </span>
+                        {product.originalPrice && (
+                          <span
+                            style={{
+                              fontSize: '0.85rem',
+                              color: '#A89FA4',
+                              textDecoration: 'line-through',
+                              marginLeft: '0.5rem',
+                            }}
+                          >
+                            {formatPrice(product.originalPrice)}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* High Converting Action Buttons for Facebook / Daraz Shoppers */}
+                      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                        {/* 1-Click Cash on Delivery Order */}
+                        <button
+                          onClick={(e) => handleBuyNowInstant(product, e)}
+                          className="depth-button"
+                          style={{
+                            backgroundColor: theme.primary,
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '0.6rem 0.85rem',
+                            borderRadius: '8px',
+                            fontSize: '0.82rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.35rem',
+                            boxShadow: '0 4px 12px rgba(109, 14, 59, 0.2)',
+                          }}
+                        >
+                          <Lock size={13} />
+                          <span>⚡ Order via Cash on Delivery</span>
+                        </button>
+
+                        {/* WhatsApp Order & Add to Bag split */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
+                          <button
+                            onClick={(e) => openWhatsAppOrder(product, e)}
+                            style={{
+                              backgroundColor: '#25D366',
+                              color: '#ffffff',
+                              border: 'none',
+                              padding: '0.45rem 0.6rem',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.25rem',
+                            }}
+                            title="Order directly on WhatsApp"
+                          >
+                            <MessageCircle size={13} />
+                            <span>WhatsApp</span>
+                          </button>
+
+                          <button
+                            onClick={(e) => handleAddToCart(product, e)}
+                            style={{
+                              backgroundColor: isJustAdded ? '#10B981' : theme.primaryLight,
+                              color: isJustAdded ? '#ffffff' : theme.primary,
+                              border: 'none',
+                              padding: '0.45rem 0.6rem',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.25rem',
+                            }}
+                          >
+                            {isJustAdded ? <Check size={13} /> : <ShoppingBag size={13} />}
+                            <span>{isJustAdded ? 'Added' : 'Add Bag'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </TiltCard>
+                );
+              })}
+
+              {filteredProducts.length === 0 && (
+                <div
+                  style={{
+                    gridColumn: '1 / -1',
+                    textAlign: 'center',
+                    padding: '4rem 1.5rem',
+                    backgroundColor: '#FAFAFA',
+                    borderRadius: '16px',
+                    border: '1.5px dashed #E5DCE0',
+                    margin: '1rem 0',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '60px',
+                      height: '60px',
+                      borderRadius: '50%',
+                      backgroundColor: '#F3E8EE',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '1rem',
+                      color: theme.primary,
+                    }}
+                  >
+                    <ShoppingBag size={28} />
+                  </div>
+                  <h3
+                    className="font-serif"
+                    style={{
+                      fontSize: '1.25rem',
+                      fontWeight: 700,
+                      color: '#260618',
+                      marginBottom: '0.4rem',
+                    }}
+                  >
+                    {selectedCategory === 'All'
+                      ? 'No products available yet'
+                      : `No products in "${selectedCategory}" yet`}
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: '0.9rem',
+                      color: '#7E757A',
+                      maxWidth: '420px',
+                      margin: '0 auto 1.5rem',
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {selectedCategory === 'All'
+                      ? 'Products added from the Admin Dashboard will appear here immediately.'
+                      : `There are currently no items under this category. Switch to "All" to browse all available items.`}
+                  </p>
+                  {selectedCategory !== 'All' && (
+                    <button
+                      onClick={() => setSelectedCategory('All')}
+                      style={{
+                        backgroundColor: theme.primary,
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '0.65rem 1.6rem',
+                        borderRadius: '999px',
+                        fontWeight: 600,
+                        fontSize: '0.88rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      View All Products
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
       </ScrollRevealSection>
 
       {/* ================================================================= */}
@@ -1918,111 +2041,111 @@ export default function UserStorePage({
                 border: '1px solid rgba(0, 0, 0, 0.04)',
               }}
             >
-            <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-              <h2
-                className="font-serif"
-                style={{
-                  fontSize: '2.2rem',
-                  fontWeight: 700,
-                  color: '#260618',
-                  marginBottom: '0.4rem',
-                }}
-              >
-                Why Order From Us?
-              </h2>
-              <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
-                Complete peace of mind for online buyers across Facebook Marketplace, Daraz, and social platforms
-              </p>
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '1.75rem',
-              }}
-              className="grid-responsive-4"
-            >
-              {[
-                {
-                  title: '100% Genuine Items',
-                  desc: 'Every single parcel is inspected and verified by the seller before courier dispatch.',
-                  icon: 'shield',
-                },
-                {
-                  title: 'Cash on Delivery',
-                  desc: 'Pay cash safely at your doorstep with open parcel inspection available.',
-                  icon: 'truck',
-                },
-                {
-                  title: '7-Day Easy Return',
-                  desc: 'Wrong size or changed your mind? Fast exchange and full refund guarantee.',
-                  icon: 'rotate',
-                },
-                {
-                  title: 'WhatsApp Assistance',
-                  desc: 'Direct seller communication on WhatsApp for tracking and immediate help.',
-                  icon: 'headset',
-                },
-              ].map((p, idx) => (
-                <TiltCard
-                  key={idx}
+              <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                <h2
+                  className="font-serif"
                   style={{
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: '16px',
-                    padding: '1.75rem 1.25rem',
-                    textAlign: 'center',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.03)',
+                    fontSize: '2.2rem',
+                    fontWeight: 700,
+                    color: '#260618',
+                    marginBottom: '0.4rem',
                   }}
                 >
-                  <div
-                    className="depth-image"
+                  Why Order From Us?
+                </h2>
+                <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+                  Complete peace of mind for online buyers across Facebook Marketplace, Daraz, and social platforms
+                </p>
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: '1.75rem',
+                }}
+                className="grid-responsive-4"
+              >
+                {[
+                  {
+                    title: '100% Genuine Items',
+                    desc: 'Every single parcel is inspected and verified by the seller before courier dispatch.',
+                    icon: 'shield',
+                  },
+                  {
+                    title: 'Cash on Delivery',
+                    desc: 'Pay cash safely at your doorstep with open parcel inspection available.',
+                    icon: 'truck',
+                  },
+                  {
+                    title: '7-Day Easy Return',
+                    desc: 'Wrong size or changed your mind? Fast exchange and full refund guarantee.',
+                    icon: 'rotate',
+                  },
+                  {
+                    title: 'WhatsApp Assistance',
+                    desc: 'Direct seller communication on WhatsApp for tracking and immediate help.',
+                    icon: 'headset',
+                  },
+                ].map((p, idx) => (
+                  <TiltCard
+                    key={idx}
                     style={{
-                      width: '52px',
-                      height: '52px',
-                      borderRadius: '50%',
-                      backgroundColor: theme.primaryLight,
-                      color: theme.primary,
-                      margin: '0 auto 1.2rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '16px',
+                      padding: '1.75rem 1.25rem',
+                      textAlign: 'center',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.03)',
                     }}
                   >
-                    {p.icon === 'shield' ? (
-                      <ShieldCheck size={26} />
-                    ) : p.icon === 'truck' ? (
-                      <Truck size={26} />
-                    ) : p.icon === 'rotate' ? (
-                      <RotateCcw size={26} />
-                    ) : (
-                      <Headphones size={26} />
-                    )}
-                  </div>
-
-                  <div className="depth-content">
-                    <h3
-                      className="font-serif"
+                    <div
+                      className="depth-image"
                       style={{
-                        fontSize: '1.1rem',
-                        fontWeight: 600,
-                        color: '#260618',
-                        marginBottom: '0.5rem',
+                        width: '52px',
+                        height: '52px',
+                        borderRadius: '50%',
+                        backgroundColor: theme.primaryLight,
+                        color: theme.primary,
+                        margin: '0 auto 1.2rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                       }}
                     >
-                      {p.title}
-                    </h3>
+                      {p.icon === 'shield' ? (
+                        <ShieldCheck size={26} />
+                      ) : p.icon === 'truck' ? (
+                        <Truck size={26} />
+                      ) : p.icon === 'rotate' ? (
+                        <RotateCcw size={26} />
+                      ) : (
+                        <Headphones size={26} />
+                      )}
+                    </div>
 
-                    <p style={{ fontSize: '0.85rem', color: '#786E75', lineHeight: 1.5 }}>
-                      {p.desc}
-                    </p>
-                  </div>
-                </TiltCard>
-              ))}
+                    <div className="depth-content">
+                      <h3
+                        className="font-serif"
+                        style={{
+                          fontSize: '1.1rem',
+                          fontWeight: 600,
+                          color: '#260618',
+                          marginBottom: '0.5rem',
+                        }}
+                      >
+                        {p.title}
+                      </h3>
+
+                      <p style={{ fontSize: '0.85rem', color: '#786E75', lineHeight: 1.5 }}>
+                        {p.desc}
+                      </p>
+                    </div>
+                  </TiltCard>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
       </ScrollRevealSection>
 
       {/* ================================================================= */}
@@ -2037,135 +2160,135 @@ export default function UserStorePage({
               backgroundColor: '#FFFFFF',
             }}
           >
-          <div className="container">
-            <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-              <h2
-                className="font-serif"
+            <div className="container">
+              <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                <h2
+                  className="font-serif"
+                  style={{
+                    fontSize: '2.2rem',
+                    fontWeight: 700,
+                    color: '#260618',
+                    marginBottom: '0.4rem',
+                  }}
+                >
+                  Best Sellers
+                </h2>
+                <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+                  Most loved products ordered by thousands of happy buyers this month
+                </p>
+              </div>
+
+              <div
                 style={{
-                  fontSize: '2.2rem',
-                  fontWeight: 700,
-                  color: '#260618',
-                  marginBottom: '0.4rem',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: '1.5rem',
                 }}
+                className="grid-responsive-4"
               >
-                Best Sellers
-              </h2>
-              <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
-                Most loved products ordered by thousands of happy buyers this month
-              </p>
-            </div>
+                {bestSellers.map((item) => {
+                  const inWishlist = isWishlisted(item._id);
+                  const isJustAdded = addedNoticeId === item._id;
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '1.5rem',
-              }}
-              className="grid-responsive-4"
-            >
-              {bestSellers.map((item) => {
-                const inWishlist = isWishlisted(item._id);
-                const isJustAdded = addedNoticeId === item._id;
-
-                return (
-                  <TiltCard
-                    key={item._id}
-                    className="luxury-product-card"
-                    style={{
-                      backgroundColor: '#FFFFFF',
-                      borderRadius: '16px',
-                      overflow: 'hidden',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      position: 'relative',
-                    }}
-                  >
-                    <div
-                      className="depth-image"
+                  return (
+                    <TiltCard
+                      key={item._id}
+                      className="luxury-product-card"
                       style={{
-                        height: '260px',
-                        backgroundColor: '#F8F3F5',
-                        position: 'relative',
+                        backgroundColor: '#FFFFFF',
+                        borderRadius: '16px',
                         overflow: 'hidden',
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => {
-                        setQuickViewProduct(item);
-                        setQuickViewQty(1);
+                        display: 'flex',
+                        flexDirection: 'column',
+                        position: 'relative',
                       }}
                     >
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="product-img"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                      <button
-                        onClick={(e) => toggleWishlist(item, e)}
+                      <div
+                        className="depth-image"
                         style={{
-                          position: 'absolute',
-                          top: '12px',
-                          right: '12px',
-                          backgroundColor: '#ffffff',
-                          border: 'none',
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: inWishlist ? '#DC2626' : '#6A6369',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          height: '260px',
+                          backgroundColor: '#F8F3F5',
+                          position: 'relative',
+                          overflow: 'hidden',
                           cursor: 'pointer',
                         }}
+                        onClick={() => {
+                          setQuickViewProduct(item);
+                          setQuickViewQty(1);
+                        }}
                       >
-                        <Heart size={16} fill={inWishlist ? '#DC2626' : 'none'} strokeWidth={2} />
-                      </button>
-                    </div>
-
-                    <div className="depth-content" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                      <span style={{ fontSize: '0.72rem', color: '#888', textTransform: 'uppercase' }}>
-                        {item.category}
-                      </span>
-                      <h3
-                        className="font-serif"
-                        style={{ fontSize: '1.05rem', fontWeight: 600, color: '#260618', margin: '0.3rem 0' }}
-                      >
-                        {item.title}
-                      </h3>
-                      <div style={{ fontSize: '1.15rem', fontWeight: 700, color: theme.primary, marginBottom: '0.75rem' }}>
-                        {formatPrice(item.price)}
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="product-img"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                        <button
+                          onClick={(e) => toggleWishlist(item, e)}
+                          style={{
+                            position: 'absolute',
+                            top: '12px',
+                            right: '12px',
+                            backgroundColor: '#ffffff',
+                            border: 'none',
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: inWishlist ? '#DC2626' : '#6A6369',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <Heart size={16} fill={inWishlist ? '#DC2626' : 'none'} strokeWidth={2} />
+                        </button>
                       </div>
 
-                      <button
-                        onClick={(e) => handleBuyNowInstant(item, e)}
-                        className="depth-button"
-                        style={{
-                          marginTop: 'auto',
-                          backgroundColor: theme.primary,
-                          color: '#ffffff',
-                          border: 'none',
-                          padding: '0.6rem',
-                          borderRadius: '8px',
-                          fontWeight: 700,
-                          fontSize: '0.82rem',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.35rem',
-                        }}
-                      >
-                        <Lock size={13} />
-                        <span>Order via Cash on Delivery</span>
-                      </button>
-                    </div>
-                  </TiltCard>
-                );
-              })}
+                      <div className="depth-content" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                        <span style={{ fontSize: '0.72rem', color: '#888', textTransform: 'uppercase' }}>
+                          {item.category}
+                        </span>
+                        <h3
+                          className="font-serif"
+                          style={{ fontSize: '1.05rem', fontWeight: 600, color: '#260618', margin: '0.3rem 0' }}
+                        >
+                          {item.title}
+                        </h3>
+                        <div style={{ fontSize: '1.15rem', fontWeight: 700, color: theme.primary, marginBottom: '0.75rem' }}>
+                          {formatPrice(item.price)}
+                        </div>
+
+                        <button
+                          onClick={(e) => handleBuyNowInstant(item, e)}
+                          className="depth-button"
+                          style={{
+                            marginTop: 'auto',
+                            backgroundColor: theme.primary,
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '0.6rem',
+                            borderRadius: '8px',
+                            fontWeight: 700,
+                            fontSize: '0.82rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.35rem',
+                          }}
+                        >
+                          <Lock size={13} />
+                          <span>Order via Cash on Delivery</span>
+                        </button>
+                      </div>
+                    </TiltCard>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
         </ScrollRevealSection>
       )}
 
@@ -2283,362 +2406,362 @@ export default function UserStorePage({
             backgroundColor: '#FFFFFF',
           }}
         >
-        <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <h2
-              className="font-serif"
-              style={{
-                fontSize: '2.2rem',
-                fontWeight: 700,
-                color: '#260618',
-                marginBottom: '0.4rem',
-              }}
-            >
-              What Our Customers Say
-            </h2>
-            <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
-              Verified reviews from Facebook Marketplace, Daraz & direct store buyers
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '1.75rem',
-            }}
-            className="grid-responsive-4"
-          >
-            {[
-              {
-                name: 'Hamza Tariq',
-                role: 'Verified Buyer (Lahore)',
-                text: 'Saw the post on Facebook Marketplace and ordered through this website. Arrived in 2 days, courier let me open the box first, exactly as described!',
-                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-              },
-              {
-                name: 'Ayesha Siddiqui',
-                role: 'Verified Buyer (Karachi)',
-                text: 'Outstanding quality and very responsive on WhatsApp. The raw Sidr honey is 100% genuine and the ambient LED kit looks phenomenal in my car.',
-                avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
-              },
-              {
-                name: 'Usman Ali',
-                role: 'Verified Buyer (Islamabad)',
-                text: 'Smooth 1-click Cash on Delivery order. No complicated sign-up. The sneakers fit comfortably and stitching is top quality.',
-                avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
-              },
-            ].map((test, idx) => (
-              <TiltCard
-                key={idx}
+          <div className="container">
+            <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+              <h2
+                className="font-serif"
                 style={{
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: '20px',
-                  padding: '2rem 1.75rem',
-                  border: '1px solid rgba(109, 14, 59, 0.08)',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.03)',
-                  display: 'flex',
-                  flexDirection: 'column',
+                  fontSize: '2.2rem',
+                  fontWeight: 700,
+                  color: '#260618',
+                  marginBottom: '0.4rem',
                 }}
               >
-                <div className="depth-content" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                  <div style={{ display: 'flex', color: '#F59E0B', marginBottom: '1.25rem' }}>
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} fill="#F59E0B" strokeWidth={0} />
-                    ))}
-                  </div>
+                What Our Customers Say
+              </h2>
+              <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+                Verified reviews from Facebook Marketplace, Daraz & direct store buyers
+              </p>
+            </div>
 
-                  <p
-                    style={{
-                      fontSize: '0.95rem',
-                      color: '#4A4248',
-                      lineHeight: 1.65,
-                      fontStyle: 'italic',
-                      marginBottom: '1.75rem',
-                      flex: 1,
-                    }}
-                  >
-                    "{test.text}"
-                  </p>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '1.75rem',
+              }}
+              className="grid-responsive-4"
+            >
+              {[
+                {
+                  name: 'Hamza Tariq',
+                  role: 'Verified Buyer (Lahore)',
+                  text: 'Saw the post on Facebook Marketplace and ordered through this website. Arrived in 2 days, courier let me open the box first, exactly as described!',
+                  avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+                },
+                {
+                  name: 'Ayesha Siddiqui',
+                  role: 'Verified Buyer (Karachi)',
+                  text: 'Outstanding quality and very responsive on WhatsApp. The raw Sidr honey is 100% genuine and the ambient LED kit looks phenomenal in my car.',
+                  avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
+                },
+                {
+                  name: 'Usman Ali',
+                  role: 'Verified Buyer (Islamabad)',
+                  text: 'Smooth 1-click Cash on Delivery order. No complicated sign-up. The sneakers fit comfortably and stitching is top quality.',
+                  avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
+                },
+              ].map((test, idx) => (
+                <TiltCard
+                  key={idx}
+                  style={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '20px',
+                    padding: '2rem 1.75rem',
+                    border: '1px solid rgba(109, 14, 59, 0.08)',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.03)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <div className="depth-content" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <div style={{ display: 'flex', color: '#F59E0B', marginBottom: '1.25rem' }}>
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={16} fill="#F59E0B" strokeWidth={0} />
+                      ))}
+                    </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                    <img
-                      src={test.avatar}
-                      alt={test.name}
+                    <p
                       style={{
-                        width: '46px',
-                        height: '46px',
-                        borderRadius: '50%',
-                        objectFit: 'cover',
+                        fontSize: '0.95rem',
+                        color: '#4A4248',
+                        lineHeight: 1.65,
+                        fontStyle: 'italic',
+                        marginBottom: '1.75rem',
+                        flex: 1,
                       }}
-                    />
-                    <div>
-                      <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#260618', margin: 0 }}>
-                        {test.name}
-                      </h4>
-                      <span
+                    >
+                      "{test.text}"
+                    </p>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                      <img
+                        src={test.avatar}
+                        alt={test.name}
                         style={{
-                          fontSize: '0.75rem',
-                          color: '#10B981',
-                          fontWeight: 600,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.2rem',
+                          width: '46px',
+                          height: '46px',
+                          borderRadius: '50%',
+                          objectFit: 'cover',
                         }}
-                      >
-                        <CheckCircle2 size={12} />
-                        {test.role}
-                      </span>
+                      />
+                      <div>
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#260618', margin: 0 }}>
+                          {test.name}
+                        </h4>
+                        <span
+                          style={{
+                            fontSize: '0.75rem',
+                            color: '#10B981',
+                            fontWeight: 600,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.2rem',
+                          }}
+                        >
+                          <CheckCircle2 size={12} />
+                          {test.role}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </TiltCard>
-            ))}
+                </TiltCard>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
       </ScrollRevealSection>
 
       {/* ================================================================= */}
       {/* 11. LUXURY DARK WINE FOOTER                                       */}
       {/* ================================================================= */}
       <ScrollRevealSection direction="up">
-      <footer
-        ref={footerRef}
-        style={{
-          backgroundColor: theme.footerBg,
-          color: '#E8DDE3',
-          padding: '4.5rem 1.25rem 2rem',
-          marginTop: 'auto',
-        }}
-      >
-        <div className="container">
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1.6fr 1fr 1.2fr 1.2fr',
-              gap: '3rem',
-              marginBottom: '3.5rem',
-            }}
-            className="grid-responsive-4"
-          >
-            {/* Column 1: Store Brand Info */}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem' }}>
-                <div
-                  style={{
-                    width: '38px',
-                    height: '38px',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Store size={20} />
+        <footer
+          ref={footerRef}
+          style={{
+            backgroundColor: theme.footerBg,
+            color: '#E8DDE3',
+            padding: '4.5rem 1.25rem 2rem',
+            marginTop: 'auto',
+          }}
+        >
+          <div className="container">
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1.6fr 1fr 1.2fr 1.2fr',
+                gap: '3rem',
+                marginBottom: '3.5rem',
+              }}
+              className="grid-responsive-4"
+            >
+              {/* Column 1: Store Brand Info */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem' }}>
+                  <div
+                    style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '8px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Store size={20} />
+                  </div>
+                  <span
+                    className="font-serif"
+                    style={{
+                      fontSize: '1.35rem',
+                      fontWeight: 700,
+                      color: '#ffffff',
+                    }}
+                  >
+                    {storeSettings.storeName}
+                  </span>
                 </div>
-                <span
-                  className="font-serif"
+
+                <p
                   style={{
-                    fontSize: '1.35rem',
-                    fontWeight: 700,
-                    color: '#ffffff',
+                    fontSize: '0.88rem',
+                    lineHeight: 1.65,
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    marginBottom: '1.5rem',
                   }}
                 >
-                  {storeSettings.storeName}
-                </span>
+                  {storeSettings.storeTagline}. Connecting customers directly with verified online sellers across Pakistan.
+                </p>
+
+                {/* Direct WhatsApp Action in Footer */}
+                <a
+                  href={`https://wa.me/${(storeSettings.whatsapp || '+923001234567').replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    backgroundColor: '#25D366',
+                    color: '#ffffff',
+                    padding: '0.55rem 1.1rem',
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  <MessageCircle size={16} />
+                  <span>Chat on WhatsApp</span>
+                </a>
               </div>
 
-              <p
-                style={{
-                  fontSize: '0.88rem',
-                  lineHeight: 1.65,
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  marginBottom: '1.5rem',
-                }}
-              >
-                {storeSettings.storeTagline}. Connecting customers directly with verified online sellers across Pakistan.
-              </p>
+              {/* Column 2: Quick Links */}
+              <div>
+                <h4
+                  className="font-serif"
+                  style={{
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    color: '#ffffff',
+                    marginBottom: '1.25rem',
+                  }}
+                >
+                  Quick Links
+                </h4>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  {[
+                    { label: 'Home', ref: heroRef },
+                    { label: 'Shop All Products', ref: productsRef },
+                    { label: 'Categories', ref: categoriesRef },
+                    { label: 'Best Sellers', ref: bestSellersRef },
+                    { label: 'Why Order From Us', ref: whyUsRef },
+                    { label: 'Customer Reviews', ref: reviewsRef },
+                  ].map((item, idx) => (
+                    <li key={idx}>
+                      <button
+                        onClick={() => scrollTo(item.ref)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'rgba(255, 255, 255, 0.75)',
+                          fontSize: '0.88rem',
+                          cursor: 'pointer',
+                          padding: 0,
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.75)')}
+                      >
+                        {item.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-              {/* Direct WhatsApp Action in Footer */}
-              <a
-                href={`https://wa.me/${(storeSettings.whatsapp || '+923001234567').replace(/[^0-9]/g, '')}`}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  backgroundColor: '#25D366',
-                  color: '#ffffff',
-                  padding: '0.55rem 1.1rem',
-                  borderRadius: '8px',
-                  fontWeight: 700,
-                  fontSize: '0.85rem',
-                }}
-              >
-                <MessageCircle size={16} />
-                <span>Chat on WhatsApp</span>
-              </a>
-            </div>
-
-            {/* Column 2: Quick Links */}
-            <div>
-              <h4
-                className="font-serif"
-                style={{
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  color: '#ffffff',
-                  marginBottom: '1.25rem',
-                }}
-              >
-                Quick Links
-              </h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                {[
-                  { label: 'Home', ref: heroRef },
-                  { label: 'Shop All Products', ref: productsRef },
-                  { label: 'Categories', ref: categoriesRef },
-                  { label: 'Best Sellers', ref: bestSellersRef },
-                  { label: 'Why Order From Us', ref: whyUsRef },
-                  { label: 'Customer Reviews', ref: reviewsRef },
-                ].map((item, idx) => (
-                  <li key={idx}>
+              {/* Column 3: Customer Care & Order Tracking */}
+              <div>
+                <h4
+                  className="font-serif"
+                  style={{
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    color: '#ffffff',
+                    marginBottom: '1.25rem',
+                  }}
+                >
+                  Customer Service
+                </h4>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  <li>
                     <button
-                      onClick={() => scrollTo(item.ref)}
+                      onClick={() => setTrackingModalOpen(true)}
                       style={{
                         background: 'none',
                         border: 'none',
-                        color: 'rgba(255, 255, 255, 0.75)',
+                        color: '#38BDF8',
+                        fontWeight: 600,
                         fontSize: '0.88rem',
                         cursor: 'pointer',
                         padding: 0,
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.75)')}
                     >
-                      {item.label}
+                      🔍 Track Your Order Status
                     </button>
                   </li>
-                ))}
-              </ul>
-            </div>
+                  {['Cash on Delivery Policy', 'Open Parcel Rules', 'Return & Replacement (7 Days)', 'Shipping Charges', 'Privacy Policy'].map(
+                    (text, idx) => (
+                      <li key={idx}>
+                        <span style={{ color: 'rgba(255, 255, 255, 0.75)', fontSize: '0.88rem' }}>
+                          {text}
+                        </span>
+                      </li>
+                    )
+                  )}
+                </ul>
+              </div>
 
-            {/* Column 3: Customer Care & Order Tracking */}
-            <div>
-              <h4
-                className="font-serif"
-                style={{
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  color: '#ffffff',
-                  marginBottom: '1.25rem',
-                }}
-              >
-                Customer Service
-              </h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                <li>
-                  <button
-                    onClick={() => setTrackingModalOpen(true)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#38BDF8',
-                      fontWeight: 600,
-                      fontSize: '0.88rem',
-                      cursor: 'pointer',
-                      padding: 0,
-                    }}
-                  >
-                    🔍 Track Your Order Status
-                  </button>
-                </li>
-                {['Cash on Delivery Policy', 'Open Parcel Rules', 'Return & Replacement (7 Days)', 'Shipping Charges', 'Privacy Policy'].map(
-                  (text, idx) => (
-                    <li key={idx}>
-                      <span style={{ color: 'rgba(255, 255, 255, 0.75)', fontSize: '0.88rem' }}>
-                        {text}
-                      </span>
-                    </li>
-                  )
-                )}
-              </ul>
-            </div>
-
-            {/* Column 4: Contact Info */}
-            <div>
-              <h4
-                className="font-serif"
-                style={{
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  color: '#ffffff',
-                  marginBottom: '1.25rem',
-                }}
-              >
-                Contact Seller
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', fontSize: '0.88rem', color: 'rgba(255, 255, 255, 0.75)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Phone size={15} style={{ color: '#ffffff' }} />
-                  <span>{storeSettings.phone || storeSettings.whatsapp}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <HelpCircle size={15} style={{ color: '#ffffff' }} />
-                  <span>{storeSettings.email}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-                  <MapPin size={15} style={{ color: '#ffffff', flexShrink: 0, marginTop: '2px' }} />
-                  <span>{storeSettings.address}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Clock size={15} style={{ color: '#ffffff' }} />
-                  <span>Delivery in 2 - 4 business days nationwide</span>
+              {/* Column 4: Contact Info */}
+              <div>
+                <h4
+                  className="font-serif"
+                  style={{
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    color: '#ffffff',
+                    marginBottom: '1.25rem',
+                  }}
+                >
+                  Contact Seller
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', fontSize: '0.88rem', color: 'rgba(255, 255, 255, 0.75)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Phone size={15} style={{ color: '#ffffff' }} />
+                    <span>{storeSettings.phone || storeSettings.whatsapp}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <HelpCircle size={15} style={{ color: '#ffffff' }} />
+                    <span>{storeSettings.email}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                    <MapPin size={15} style={{ color: '#ffffff', flexShrink: 0, marginTop: '2px' }} />
+                    <span>{storeSettings.address}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Clock size={15} style={{ color: '#ffffff' }} />
+                    <span>Delivery in 2 - 4 business days nationwide</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div
-            style={{
-              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-              paddingTop: '1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '1rem',
-              fontSize: '0.82rem',
-              color: 'rgba(255, 255, 255, 0.6)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
-              <span>© 2026 {storeSettings.storeName}. All rights reserved.</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              {['Cash on Delivery', 'EasyPaisa', 'JazzCash', 'Bank Transfer'].map((pay, i) => (
-                <span
-                  key={i}
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                    color: '#ffffff',
-                    padding: '0.2rem 0.55rem',
-                    borderRadius: '4px',
-                    fontSize: '0.72rem',
-                    fontWeight: 600,
-                  }}
-                >
-                  {pay}
-                </span>
-              ))}
+            <div
+              style={{
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                paddingTop: '1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '1rem',
+                fontSize: '0.82rem',
+                color: 'rgba(255, 255, 255, 0.6)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+                <span>© 2026 {storeSettings.storeName}. All rights reserved.</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                {['Cash on Delivery', 'EasyPaisa', 'JazzCash', 'Bank Transfer'].map((pay, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                      color: '#ffffff',
+                      padding: '0.2rem 0.55rem',
+                      borderRadius: '4px',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {pay}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </footer>
+        </footer>
       </ScrollRevealSection>
 
       {/* ================================================================= */}
@@ -2677,8 +2800,8 @@ export default function UserStorePage({
                   {checkoutStep === 'cart'
                     ? `Shopping Bag (${itemsCount})`
                     : checkoutStep === 'checkout'
-                    ? '⚡ Fast Cash on Delivery Order'
-                    : 'Order Placed Successfully!'}
+                      ? '⚡ Fast Cash on Delivery Order'
+                      : 'Order Placed Successfully!'}
                 </h3>
               </div>
               <button
@@ -2833,19 +2956,23 @@ export default function UserStorePage({
                 <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.85rem', padding: '1.25rem 1.5rem' }}>
                   <div
                     style={{
-                      backgroundColor: '#ECFDF5',
-                      border: '1px solid #A7F3D0',
+                      backgroundColor: paymentMethod === 'Cash on Delivery' ? '#ECFDF5' : '#EFF6FF',
+                      border: paymentMethod === 'Cash on Delivery' ? '1px solid #A7F3D0' : '1px solid #BFDBFE',
                       borderRadius: '8px',
                       padding: '0.65rem 0.85rem',
                       fontSize: '0.82rem',
-                      color: '#065F46',
+                      color: paymentMethod === 'Cash on Delivery' ? '#065F46' : '#1E40AF',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '0.4rem',
                     }}
                   >
                     <CheckCircle2 size={16} />
-                    <span>Pay with Cash when courier delivers parcel to your door.</span>
+                    <span>
+                      {paymentMethod === 'Cash on Delivery'
+                        ? 'Pay with Cash when courier delivers parcel to your door.'
+                        : 'Online Payment Selected: Please transfer funds and attach screenshot proof below.'}
+                    </span>
                   </div>
 
                   {orderError && (
@@ -2954,14 +3081,421 @@ export default function UserStorePage({
                           fontSize: '0.9rem',
                           outline: 'none',
                           backgroundColor: '#ffffff',
+                          fontWeight: 600,
                         }}
                       >
                         <option value="Cash on Delivery">Cash on Delivery (COD)</option>
-                        <option value="JazzCash / EasyPaisa">JazzCash / EasyPaisa</option>
-                        <option value="Online Bank Transfer">Bank Transfer</option>
+                        <option value="EasyPaisa">EasyPaisa (Mobile Transfer)</option>
+                        <option value="JazzCash">JazzCash (Mobile Transfer)</option>
+                        <option value="Online Bank Transfer">Bank Transfer (IBAN / Online Banking)</option>
                       </select>
                     </div>
                   </div>
+
+                  {/* ONLINE PAYMENT ACCOUNT DETAILS & SCREENSHOT UPLOAD */}
+                  {paymentMethod !== 'Cash on Delivery' && (
+                    <div
+                      style={{
+                        backgroundColor: '#F8FAFC',
+                        border: '1.5px solid #CBD5E1',
+                        borderRadius: '12px',
+                        padding: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.85rem',
+                      }}
+                    >
+                      {/* EasyPaisa Box */}
+                      {paymentMethod === 'EasyPaisa' && (
+                        <div
+                          style={{
+                            backgroundColor: '#F0FDF4',
+                            border: '1px solid #86EFAC',
+                            borderRadius: '10px',
+                            padding: '0.85rem',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#166534', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <span>🟢</span> EasyPaisa Account Details
+                            </span>
+                            <span style={{ fontSize: '0.72rem', backgroundColor: '#DCFCE7', color: '#166534', padding: '0.15rem 0.5rem', borderRadius: '999px', fontWeight: 700 }}>
+                              Instant Mobile Transfer
+                            </span>
+                          </div>
+
+                          <div style={{ fontSize: '0.85rem', color: '#1F2937', marginBottom: '0.35rem' }}>
+                            <span style={{ color: '#4B5563', fontSize: '0.78rem' }}>Account Title: </span>
+                            <strong style={{ color: '#111827' }}>{storeSettings.easypaisaTitle || 'Abdul Sami'}</strong>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FFFFFF', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid #BBF7D0' }}>
+                            <div>
+                              <span style={{ fontSize: '0.72rem', color: '#6B7280', display: 'block' }}>EasyPaisa Number</span>
+                              <strong style={{ fontSize: '1.05rem', color: '#166534', letterSpacing: '0.04em' }}>
+                                {storeSettings.easypaisaNumber || '0306 5779097'}
+                              </strong>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(storeSettings.easypaisaNumber || '0306 5779097', 'easypaisa')}
+                              style={{
+                                backgroundColor: copiedField === 'easypaisa' ? '#16A34A' : '#15803D',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                padding: '0.35rem 0.75rem',
+                                borderRadius: '6px',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                              }}
+                            >
+                              <Copy size={13} />
+                              <span>{copiedField === 'easypaisa' ? 'Copied!' : 'Copy'}</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* JazzCash Box */}
+                      {paymentMethod === 'JazzCash' && (
+                        <div
+                          style={{
+                            backgroundColor: '#FEF2F2',
+                            border: '1px solid #FCA5A5',
+                            borderRadius: '10px',
+                            padding: '0.85rem',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#991B1B', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <span>🔴</span> JazzCash Account Details
+                            </span>
+                            <span style={{ fontSize: '0.72rem', backgroundColor: '#FEE2E2', color: '#991B1B', padding: '0.15rem 0.5rem', borderRadius: '999px', fontWeight: 700 }}>
+                              Instant Mobile Transfer
+                            </span>
+                          </div>
+
+                          <div style={{ fontSize: '0.85rem', color: '#1F2937', marginBottom: '0.35rem' }}>
+                            <span style={{ color: '#4B5563', fontSize: '0.78rem' }}>Account Title: </span>
+                            <strong style={{ color: '#111827' }}>{storeSettings.jazzcashTitle || 'Abdul Sami'}</strong>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FFFFFF', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid #FECACA' }}>
+                            <div>
+                              <span style={{ fontSize: '0.72rem', color: '#6B7280', display: 'block' }}>JazzCash Number</span>
+                              <strong style={{ fontSize: '1.05rem', color: '#991B1B', letterSpacing: '0.04em' }}>
+                                {storeSettings.jazzcashNumber || '0306 5779097'}
+                              </strong>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(storeSettings.jazzcashNumber || '0306 5779097', 'jazzcash')}
+                              style={{
+                                backgroundColor: copiedField === 'jazzcash' ? '#DC2626' : '#B91C1C',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                padding: '0.35rem 0.75rem',
+                                borderRadius: '6px',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                              }}
+                            >
+                              <Copy size={13} />
+                              <span>{copiedField === 'jazzcash' ? 'Copied!' : 'Copy'}</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Bank Transfer Box */}
+                      {paymentMethod === 'Online Bank Transfer' && (
+                        <div
+                          style={{
+                            backgroundColor: '#F8FAFC',
+                            border: '1px solid #94A3B8',
+                            borderRadius: '10px',
+                            padding: '0.85rem',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0F172A', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <span>🏦</span> {storeSettings.bankName || 'Meezan Bank'}
+                            </span>
+                            <span style={{ fontSize: '0.72rem', backgroundColor: '#E2E8F0', color: '#1E293B', padding: '0.15rem 0.5rem', borderRadius: '999px', fontWeight: 700 }}>
+                              Bank Transfer
+                            </span>
+                          </div>
+
+                          <div style={{ fontSize: '0.85rem', color: '#1F2937', marginBottom: '0.35rem' }}>
+                            <span style={{ color: '#4B5563', fontSize: '0.78rem' }}>Account Title: </span>
+                            <strong style={{ color: '#111827' }}>{storeSettings.bankAccountTitle || 'Abdul Sami'}</strong>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FFFFFF', padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid #CBD5E1' }}>
+                            <div>
+                              <span style={{ fontSize: '0.72rem', color: '#6B7280', display: 'block' }}>Account / IBAN Number</span>
+                              <strong style={{ fontSize: '0.98rem', color: '#0F172A', letterSpacing: '0.03em', wordBreak: 'break-all' }}>
+                                {storeSettings.bankAccountNumber || '01020304050607'}
+                              </strong>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(storeSettings.bankAccountNumber || '01020304050607', 'bank')}
+                              style={{
+                                backgroundColor: copiedField === 'bank' ? '#16A34A' : '#334155',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                padding: '0.35rem 0.75rem',
+                                borderRadius: '6px',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                flexShrink: 0,
+                                marginLeft: '0.5rem',
+                              }}
+                            >
+                              <Copy size={13} />
+                              <span>{copiedField === 'bank' ? 'Copied!' : 'Copy'}</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Exact Transfer Amount */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          backgroundColor: '#FEF3C7',
+                          border: '1px solid #FDE68A',
+                          borderRadius: '8px',
+                          padding: '0.55rem 0.85rem',
+                          fontSize: '0.82rem',
+                          color: '#92400E',
+                        }}
+                      >
+                        <span>Exact Amount to Transfer:</span>
+                        <strong style={{ fontSize: '0.95rem', color: '#78350F' }}>
+                          Rs. {(totalPrice + 199).toLocaleString()}
+                        </strong>
+                      </div>
+
+                      {/* Instructions */}
+                      <p style={{ fontSize: '0.78rem', color: '#64748B', margin: 0, lineHeight: 1.4 }}>
+                        ℹ️ {storeSettings.onlinePaymentInstructions || 'Please transfer the exact amount and attach your payment screenshot below.'}
+                      </p>
+
+                      {/* Upload Payment Screenshot Area */}
+                      <div>
+                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1E293B', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                          <span>Attach Payment Screenshot / Receipt *</span>
+                          {paymentScreenshot ? (
+                            <span style={{ fontSize: '0.72rem', color: '#16A34A', fontWeight: 700 }}>
+                              ✓ Screenshot Ready
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '0.72rem', color: '#DC2626', fontWeight: 700 }}>
+                              * Required
+                            </span>
+                          )}
+                        </label>
+
+                        {/* Native cross-browser file input */}
+                        <input
+                          id="customer-payment-screenshot-input"
+                          ref={screenshotInputRef}
+                          type="file"
+                          accept="image/*,.png,.jpg,.jpeg,.webp"
+                          onChange={handleScreenshotUpload}
+                          onClick={(e) => { e.target.value = null; }}
+                          style={{ position: 'absolute', opacity: 0, width: 0, height: 0, pointerEvents: 'none' }}
+                        />
+
+                        {uploadingScreenshot ? (
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.5rem',
+                              padding: '1.25rem',
+                              backgroundColor: '#EFF6FF',
+                              border: '1.5px dashed #3B82F6',
+                              borderRadius: '8px',
+                              fontSize: '0.85rem',
+                              color: '#1D4ED8',
+                              fontWeight: 600,
+                            }}
+                          >
+                            <span className="spin">⏳</span> Reading screenshot...
+                          </div>
+                        ) : !paymentScreenshot ? (
+                          <label
+                            htmlFor="customer-payment-screenshot-input"
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.4rem',
+                              padding: '1.35rem 1rem',
+                              backgroundColor: '#FFFFFF',
+                              border: '2px dashed #6D0E3B',
+                              borderRadius: '10px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              textAlign: 'center',
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: '44px',
+                                height: '44px',
+                                borderRadius: '50%',
+                                backgroundColor: '#FDF2F5',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginBottom: '0.2rem',
+                              }}
+                            >
+                              <Upload size={22} color={theme.primary} />
+                            </div>
+                            <span style={{ fontSize: '0.92rem', fontWeight: 700, color: theme.primary }}>
+                              Click to Upload Payment Screenshot
+                            </span>
+                            <span style={{ fontSize: '0.76rem', color: '#64748B' }}>
+                              Tap to select receipt from gallery, camera, or screenshots
+                            </span>
+                            <span
+                              style={{
+                                marginTop: '0.4rem',
+                                backgroundColor: '#FDF2F5',
+                                color: theme.primary,
+                                border: '1px solid #F2D3DF',
+                                padding: '0.4rem 1rem',
+                                borderRadius: '6px',
+                                fontSize: '0.8rem',
+                                fontWeight: 700,
+                                display: 'inline-block',
+                              }}
+                            >
+                              Choose File / Photo ↗
+                            </span>
+                          </label>
+                        ) : (
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              backgroundColor: '#F0FDF4',
+                              border: '2px solid #16A34A',
+                              borderRadius: '10px',
+                              padding: '0.75rem 0.95rem',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', overflow: 'hidden' }}>
+                              <img
+                                src={paymentScreenshot}
+                                alt="Payment proof preview"
+                                style={{
+                                  width: '60px',
+                                  height: '60px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                  border: '1.5px solid #86EFAC',
+                                  flexShrink: 0,
+                                  boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                                }}
+                              />
+                              <div style={{ overflow: 'hidden' }}>
+                                <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#166534', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                                  <Check size={16} strokeWidth={3} /> Screenshot Attached
+                                </span>
+                                <span style={{ fontSize: '0.75rem', color: '#374151', display: 'block', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '190px', fontWeight: 600 }}>
+                                  {screenshotFileName || 'Payment-receipt.jpg'}
+                                </span>
+                                <span style={{ fontSize: '0.7rem', color: '#059669' }}>
+                                  Ready to submit with order
+                                </span>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.45rem', flexShrink: 0 }}>
+                              <label
+                                htmlFor="customer-payment-screenshot-input"
+                                style={{
+                                  backgroundColor: '#FFFFFF',
+                                  color: '#334155',
+                                  border: '1px solid #CBD5E1',
+                                  padding: '0.35rem 0.7rem',
+                                  borderRadius: '6px',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Change
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setPaymentScreenshot('');
+                                  setScreenshotFileName('');
+                                }}
+                                style={{
+                                  backgroundColor: '#FEE2E2',
+                                  color: '#DC2626',
+                                  border: 'none',
+                                  padding: '0.35rem 0.7rem',
+                                  borderRadius: '6px',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* WhatsApp Fallback Link */}
+                        <div style={{ marginTop: '0.65rem', textAlign: 'center' }}>
+                          <a
+                            href={`https://wa.me/${(storeSettings.whatsapp || '+923065779097').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                              `Hello ${storeSettings.storeName}! I am placing an order for Rs. ${(totalPrice + 199).toLocaleString()} via ${paymentMethod}. Here is my payment receipt screenshot.`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              fontSize: '0.75rem',
+                              color: '#15803D',
+                              fontWeight: 700,
+                              textDecoration: 'none',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.3rem',
+                            }}
+                          >
+                            <span>📲</span> Or Send Screenshot on WhatsApp
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div>
                     <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#4A4248', display: 'block', marginBottom: '0.25rem' }}>
@@ -3004,7 +3538,7 @@ export default function UserStorePage({
                   >
                     <div>
                       <span style={{ fontSize: '0.82rem', color: '#6A6367', display: 'block' }}>
-                        Total Cash to Pay
+                        {paymentMethod === 'Cash on Delivery' ? 'Total Cash to Pay' : 'Total Amount to Transfer'}
                       </span>
                       <span style={{ fontSize: '1.25rem', fontWeight: 800, color: theme.primary }}>
                         {formatPrice(totalPrice + 199)}
@@ -3014,13 +3548,13 @@ export default function UserStorePage({
                       style={{
                         fontSize: '0.75rem',
                         fontWeight: 700,
-                        color: '#065F46',
-                        backgroundColor: '#D1FAE5',
+                        color: paymentMethod === 'Cash on Delivery' ? '#065F46' : '#1E40AF',
+                        backgroundColor: paymentMethod === 'Cash on Delivery' ? '#D1FAE5' : '#DBEAFE',
                         padding: '0.25rem 0.6rem',
                         borderRadius: '999px',
                       }}
                     >
-                      100% Cash on Delivery
+                      {paymentMethod === 'Cash on Delivery' ? '100% Cash on Delivery' : 'Online Payment'}
                     </span>
                   </div>
 
@@ -3041,16 +3575,26 @@ export default function UserStorePage({
                       Back
                     </button>
                     <button
-                      type="submit"
+                      type={paymentMethod !== 'Cash on Delivery' && !paymentScreenshot ? 'button' : 'submit'}
+                      onClick={(e) => {
+                        if (paymentMethod !== 'Cash on Delivery' && !paymentScreenshot) {
+                          e.preventDefault();
+                          document.getElementById('customer-payment-screenshot-input')?.click();
+                          setOrderError('⚠️ Please select your payment screenshot / receipt before submitting.');
+                        }
+                      }}
                       disabled={placingOrder}
                       style={{
                         flex: 1,
-                        backgroundColor: theme.primary,
+                        backgroundColor:
+                          paymentMethod !== 'Cash on Delivery' && !paymentScreenshot
+                            ? '#92400E'
+                            : theme.primary,
                         color: '#ffffff',
                         padding: '0.85rem 1rem',
                         borderRadius: '10px',
                         fontWeight: 700,
-                        fontSize: '0.98rem',
+                        fontSize: '0.95rem',
                         cursor: placingOrder ? 'not-allowed' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -3058,11 +3602,19 @@ export default function UserStorePage({
                         gap: '0.5rem',
                         border: 'none',
                         boxShadow: '0 4px 14px rgba(109, 14, 59, 0.28)',
-                        transition: 'transform 0.15s ease',
+                        transition: 'all 0.2s ease',
                       }}
                     >
                       <CheckCircle2 size={18} />
-                      <span>{placingOrder ? 'Placing Order...' : 'Submit Order (Cash on Delivery)'}</span>
+                      <span>
+                        {placingOrder
+                          ? 'Submitting Order...'
+                          : paymentMethod === 'Cash on Delivery'
+                            ? 'Submit Order (Cash on Delivery)'
+                            : paymentScreenshot
+                              ? '✓ Submit Order (Proof Attached)'
+                              : '📷 Select Screenshot to Submit'}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -3398,58 +3950,318 @@ export default function UserStorePage({
               </button>
             </div>
 
-            {trackingOrder && (
-              <div style={{ backgroundColor: '#FAF6F8', borderRadius: '16px', padding: '1.5rem', border: '1px solid #EFEAEB' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px dashed #E0D6DA', paddingBottom: '0.75rem' }}>
-                  <div>
-                    <span style={{ fontSize: '0.75rem', color: '#8A8287', textTransform: 'uppercase' }}>Tracking ID</span>
-                    <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: theme.primary, margin: 0 }}>
-                      {trackingOrder.orderNumber || trackSearchId}
-                    </h4>
-                  </div>
-                  <span style={{ backgroundColor: '#D1FAE5', color: '#065F46', padding: '0.2rem 0.65rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700, alignSelf: 'center' }}>
-                    {trackingOrder.status || 'In Transit'}
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  {(
-                    trackingOrder.trackingSteps || [
-                      { status: 'Order Placed (Cash on Delivery)', done: true, time: 'Today, 10:30 AM' },
-                      { status: 'Confirmed & Packed by Seller', done: true, time: 'Today, 01:15 PM' },
-                      { status: 'In Transit with Courier', done: true, time: 'Today, 04:45 PM' },
-                      { status: 'Delivered to Doorstep', done: false, time: 'Estimated 2-3 days' },
-                    ]
-                  ).map((step, idx) => (
-                    <div key={idx} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                      <div
-                        style={{
-                          width: '28px',
-                          height: '28px',
-                          borderRadius: '50%',
-                          backgroundColor: step.done ? theme.primary : '#E2DADC',
-                          color: '#ffffff',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0,
-                          fontSize: '0.8rem',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {step.done ? <Check size={14} /> : idx + 1}
-                      </div>
-                      <div>
-                        <h5 style={{ fontSize: '0.9rem', fontWeight: 700, color: step.done ? '#260618' : '#8A8287', margin: 0 }}>
-                          {step.status}
-                        </h5>
-                        <span style={{ fontSize: '0.78rem', color: '#8A8287' }}>{step.time}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            {trackingError && (
+              <div
+                style={{
+                  padding: '0.85rem 1rem',
+                  backgroundColor: '#FEF2F2',
+                  color: '#DC2626',
+                  borderRadius: '10px',
+                  fontSize: '0.85rem',
+                  marginBottom: '1.25rem',
+                  border: '1px solid #FECACA',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                <span>⚠️</span>
+                <span>{trackingError}</span>
               </div>
             )}
+
+            {trackingOrder && (() => {
+              const statusOrder = ['New', 'Confirmed', 'Shipped', 'Delivered'];
+              const currentStepIdx = trackingOrder.status === 'Cancelled' ? -1 : statusOrder.indexOf(trackingOrder.status);
+              const effectiveIdx = currentStepIdx >= 0 ? currentStepIdx : 0;
+
+              const isCOD = !trackingOrder.paymentMethod || trackingOrder.paymentMethod.toLowerCase().includes('cash on delivery');
+              const step1Title = isCOD ? 'Order Placed (Cash on Delivery)' : `Order Placed (${trackingOrder.paymentMethod || 'Online Payment'})`;
+
+              const findTimelineDate = (st) => {
+                const item = trackingOrder.timeline?.find((t) => t.status === st);
+                return item ? item.date : null;
+              };
+
+              const steps = [
+                {
+                  step: 1,
+                  key: 'New',
+                  title: step1Title,
+                  done: effectiveIdx >= 0,
+                  current: effectiveIdx === 0,
+                  desc: isCOD ? 'Order placed with Cash on Delivery' : 'Order placed with online payment verification',
+                  time: findTimelineDate('New') || trackingOrder.createdAt,
+                },
+                {
+                  step: 2,
+                  key: 'Confirmed',
+                  title: 'Confirmed',
+                  done: effectiveIdx >= 1,
+                  current: effectiveIdx === 1,
+                  desc: effectiveIdx >= 1 ? 'Order verified & confirmed by store' : 'Waiting for store confirmation...',
+                  time: findTimelineDate('Confirmed'),
+                },
+                {
+                  step: 3,
+                  key: 'Shipped',
+                  title: 'In Transit with Courier',
+                  done: effectiveIdx >= 2,
+                  current: effectiveIdx === 2,
+                  desc: effectiveIdx >= 2 ? 'In transit with courier for doorstep delivery' : 'Pending courier dispatch...',
+                  time: findTimelineDate('Shipped'),
+                },
+                {
+                  step: 4,
+                  key: 'Delivered',
+                  title: 'Delivered to Doorstep',
+                  done: effectiveIdx >= 3,
+                  current: effectiveIdx === 3,
+                  desc: effectiveIdx >= 3 ? 'Package delivered to your doorstep' : 'Estimated delivery within 2-3 business days',
+                  time: findTimelineDate('Delivered'),
+                },
+              ];
+
+              return (
+                <div style={{ backgroundColor: '#FAF6F8', borderRadius: '16px', padding: '1.5rem', border: '1px solid #EFEAEB' }}>
+                  {/* Tracking Header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px dashed #E0D6DA', paddingBottom: '0.75rem' }}>
+                    <div>
+                      <span style={{ fontSize: '0.72rem', color: '#8A8287', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Live Tracking ID
+                      </span>
+                      <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: theme.primary, margin: '2px 0 0' }}>
+                        #{trackingOrder.orderNumber || trackSearchId}
+                      </h4>
+                    </div>
+                    <span
+                      style={{
+                        backgroundColor:
+                          trackingOrder.status === 'Delivered'
+                            ? '#DCFCE7'
+                            : trackingOrder.status === 'Shipped'
+                              ? '#DBEAFE'
+                              : trackingOrder.status === 'Confirmed'
+                                ? '#E0E7FF'
+                                : '#FEF3C7',
+                        color:
+                          trackingOrder.status === 'Delivered'
+                            ? '#166534'
+                            : trackingOrder.status === 'Shipped'
+                              ? '#1E40AF'
+                              : trackingOrder.status === 'Confirmed'
+                                ? '#3730A3'
+                                : '#92400E',
+                        padding: '0.25rem 0.75rem',
+                        borderRadius: '999px',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                      }}
+                    >
+                      ● {trackingOrder.status || 'New'}
+                    </span>
+                  </div>
+
+                  {/* Horizontal Milestone Connector Bar */}
+                  <div style={{ marginBottom: '1.75rem', padding: '0.85rem 0.5rem', backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #EFEAEB' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+                      {steps.map((st, sIdx) => {
+                        const isDone = st.done;
+                        const isNextDone = steps[sIdx + 1]?.done;
+
+                        return (
+                          <div
+                            key={st.step}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              flex: sIdx === steps.length - 1 ? '0 0 auto' : 1,
+                              position: 'relative',
+                            }}
+                          >
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
+                              <div
+                                style={{
+                                  width: '30px',
+                                  height: '30px',
+                                  borderRadius: '50%',
+                                  backgroundColor: isDone ? '#10B981' : '#F1F5F9',
+                                  border: isDone ? '2px solid #10B981' : '2px solid #CBD5E1',
+                                  color: isDone ? '#FFFFFF' : '#94A3B8',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontWeight: 800,
+                                  fontSize: '0.75rem',
+                                  boxShadow: isDone ? '0 0 10px rgba(16, 185, 129, 0.35)' : 'none',
+                                  transition: 'all 0.3s ease',
+                                }}
+                              >
+                                {isDone ? <Check size={16} strokeWidth={3} /> : st.step}
+                              </div>
+                              <span
+                                style={{
+                                  fontSize: '0.65rem',
+                                  fontWeight: isDone ? 700 : 500,
+                                  color: isDone ? '#0F172A' : '#94A3B8',
+                                  marginTop: '0.35rem',
+                                  textAlign: 'center',
+                                  maxWidth: '65px',
+                                  lineHeight: 1.1,
+                                }}
+                              >
+                                {st.step === 1 ? 'Placed' : st.step === 2 ? 'Confirmed' : st.step === 3 ? 'In Transit' : 'Delivered'}
+                              </span>
+                            </div>
+
+                            {/* Connecting Line Segment */}
+                            {sIdx < steps.length - 1 && (
+                              <div
+                                style={{
+                                  flex: 1,
+                                  height: '4px',
+                                  backgroundColor: isNextDone ? '#10B981' : '#E2E8F0',
+                                  margin: '0 4px',
+                                  marginBottom: '1.1rem',
+                                  borderRadius: '999px',
+                                  transition: 'background-color 0.4s ease',
+                                }}
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Step-by-Step Connected Vertical Timeline */}
+                  <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', marginBottom: '1.5rem' }}>
+                    {steps.map((st, idx) => {
+                      const isDone = st.done;
+                      const isNextDone = steps[idx + 1]?.done;
+                      const isLast = idx === steps.length - 1;
+
+                      return (
+                        <div
+                          key={idx}
+                          style={{
+                            display: 'flex',
+                            gap: '1rem',
+                            position: 'relative',
+                            paddingBottom: isLast ? 0 : '1.75rem',
+                          }}
+                        >
+                          {/* Vertical Connector Column */}
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', width: '32px', flexShrink: 0 }}>
+                            <div
+                              style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '50%',
+                                backgroundColor: isDone ? '#10B981' : '#F1F5F9',
+                                border: isDone ? '2px solid #10B981' : '2px solid #CBD5E1',
+                                color: isDone ? '#FFFFFF' : '#94A3B8',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 800,
+                                fontSize: '0.85rem',
+                                zIndex: 2,
+                                boxShadow: isDone ? '0 0 10px rgba(16, 185, 129, 0.35)' : 'none',
+                                transition: 'all 0.3s ease',
+                              }}
+                            >
+                              {isDone ? <Check size={18} strokeWidth={3} /> : idx + 1}
+                            </div>
+
+                            {/* Connecting Line to next step: Green when next step is confirmed! */}
+                            {!isLast && (
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  top: '32px',
+                                  bottom: 0,
+                                  width: '3px',
+                                  backgroundColor: isNextDone ? '#10B981' : '#E2E8F0',
+                                  zIndex: 1,
+                                  transition: 'background-color 0.4s ease',
+                                }}
+                              />
+                            )}
+                          </div>
+
+                          {/* Content Column */}
+                          <div style={{ flex: 1, paddingTop: '3px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              <h5
+                                style={{
+                                  fontSize: '0.92rem',
+                                  fontWeight: isDone ? 800 : 600,
+                                  color: isDone ? '#0F172A' : '#94A3B8',
+                                  margin: 0,
+                                }}
+                              >
+                                {st.title}
+                              </h5>
+                              {st.current && (
+                                <span
+                                  style={{
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700,
+                                    backgroundColor: '#DCFCE7',
+                                    color: '#15803D',
+                                    padding: '0.15rem 0.5rem',
+                                    borderRadius: '999px',
+                                  }}
+                                >
+                                  ● Active Status
+                                </span>
+                              )}
+                            </div>
+                            <p style={{ fontSize: '0.8rem', color: isDone ? '#475569' : '#94A3B8', margin: '0.2rem 0 0.15rem' }}>
+                              {st.desc}
+                            </p>
+                            {st.time && (
+                              <span style={{ fontSize: '0.74rem', color: isDone ? '#64748B' : '#CBD5E1', fontWeight: 500 }}>
+                                {typeof st.time === 'string' && st.time.includes('T') ? formatDateTime(st.time) : st.time}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Summary & Customer Details */}
+                  <div
+                    style={{
+                      padding: '1rem',
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '12px',
+                      border: '1px solid #EFEAEB',
+                      fontSize: '0.85rem',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <span style={{ color: '#64748b' }}>Recipient:</span>
+                      <strong>{trackingOrder.customerName}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <span style={{ color: '#64748b' }}>Delivery Address:</span>
+                      <strong style={{ maxWidth: '240px', textAlign: 'right' }}>{trackingOrder.shippingAddress}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <span style={{ color: '#64748b' }}>Payment Method:</span>
+                      <span style={{ fontWeight: 700, color: theme.primary }}>{trackingOrder.paymentMethod || 'Cash on Delivery'}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px dashed #E2E8F0', fontSize: '0.95rem', fontWeight: 800 }}>
+                      <span>Total Amount:</span>
+                      <span style={{ color: theme.primary }}>Rs. {trackingOrder.totalPrice?.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}

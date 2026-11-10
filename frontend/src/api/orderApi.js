@@ -15,8 +15,9 @@ export const fetchSellerOrders = async (params = {}) => {
   return data;
 };
 
-export const updateOrderStatus = async (orderId, status) => {
-  const { data } = await API.put(`/orders/${orderId}/status`, { status });
+export const updateOrderStatus = async (orderId, status, paymentStatus) => {
+  const payload = typeof status === 'object' && status !== null ? status : { status, paymentStatus };
+  const { data } = await API.put(`/orders/${orderId}/status`, payload);
   return data;
 };
 
