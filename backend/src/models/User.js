@@ -103,6 +103,66 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'Please send payment to the account above and attach your payment screenshot or transaction receipt.',
     },
+    // Store Logo, Hero Banner & Visual Identity
+    storeLogo: {
+      type: String,
+      default: '',
+    },
+    heroBannerImage: {
+      type: String,
+      default: '',
+    },
+    heroBadgeText: {
+      type: String,
+      default: '✨ Direct From Verified Sellers',
+    },
+    heroTitle: {
+      type: String,
+      default: 'Premium Quality Products for Everyday Life',
+    },
+    heroSubtitle: {
+      type: String,
+      default: 'Shop pure natural honey, luxury car decoration, premium footwear, trending fashion, and daily essentials. Order with 100% Cash on Delivery and open parcel delivery.',
+    },
+    heroButtonText: {
+      type: String,
+      default: 'Shop All Products',
+    },
+    heroFloatingBadge: {
+      type: String,
+      default: '100% Genuine Quality',
+    },
+    // Top Announcement Ticker Bar
+    tickerText: {
+      type: String,
+      default: '⚡ FLASH SALE LIVE: GET EXTRA 10% OFF • 🚚 FREE OPEN PARCEL CASH ON DELIVERY • ⭐ 100% MONEY-BACK GUARANTEE',
+    },
+    showTicker: {
+      type: Boolean,
+      default: true,
+    },
+    // Active Store Template / Theme
+    selectedTemplate: {
+      type: String,
+      default: 'luxury-boutique',
+    },
+    // Social Links
+    facebook: {
+      type: String,
+      default: 'https://facebook.com',
+    },
+    tiktok: {
+      type: String,
+      default: '',
+    },
+    deliveryCharges: {
+      type: Number,
+      default: 199,
+    },
+    currency: {
+      type: String,
+      default: 'Rs.',
+    },
   },
   {
     timestamps: true,

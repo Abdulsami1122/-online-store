@@ -77,6 +77,20 @@ export const loginUser = async (req, res) => {
         avatar: user.avatar,
         storeName: user.storeName,
         storeTagline: user.storeTagline,
+        storeLogo: user.storeLogo,
+        heroBannerImage: user.heroBannerImage,
+        heroBadgeText: user.heroBadgeText,
+        heroTitle: user.heroTitle,
+        heroSubtitle: user.heroSubtitle,
+        heroButtonText: user.heroButtonText,
+        heroFloatingBadge: user.heroFloatingBadge,
+        tickerText: user.tickerText,
+        showTicker: user.showTicker,
+        selectedTemplate: user.selectedTemplate,
+        facebook: user.facebook,
+        tiktok: user.tiktok,
+        deliveryCharges: user.deliveryCharges,
+        currency: user.currency,
         whatsapp: user.whatsapp,
         bankName: user.bankName,
         bankAccountTitle: user.bankAccountTitle,
@@ -139,6 +153,22 @@ export const updateUserProfile = async (req, res) => {
       if (req.body.address) user.address = req.body.address;
       if (req.body.city) user.city = req.body.city;
 
+      // Store Logo, Hero Banner & Customizations
+      if (req.body.storeLogo !== undefined) user.storeLogo = req.body.storeLogo;
+      if (req.body.heroBannerImage !== undefined) user.heroBannerImage = req.body.heroBannerImage;
+      if (req.body.heroBadgeText !== undefined) user.heroBadgeText = req.body.heroBadgeText;
+      if (req.body.heroTitle !== undefined) user.heroTitle = req.body.heroTitle;
+      if (req.body.heroSubtitle !== undefined) user.heroSubtitle = req.body.heroSubtitle;
+      if (req.body.heroButtonText !== undefined) user.heroButtonText = req.body.heroButtonText;
+      if (req.body.heroFloatingBadge !== undefined) user.heroFloatingBadge = req.body.heroFloatingBadge;
+      if (req.body.tickerText !== undefined) user.tickerText = req.body.tickerText;
+      if (req.body.showTicker !== undefined) user.showTicker = req.body.showTicker;
+      if (req.body.selectedTemplate !== undefined) user.selectedTemplate = req.body.selectedTemplate;
+      if (req.body.facebook !== undefined) user.facebook = req.body.facebook;
+      if (req.body.tiktok !== undefined) user.tiktok = req.body.tiktok;
+      if (req.body.deliveryCharges !== undefined) user.deliveryCharges = Number(req.body.deliveryCharges);
+      if (req.body.currency !== undefined) user.currency = req.body.currency;
+
       // Online Payment & Bank Configuration
       if (req.body.bankName !== undefined) user.bankName = req.body.bankName;
       if (req.body.bankAccountTitle !== undefined) user.bankAccountTitle = req.body.bankAccountTitle;
@@ -169,8 +199,24 @@ export const updateUserProfile = async (req, res) => {
         role: updatedUser.role,
         avatar: updatedUser.avatar,
         phone: updatedUser.phone,
+        address: updatedUser.address,
+        city: updatedUser.city,
         storeName: updatedUser.storeName,
         storeTagline: updatedUser.storeTagline,
+        storeLogo: updatedUser.storeLogo,
+        heroBannerImage: updatedUser.heroBannerImage,
+        heroBadgeText: updatedUser.heroBadgeText,
+        heroTitle: updatedUser.heroTitle,
+        heroSubtitle: updatedUser.heroSubtitle,
+        heroButtonText: updatedUser.heroButtonText,
+        heroFloatingBadge: updatedUser.heroFloatingBadge,
+        tickerText: updatedUser.tickerText,
+        showTicker: updatedUser.showTicker,
+        selectedTemplate: updatedUser.selectedTemplate,
+        facebook: updatedUser.facebook,
+        tiktok: updatedUser.tiktok,
+        deliveryCharges: updatedUser.deliveryCharges,
+        currency: updatedUser.currency,
         whatsapp: updatedUser.whatsapp,
         bankName: updatedUser.bankName,
         bankAccountTitle: updatedUser.bankAccountTitle,
@@ -214,6 +260,20 @@ export const getStoreSettings = async (req, res) => {
       return res.json({
         storeName: 'TrendBazaar',
         storeTagline: 'Quality Products • Best Prices • 100% Cash on Delivery',
+        storeLogo: '',
+        heroBannerImage: '',
+        heroBadgeText: '✨ Direct From Verified Sellers',
+        heroTitle: 'Premium Quality Products for Everyday Life',
+        heroSubtitle: 'Shop pure natural honey, luxury car decoration, premium footwear, trending fashion, and daily essentials. Order with 100% Cash on Delivery and open parcel delivery.',
+        heroButtonText: 'Shop All Products',
+        heroFloatingBadge: '100% Genuine Quality',
+        tickerText: '⚡ FLASH SALE LIVE: GET EXTRA 10% OFF • 🚚 FREE OPEN PARCEL CASH ON DELIVERY • ⭐ 100% MONEY-BACK GUARANTEE',
+        showTicker: true,
+        selectedTemplate: 'luxury-boutique',
+        facebook: 'https://facebook.com',
+        tiktok: '',
+        deliveryCharges: 199,
+        currency: 'Rs.',
         whatsapp: '+92 306 5779097',
         phone: '+92 306 5779097',
         email: 'admin@store.com',
@@ -233,6 +293,24 @@ export const getStoreSettings = async (req, res) => {
     res.json({
       storeName: adminUser.storeName || 'TrendBazaar',
       storeTagline: adminUser.storeTagline || '',
+      storeLogo: adminUser.storeLogo || '',
+      heroBannerImage: adminUser.heroBannerImage || '',
+      heroBadgeText: adminUser.heroBadgeText || '✨ Direct From Verified Sellers',
+      heroTitle: adminUser.heroTitle || 'Premium Quality Products for Everyday Life',
+      heroSubtitle:
+        adminUser.heroSubtitle ||
+        'Shop pure natural honey, luxury car decoration, premium footwear, trending fashion, and daily essentials. Order with 100% Cash on Delivery and open parcel delivery.',
+      heroButtonText: adminUser.heroButtonText || 'Shop All Products',
+      heroFloatingBadge: adminUser.heroFloatingBadge || '100% Genuine Quality',
+      tickerText:
+        adminUser.tickerText ||
+        '⚡ FLASH SALE LIVE: GET EXTRA 10% OFF • 🚚 FREE OPEN PARCEL CASH ON DELIVERY • ⭐ 100% MONEY-BACK GUARANTEE',
+      showTicker: adminUser.showTicker !== undefined ? adminUser.showTicker : true,
+      selectedTemplate: adminUser.selectedTemplate || 'luxury-boutique',
+      facebook: adminUser.facebook || 'https://facebook.com',
+      tiktok: adminUser.tiktok || '',
+      deliveryCharges: adminUser.deliveryCharges !== undefined ? adminUser.deliveryCharges : 199,
+      currency: adminUser.currency || 'Rs.',
       whatsapp: adminUser.whatsapp || '+92 306 5779097',
       phone: adminUser.phone || '+92 306 5779097',
       email: adminUser.email || '',

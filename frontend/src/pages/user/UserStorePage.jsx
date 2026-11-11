@@ -42,6 +42,9 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { formatDateTime } from '../../utils/formatters';
 import AiAssistantModal from '../../components/common/AiAssistantModal';
+import { getTheme } from '../../utils/themeTemplates';
+import { compressImageFile } from '../../utils/imageCompressor';
+export { compressImageFile };
 
 // Curated Standard Categories for the Store
 const STORE_CATEGORIES = [
@@ -211,37 +214,6 @@ function ScrollRevealSection({
   );
 }
 
-// Client-side auto-compression utility: scales phone camera photos down to crisp lightweight JPEG (<300KB)
-export const compressImageFile = (file, maxWidth = 1200, quality = 0.85) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = reject;
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onerror = reject;
-      img.onload = () => {
-        let width = img.width;
-        let height = img.height;
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        resolve(dataUrl);
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-};
-
 export default function UserStorePage({
   defaultOpenCart = false,
   defaultSection = null,
@@ -302,20 +274,9 @@ export default function UserStorePage({
       .catch(() => {});
   }, []);
 
-  // Color Theme (Deep luxury berry / wine matching the mockup)
-  const theme = {
-    primary: '#6D0E3B',
-    primaryHover: '#56092E',
-    primaryLight: '#FDF2F5',
-    primaryBorder: '#F2D3DF',
-    heroBg: 'linear-gradient(135deg, #FBF2F4 0%, #F8E7EC 50%, #FCF5F7 100%)',
-    promoBg: 'linear-gradient(135deg, #530B2D 0%, #6E0F3E 100%)',
-    footerBg: '#36061E',
-    badgeBg: '#7A1343',
-    mintCardBg: '#F3F8F5',
-    peachCardBg: '#FAF0ED',
-    accentScriptColor: '#801446',
-  };
+  // Color Theme: Dynamically loaded from Published Admin Settings (or defaults to luxury-boutique)
+  const theme = getTheme(storeSettings.selectedTemplate);
+  const deliveryFee = Number(storeSettings.deliveryCharges !== undefined ? storeSettings.deliveryCharges : 199);
 
   // ----------------------------------------------------------------------
   // Products from Backend & Catalog
@@ -688,7 +649,7 @@ export default function UserStorePage({
         paymentMethod,
         paymentProof: paymentScreenshot || '',
         accountDetailsUsed,
-        deliveryCharges: 199,
+        deliveryCharges: deliveryFee,
         orderItems: cartItems.map((item) => ({
           product: item._id,
           title: item.title,
@@ -759,38 +720,34 @@ export default function UserStorePage({
       {/* ================================================================= */}
       {/* 1. TOP ADVERTISEMENT MARQUEE CAROUSEL (Text flows from right)     */}
       {/* ================================================================= */}
-      <div className="advertisement-ticker-wrap">
-        <div className="advertisement-ticker-track">
-          {[0, 1].map((loopIdx) => (
-            <div key={loopIdx} style={{ display: 'inline-flex', alignItems: 'center' }}>
-              <span className="advertisement-item">
-                <span>✨ 100% CASH ON DELIVERY AVAILABLE</span>
-                <span className="dot-divider" />
-              </span>
-              <span className="advertisement-item">
-                <span>🚀 2-4 DAYS FAST SHIPPING</span>
-                <span className="dot-divider" />
-              </span>
-              <span className="advertisement-item">
-                <span>📦 OPEN PARCEL BEFORE PAYMENT</span>
-                <span className="dot-divider" />
-              </span>
-              <span className="advertisement-item">
-                <span>🔄 7-DAY EASY REPLACEMENT & MONEY BACK</span>
-                <span className="dot-divider" />
-              </span>
-              <span className="advertisement-item">
-                <span>💬 DIRECT WHATSAPP SELLER HELPLINE: {storeSettings.whatsapp}</span>
-                <span className="dot-divider" />
-              </span>
-              <span className="advertisement-item">
-                <span>⭐ VERIFIED QUALITY • FACEBOOK MARKETPLACE & DARAZ STORES</span>
-                <span className="dot-divider" />
-              </span>
-            </div>
-          ))}
+      {storeSettings.showTicker !== false && (
+        <div className="advertisement-ticker-wrap">
+          <div className="advertisement-ticker-track">
+            {[0, 1].map((loopIdx) => {
+              const tickerItems = storeSettings.tickerText
+                ? storeSettings.tickerText.split('•').map((t) => t.trim()).filter(Boolean)
+                : [
+                    '✨ 100% CASH ON DELIVERY AVAILABLE',
+                    '🚀 2-4 DAYS FAST SHIPPING ACROSS PAKISTAN',
+                    '📦 OPEN PARCEL BEFORE PAYMENT',
+                    '🔄 7-DAY EASY REPLACEMENT & MONEY BACK',
+                    `💬 DIRECT WHATSAPP SELLER HELPLINE: ${storeSettings.whatsapp}`,
+                    '⭐ 100% VERIFIED QUALITY GUARANTEED',
+                  ];
+              return (
+                <div key={loopIdx} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  {tickerItems.map((item, idx) => (
+                    <span key={idx} className="advertisement-item">
+                      <span>{item}</span>
+                      <span className="dot-divider" />
+                    </span>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ================================================================= */}
       {/* 2. MAIN HEADER (Logo, Nav Links, Search, Wishlist, Cart)          */}
@@ -820,31 +777,45 @@ export default function UserStorePage({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.65rem',
+              gap: '0.75rem',
               cursor: 'pointer',
               userSelect: 'none',
             }}
           >
-            <div
-              style={{
-                width: '42px',
-                height: '42px',
-                borderRadius: '12px',
-                backgroundColor: theme.primaryLight,
-                color: theme.primary,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              }}
-            >
-              <Store size={22} strokeWidth={2.2} />
-            </div>
+            {storeSettings.storeLogo ? (
+              <img
+                src={storeSettings.storeLogo}
+                alt={storeSettings.storeName}
+                style={{
+                  maxHeight: '44px',
+                  maxWidth: '56px',
+                  objectFit: 'contain',
+                  display: 'block',
+                  borderRadius: '8px',
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '12px',
+                  backgroundColor: theme.primaryLight,
+                  color: theme.primary,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                }}
+              >
+                <Store size={22} strokeWidth={2.2} />
+              </div>
+            )}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <span
-                  className="font-serif"
                   style={{
+                    fontFamily: theme.headingFont,
                     fontSize: '1.4rem',
                     fontWeight: 700,
                     color: theme.primary,
@@ -1069,20 +1040,23 @@ export default function UserStorePage({
           {/* Left Column: Heading, Subtitle, CTA Button, and 3 Features */}
           <div style={{ flex: 1.15, maxWidth: '600px' }}>
             <div
-              className="font-script"
+              className={theme.hasScriptFont ? 'font-script' : ''}
               style={{
-                fontSize: '2rem',
+                fontSize: theme.hasScriptFont ? '2rem' : '0.92rem',
+                fontWeight: theme.hasScriptFont ? 400 : 700,
                 color: theme.accentScriptColor,
                 lineHeight: 1.2,
-                marginBottom: '0.5rem',
+                marginBottom: '0.65rem',
+                letterSpacing: theme.hasScriptFont ? 'normal' : '0.05em',
+                textTransform: theme.hasScriptFont ? 'none' : 'uppercase',
               }}
             >
-              ✨ Direct From Verified Sellers
+              {storeSettings.heroBadgeText || '✨ Direct From Verified Sellers'}
             </div>
 
             <h1
-              className="font-serif"
               style={{
+                fontFamily: theme.headingFont,
                 fontSize: 'clamp(2.3rem, 4.6vw, 3.6rem)',
                 fontWeight: 700,
                 color: '#260618',
@@ -1091,7 +1065,7 @@ export default function UserStorePage({
                 marginBottom: '1.25rem',
               }}
             >
-              Premium Quality Products for Everyday Life
+              {storeSettings.heroTitle || 'Premium Quality Products for Everyday Life'}
             </h1>
 
             <p
@@ -1102,8 +1076,8 @@ export default function UserStorePage({
                 marginBottom: '2rem',
               }}
             >
-              Shop pure natural honey, luxury car decoration, premium footwear, trending fashion, and daily essentials.
-              Order with 100% Cash on Delivery and open parcel delivery.
+              {storeSettings.heroSubtitle ||
+                'Shop pure natural honey, luxury car decoration, premium footwear, trending fashion, and daily essentials. Order with 100% Cash on Delivery and open parcel delivery.'}
             </p>
 
             {/* Action Buttons */}
@@ -1120,7 +1094,7 @@ export default function UserStorePage({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.6rem',
-                  boxShadow: '0 8px 24px rgba(109, 14, 59, 0.25)',
+                  boxShadow: `0 8px 24px ${theme.primary}35`,
                   cursor: 'pointer',
                   border: 'none',
                   transition: 'all 0.2s ease',
@@ -1128,7 +1102,7 @@ export default function UserStorePage({
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.primaryHover)}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.primary)}
               >
-                <span>Shop All Products</span>
+                <span>{storeSettings.heroButtonText || 'Shop All Products'}</span>
                 <ArrowRight size={18} />
               </button>
 
@@ -1273,8 +1247,11 @@ export default function UserStorePage({
               }}
             >
               <img
-                src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=900&q=80"
-                alt="Online Store Showcase"
+                src={
+                  storeSettings.heroBannerImage ||
+                  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=900&q=80'
+                }
+                alt={storeSettings.heroTitle || 'Online Store Showcase'}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -1284,9 +1261,9 @@ export default function UserStorePage({
               />
             </div>
 
-            {/* Floating Luxury Script Badge */}
+            {/* Floating Badge */}
             <div
-              className="animate-float font-script depth-badge"
+              className={`animate-float depth-badge ${theme.hasScriptFont ? 'font-script' : ''}`}
               style={{
                 position: 'absolute',
                 top: '30px',
@@ -1296,14 +1273,15 @@ export default function UserStorePage({
                 color: theme.primary,
                 padding: '0.65rem 1.4rem',
                 borderRadius: '999px',
-                fontSize: '1.45rem',
-                boxShadow: '0 12px 30px rgba(109, 14, 59, 0.15)',
+                fontSize: theme.hasScriptFont ? '1.45rem' : '0.88rem',
+                fontWeight: 700,
+                boxShadow: `0 12px 30px ${theme.primary}25`,
                 border: '1px solid rgba(255, 255, 255, 0.8)',
                 zIndex: 5,
                 transform: 'rotate(2deg)',
               }}
             >
-              100% Genuine Quality
+              {storeSettings.heroFloatingBadge || '100% Genuine Quality'}
             </div>
           </div>
         </div>
@@ -2548,23 +2526,39 @@ export default function UserStorePage({
             {/* Column 1: Store Brand Info */}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem' }}>
-                <div
-                  style={{
-                    width: '38px',
-                    height: '38px',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Store size={20} />
-                </div>
+                {storeSettings.storeLogo ? (
+                  <img
+                    src={storeSettings.storeLogo}
+                    alt={storeSettings.storeName}
+                    style={{
+                      maxHeight: '40px',
+                      maxWidth: '50px',
+                      objectFit: 'contain',
+                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                      padding: '2px 4px',
+                      borderRadius: '8px',
+                      display: 'block',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '8px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Store size={20} />
+                  </div>
+                )}
                 <span
-                  className="font-serif"
                   style={{
+                    fontFamily: theme.headingFont,
                     fontSize: '1.35rem',
                     fontWeight: 700,
                     color: '#ffffff',
@@ -2994,11 +2988,11 @@ export default function UserStorePage({
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', color: '#6A6367', marginBottom: '0.65rem' }}>
                         <span>Delivery (Courier COD)</span>
-                        <span style={{ color: '#059669', fontWeight: 600 }}>Rs. 199</span>
+                        <span style={{ color: '#059669', fontWeight: 600 }}>Rs. {deliveryFee}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.15rem', fontWeight: 700, color: '#260618', marginBottom: '1rem', borderTop: '1px dashed #EFEAEB', paddingTop: '0.65rem' }}>
                         <span>Total (Cash on Delivery)</span>
-                        <span style={{ color: theme.primary }}>{formatPrice(totalPrice + 199)}</span>
+                        <span style={{ color: theme.primary }}>{formatPrice(totalPrice + deliveryFee)}</span>
                       </div>
 
                       <button
@@ -3369,7 +3363,7 @@ export default function UserStorePage({
                       >
                         <span>Exact Amount to Transfer:</span>
                         <strong style={{ fontSize: '0.95rem', color: '#78350F' }}>
-                          Rs. {(totalPrice + 199).toLocaleString()}
+                          Rs. {(totalPrice + deliveryFee).toLocaleString()}
                         </strong>
                       </div>
 
@@ -3557,7 +3551,7 @@ export default function UserStorePage({
                         <div style={{ marginTop: '0.65rem', textAlign: 'center' }}>
                           <a
                             href={`https://wa.me/${(storeSettings.whatsapp || '+923065779097').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                              `Hello ${storeSettings.storeName}! I am placing an order for Rs. ${(totalPrice + 199).toLocaleString()} via ${paymentMethod}. Here is my payment receipt screenshot.`
+                              `Hello ${storeSettings.storeName}! I am placing an order for Rs. ${(totalPrice + deliveryFee).toLocaleString()} via ${paymentMethod}. Here is my payment receipt screenshot.`
                             )}`}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -3622,7 +3616,7 @@ export default function UserStorePage({
                         {paymentMethod === 'Cash on Delivery' ? 'Total Cash to Pay' : 'Total Amount to Transfer'}
                       </span>
                       <span style={{ fontSize: '1.25rem', fontWeight: 800, color: theme.primary }}>
-                        {formatPrice(totalPrice + 199)}
+                        {formatPrice(totalPrice + deliveryFee)}
                       </span>
                     </div>
                     <span
@@ -4352,9 +4346,18 @@ export default function UserStorePage({
         <div className="drawer-backdrop" onClick={() => setMobileMenuOpen(false)}>
           <div className="drawer-panel" onClick={(e) => e.stopPropagation()} style={{ padding: '2rem 1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-              <span className="font-serif" style={{ fontSize: '1.3rem', fontWeight: 700, color: theme.primary }}>
-                {storeSettings.storeName}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                {storeSettings.storeLogo && (
+                  <img
+                    src={storeSettings.storeLogo}
+                    alt={storeSettings.storeName}
+                    style={{ height: '34px', width: '34px', borderRadius: '8px', objectFit: 'contain' }}
+                  />
+                )}
+                <span className="font-serif" style={{ fontSize: '1.3rem', fontWeight: 700, color: theme.primary }}>
+                  {storeSettings.storeName}
+                </span>
+              </div>
               <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                 <X size={24} />
               </button>
