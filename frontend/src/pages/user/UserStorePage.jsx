@@ -911,6 +911,7 @@ export default function UserStorePage({
             {/* Wishlist */}
             <button
               onClick={() => setWishlistDrawerOpen(true)}
+              className="desktop-nav-icon"
               style={{
                 background: 'none',
                 border: 'none',
@@ -954,6 +955,7 @@ export default function UserStorePage({
                 setCartDrawerOpen(true);
                 setCheckoutStep('cart');
               }}
+              className="desktop-nav-icon"
               style={{
                 background: 'none',
                 border: 'none',
@@ -1010,7 +1012,11 @@ export default function UserStorePage({
         <style>{`
           @media (min-width: 900px) {
             .desktop-nav { display: flex !important; }
+            .desktop-nav-icon { display: flex !important; }
             .mobile-nav-toggle { display: none !important; }
+          }
+          @media (max-width: 899px) {
+            .desktop-nav-icon { display: none !important; }
           }
         `}</style>
       </header>
@@ -1343,27 +1349,9 @@ export default function UserStorePage({
                         scrollTo(productsRef);
                       }}
                       className="category-card"
-                      style={{
-                        backgroundColor: '#FCF9FA',
-                        borderRadius: '16px',
-                        padding: '1.4rem 1rem',
-                        textAlign: 'center',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                      }}
                     >
                       <div
-                        className="depth-image"
-                        style={{
-                          width: '105px',
-                          height: '105px',
-                          borderRadius: '50%',
-                          overflow: 'hidden',
-                          marginBottom: '1rem',
-                          backgroundColor: '#EDE3E7',
-                        }}
+                        className="depth-image category-card-img-wrap"
                       >
                         <img
                           src={catImg}
@@ -1379,30 +1367,18 @@ export default function UserStorePage({
                       </div>
 
                       <div className="depth-content">
-                        <h3
-                          className="font-serif"
-                          style={{
-                            fontSize: '1.05rem',
-                            fontWeight: 600,
-                            color: '#260618',
-                            marginBottom: '0.2rem',
-                          }}
-                        >
+                        <h3 className="font-serif category-card-title">
                           {catName}
                         </h3>
 
-                        <span style={{ fontSize: '0.78rem', color: '#8F868C', marginBottom: '0.5rem', display: 'block' }}>
+                        <span className="category-card-subtitle">
                           {count} {count === 1 ? 'item' : 'items'}
                         </span>
 
                         <span
+                          className="category-card-link"
                           style={{
-                            fontSize: '0.8rem',
-                            fontWeight: 600,
                             color: theme.primary,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.25rem',
                           }}
                         >
                           Explore →
@@ -1651,14 +1627,7 @@ export default function UserStorePage({
                   >
                     {/* Product Image */}
                     <div
-                      className="depth-image"
-                      style={{
-                        height: '270px',
-                        backgroundColor: '#F8F3F5',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        cursor: 'pointer',
-                      }}
+                      className="depth-image product-card-image-wrap"
                       onClick={() => {
                         setQuickViewProduct(product);
                         setQuickViewQty(1);
@@ -1678,17 +1647,10 @@ export default function UserStorePage({
                       {/* Badge */}
                       {product.badge && (
                         <span
-                          className="depth-badge"
+                          className="depth-badge product-card-badge"
                           style={{
-                            position: 'absolute',
-                            top: '12px',
-                            left: '12px',
                             backgroundColor: theme.badgeBg,
                             color: '#ffffff',
-                            fontSize: '0.7rem',
-                            fontWeight: 700,
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: '6px',
                           }}
                         >
                           {product.badge}
@@ -1696,21 +1658,11 @@ export default function UserStorePage({
                       )}
 
                       {/* Top Right Action Icons: Wishlist & Share Link */}
-                      <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <div className="product-card-action-icons">
                         <button
                           onClick={(e) => toggleWishlist(product, e)}
                           style={{
-                            backgroundColor: '#ffffff',
-                            border: 'none',
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
                             color: inWishlist ? '#DC2626' : '#6A6369',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                            cursor: 'pointer',
                           }}
                           title={inWishlist ? 'Remove from Wishlist' : 'Save to Wishlist'}
                         >
@@ -1722,16 +1674,7 @@ export default function UserStorePage({
                           onClick={(e) => handleCopyProductLink(product, e)}
                           style={{
                             backgroundColor: isLinkCopied ? '#10B981' : '#ffffff',
-                            border: 'none',
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
                             color: isLinkCopied ? '#ffffff' : '#6A6369',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                            cursor: 'pointer',
                           }}
                           title="Copy direct product link for Facebook / Daraz post"
                         >
@@ -1741,29 +1684,11 @@ export default function UserStorePage({
 
                       {/* Quick View Button */}
                       <button
+                        className="product-card-quickview"
                         onClick={(e) => {
                           e.stopPropagation();
                           setQuickViewProduct(product);
                           setQuickViewQty(1);
-                        }}
-                        style={{
-                          position: 'absolute',
-                          bottom: '12px',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.94)',
-                          backdropFilter: 'blur(4px)',
-                          color: '#260618',
-                          border: 'none',
-                          padding: '0.35rem 0.85rem',
-                          borderRadius: '999px',
-                          fontSize: '0.78rem',
-                          fontWeight: 600,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.3rem',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                          cursor: 'pointer',
                         }}
                       >
                         <Eye size={13} />
@@ -1773,67 +1698,42 @@ export default function UserStorePage({
 
                     {/* Card Body */}
                     <div
-                      className="depth-content"
-                      style={{
-                        padding: '1.25rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        flex: 1,
-                      }}
+                      className="depth-content product-card-body"
                     >
                       <span
-                        style={{
-                          fontSize: '0.75rem',
-                          color: '#8A8287',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          marginBottom: '0.35rem',
-                        }}
+                        className="product-card-category"
                       >
                         {product.category || 'General'}
                       </span>
 
                       <h3
-                        className="font-serif"
-                        style={{
-                          fontSize: '1.05rem',
-                          fontWeight: 600,
-                          color: '#260618',
-                          marginBottom: '0.45rem',
-                          lineHeight: 1.3,
-                        }}
+                        className="font-serif product-card-title"
                       >
                         {product.title}
                       </h3>
 
                       {/* Rating & Stock */}
                       <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          marginBottom: '0.85rem',
-                        }}
+                        className="product-card-rating-stock"
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                          <div style={{ display: 'flex', color: '#F59E0B' }}>
+                          <div style={{ display: 'flex', color: '#F59E0B' }} className="product-card-stars">
                             {[...Array(5)].map((_, i) => (
                               <Star key={i} size={13} fill="#F59E0B" strokeWidth={0} />
                             ))}
                           </div>
-                          <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>{product.rating || 4.9}</span>
+                          <span className="product-card-rating-val" style={{ fontSize: '0.78rem', fontWeight: 600 }}>{product.rating || 4.9}</span>
                         </div>
-                        <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
+                        <span className="product-card-stock-tag" style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
                           ✓ In Stock ({product.stock || 15})
                         </span>
                       </div>
 
                       {/* Price */}
-                      <div style={{ marginBottom: '1rem' }}>
+                      <div className="product-card-price-row">
                         <span
+                          className="product-card-price"
                           style={{
-                            fontSize: '1.2rem',
-                            fontWeight: 700,
                             color: theme.primary,
                           }}
                         >
@@ -1841,12 +1741,7 @@ export default function UserStorePage({
                         </span>
                         {product.originalPrice && (
                           <span
-                            style={{
-                              fontSize: '0.85rem',
-                              color: '#A89FA4',
-                              textDecoration: 'line-through',
-                              marginLeft: '0.5rem',
-                            }}
+                            className="product-card-original-price"
                           >
                             {formatPrice(product.originalPrice)}
                           </span>
@@ -1858,44 +1753,24 @@ export default function UserStorePage({
                         {/* 1-Click Cash on Delivery Order */}
                         <button
                           onClick={(e) => handleBuyNowInstant(product, e)}
-                          className="depth-button"
+                          className="depth-button product-card-cod-btn"
                           style={{
                             backgroundColor: theme.primary,
                             color: '#ffffff',
-                            border: 'none',
-                            padding: '0.6rem 0.85rem',
-                            borderRadius: '8px',
-                            fontSize: '0.82rem',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.35rem',
                             boxShadow: '0 4px 12px rgba(109, 14, 59, 0.2)',
                           }}
                         >
                           <Lock size={13} />
-                          <span>⚡ Order via Cash on Delivery</span>
+                          <span>⚡ Cash on Delivery</span>
                         </button>
 
                         {/* WhatsApp Order & Add to Bag split */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
+                        <div className="product-card-sub-buttons">
                           <button
                             onClick={(e) => openWhatsAppOrder(product, e)}
                             style={{
                               backgroundColor: '#25D366',
                               color: '#ffffff',
-                              border: 'none',
-                              padding: '0.45rem 0.6rem',
-                              borderRadius: '6px',
-                              fontSize: '0.75rem',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '0.25rem',
                             }}
                             title="Order directly on WhatsApp"
                           >
@@ -1908,16 +1783,6 @@ export default function UserStorePage({
                             style={{
                               backgroundColor: isJustAdded ? '#10B981' : theme.primaryLight,
                               color: isJustAdded ? '#ffffff' : theme.primary,
-                              border: 'none',
-                              padding: '0.45rem 0.6rem',
-                              borderRadius: '6px',
-                              fontSize: '0.75rem',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '0.25rem',
                             }}
                           >
                             {isJustAdded ? <Check size={13} /> : <ShoppingBag size={13} />}
@@ -2015,14 +1880,12 @@ export default function UserStorePage({
         <section ref={whyUsRef} style={{ padding: '3.5rem 1.25rem' }}>
           <div className="container">
             <div
+              className="trust-section-box"
               style={{
                 backgroundColor: theme.mintCardBg,
-                borderRadius: '24px',
-                padding: '3.5rem 2.5rem',
-                border: '1px solid rgba(0, 0, 0, 0.04)',
               }}
             >
-              <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+              <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                 <h2
                   className="font-serif"
                   style={{
@@ -2071,26 +1934,13 @@ export default function UserStorePage({
                 ].map((p, idx) => (
                   <TiltCard
                     key={idx}
-                    style={{
-                      backgroundColor: '#FFFFFF',
-                      borderRadius: '16px',
-                      padding: '1.75rem 1.25rem',
-                      textAlign: 'center',
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.03)',
-                    }}
+                    className="trust-card"
                   >
                     <div
-                      className="depth-image"
+                      className="depth-image trust-card-icon"
                       style={{
-                        width: '52px',
-                        height: '52px',
-                        borderRadius: '50%',
                         backgroundColor: theme.primaryLight,
                         color: theme.primary,
-                        margin: '0 auto 1.2rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
                       }}
                     >
                       {p.icon === 'shield' ? (
@@ -2185,14 +2035,7 @@ export default function UserStorePage({
                       }}
                     >
                       <div
-                        className="depth-image"
-                        style={{
-                          height: '260px',
-                          backgroundColor: '#F8F3F5',
-                          position: 'relative',
-                          overflow: 'hidden',
-                          cursor: 'pointer',
-                        }}
+                        className="depth-image product-card-image-wrap"
                         onClick={() => {
                           setQuickViewProduct(item);
                           setQuickViewQty(1);
@@ -2204,64 +2047,44 @@ export default function UserStorePage({
                           className="product-img"
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
-                        <button
-                          onClick={(e) => toggleWishlist(item, e)}
-                          style={{
-                            position: 'absolute',
-                            top: '12px',
-                            right: '12px',
-                            backgroundColor: '#ffffff',
-                            border: 'none',
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: inWishlist ? '#DC2626' : '#6A6369',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          <Heart size={16} fill={inWishlist ? '#DC2626' : 'none'} strokeWidth={2} />
-                        </button>
+                        <div className="product-card-action-icons">
+                          <button
+                            onClick={(e) => toggleWishlist(item, e)}
+                            style={{
+                              color: inWishlist ? '#DC2626' : '#6A6369',
+                            }}
+                          >
+                            <Heart size={16} fill={inWishlist ? '#DC2626' : 'none'} strokeWidth={2} />
+                          </button>
+                        </div>
                       </div>
 
-                      <div className="depth-content" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                        <span style={{ fontSize: '0.72rem', color: '#888', textTransform: 'uppercase' }}>
+                      <div className="depth-content product-card-body">
+                        <span className="product-card-category">
                           {item.category}
                         </span>
                         <h3
-                          className="font-serif"
-                          style={{ fontSize: '1.05rem', fontWeight: 600, color: '#260618', margin: '0.3rem 0' }}
+                          className="font-serif product-card-title"
                         >
                           {item.title}
                         </h3>
-                        <div style={{ fontSize: '1.15rem', fontWeight: 700, color: theme.primary, marginBottom: '0.75rem' }}>
-                          {formatPrice(item.price)}
+                        <div className="product-card-price-row" style={{ marginBottom: '0.75rem' }}>
+                          <span className="product-card-price" style={{ color: theme.primary }}>
+                            {formatPrice(item.price)}
+                          </span>
                         </div>
 
                         <button
                           onClick={(e) => handleBuyNowInstant(item, e)}
-                          className="depth-button"
+                          className="depth-button product-card-cod-btn"
                           style={{
                             marginTop: 'auto',
                             backgroundColor: theme.primary,
                             color: '#ffffff',
-                            border: 'none',
-                            padding: '0.6rem',
-                            borderRadius: '8px',
-                            fontWeight: 700,
-                            fontSize: '0.82rem',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '0.35rem',
                           }}
                         >
                           <Lock size={13} />
-                          <span>Order via Cash on Delivery</span>
+                          <span>⚡ Cash on Delivery</span>
                         </button>
                       </div>
                     </TiltCard>
@@ -2290,13 +2113,10 @@ export default function UserStorePage({
               className="hero-split"
             >
               <div
+                className="flash-sale-box"
                 style={{
                   backgroundColor: theme.primary,
                   color: '#ffffff',
-                  padding: '4rem 3.5rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
                 }}
               >
                 <span
@@ -2406,12 +2226,7 @@ export default function UserStorePage({
             </div>
 
             <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '1.75rem',
-              }}
-              className="grid-responsive-4"
+              className="reviews-grid-responsive"
             >
               {[
                 {
@@ -2435,15 +2250,7 @@ export default function UserStorePage({
               ].map((test, idx) => (
                 <TiltCard
                   key={idx}
-                  style={{
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: '20px',
-                    padding: '2rem 1.75rem',
-                    border: '1px solid rgba(109, 14, 59, 0.08)',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.03)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
+                  className="review-card"
                 >
                   <div className="depth-content" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                     <div style={{ display: 'flex', color: '#F59E0B', marginBottom: '1.25rem' }}>
@@ -3791,7 +3598,7 @@ export default function UserStorePage({
             </button>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }} className="hero-split">
-              <div style={{ borderRadius: '16px', overflow: 'hidden', height: '340px', backgroundColor: '#F8F3F5' }}>
+              <div className="quickview-img-box" style={{ borderRadius: '16px', overflow: 'hidden', height: '340px', backgroundColor: '#F8F3F5' }}>
                 <img
                   src={quickViewProduct.image}
                   alt={quickViewProduct.title}
@@ -4377,12 +4184,83 @@ export default function UserStorePage({
                           </button>
                         </div>
 
+                        {/* Quick Wishlist Access in Burger Menu */}
+                        <button
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            setWishlistDrawerOpen(true);
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            width: '100%',
+                            backgroundColor: '#FFF1F5',
+                            border: '1.5px solid #FDE2EA',
+                            borderRadius: '12px',
+                            padding: '0.75rem 0.95rem',
+                            cursor: 'pointer',
+                            marginBottom: '1.25rem',
+                            textAlign: 'left',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                            <div
+                              style={{
+                                width: '34px',
+                                height: '34px',
+                                borderRadius: '8px',
+                                backgroundColor: '#ffffff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#DC2626',
+                                boxShadow: '0 2px 6px rgba(220, 38, 38, 0.15)',
+                              }}
+                            >
+                              <Heart size={18} fill="#DC2626" />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#260618' }}>
+                                My Wishlist
+                              </div>
+                              <div style={{ fontSize: '0.72rem', color: '#8A8287' }}>
+                                {wishlist.length === 0 ? 'No items saved yet' : `${wishlist.length} ${wishlist.length === 1 ? 'item' : 'items'} saved`}
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                            {wishlist.length > 0 && (
+                              <span
+                                style={{
+                                  backgroundColor: theme.primary,
+                                  color: '#ffffff',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 800,
+                                  padding: '0.15rem 0.55rem',
+                                  borderRadius: '999px',
+                                }}
+                              >
+                                {wishlist.length}
+                              </span>
+                            )}
+                            <span style={{ fontSize: '0.95rem', color: '#8A8287', fontWeight: 700 }}>→</span>
+                          </div>
+                        </button>
+
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                           {[
                             { label: 'Home', ref: heroRef },
                             { label: 'Shop All Products', ref: productsRef },
                             { label: 'Browse Categories', ref: categoriesRef },
                             { label: 'Best Sellers', ref: bestSellersRef },
+                            {
+                              label: `❤️ Saved Wishlist (${wishlist.length})`,
+                              action: () => {
+                                setMobileMenuOpen(false);
+                                setWishlistDrawerOpen(true);
+                              },
+                            },
                             { label: '🚚 Track Order Status', action: () => { setMobileMenuOpen(false); setTrackingModalOpen(true); } },
                             { label: 'Contact Seller', ref: footerRef },
                           ].map((link, idx) => (
