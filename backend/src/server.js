@@ -26,28 +26,50 @@ connectDB();
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
 
-// ── 3. CORS ──────────────────────────────────────────────────────────────────
-// In production, only allow requests from your own frontend domain.
-// In development, allow any origin (Vite dev server).
-const allowedOrigins = process.env.ALLOWED_ORIGINS
+// ── 3. CORS Configuration (Localhost & Vercel) ──────────────────────────────
+const defaultAllowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5173',
+  'https://online-store-oyaa.vercel.app',
+];
+
+const envAllowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
   : [];
 
-app.use(
-  cors({
-    origin: isProduction
-      ? (origin, callback) => {
-          // Allow requests with no origin (mobile apps, curl) or whitelisted origins
-          if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-          } else {
-            callback(new Error(`CORS: origin ${origin} not allowed`));
-          }
-        }
-      : true, // allow all in development
-    credentials: true,
-  })
+const allowedOrigins = [...new Set([...defaultAllowedOrigins, ...envAllowedOrigins])].map((o) =>
+  o.replace(/\/$/, '')
 );
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow non-browser requests (mobile apps, Postman, curl, server-side)
+    if (!origin) return callback(null, true);
+
+    const cleanOrigin = origin.replace(/\/$/, '');
+
+    // Allow whitelisted origins, localhost, or any Vercel deployment domain
+    const isWhitelisted = allowedOrigins.includes(cleanOrigin);
+    const isVercel = cleanOrigin.endsWith('.vercel.app');
+    const isLocal =
+      cleanOrigin.includes('localhost') || cleanOrigin.includes('127.0.0.1');
+
+    if (isWhitelisted || isVercel || isLocal || !isProduction) {
+      callback(null, true);
+    } else {
+      console.warn(`[CORS Blocked] Origin: ${origin}`);
+      callback(new Error(`CORS error: Origin ${origin} not allowed`));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // ── 4. Body parsers ──────────────────────────────────────────────────────────
 app.use(express.json({ limit: '15mb' }));
@@ -115,6 +137,10 @@ app.use(errorHandler);
 // ── 10. Start Server ─────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 AI Order Assistant Server running on port ${PORT} [${process.env.NODE_ENV}]`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`🚀 AI Order Assistant Server running on port ${PORT} [${process.env.NODE_ENV}]`);
+  });
+}
+
+export default app;
