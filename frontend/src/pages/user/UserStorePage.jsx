@@ -4348,217 +4348,176 @@ export default function UserStorePage({
       {/* MOBILE MENU */}
       {mobileMenuOpen && (
         <div className="drawer-backdrop" onClick={() => setMobileMenuOpen(false)}>
-          <div className="drawer-panel" onClick={(e) => e.stopPropagation()} style={{ padding: '2rem 1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                {storeSettings.storeLogo && (
-                  <img
-                    src={storeSettings.storeLogo}
-                    alt={storeSettings.storeName}
-                    style={{ height: '34px', width: '34px', borderRadius: '8px', objectFit: 'contain' }}
-                  />
-                )}
-                <span className="font-serif" style={{ fontSize: '1.3rem', fontWeight: 700, color: theme.primary }}>
-                  {storeSettings.storeName}
-                </span>
-                <div
-                  className="drawer-panel"
-                  onClick={(e) => e.stopPropagation()}
-                  style={{
-                    padding: '1.5rem 1.25rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', borderBottom: '1px solid #EFEAEB', paddingBottom: '0.85rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                        {storeSettings.storeLogo && (
-                          <img
-                            src={storeSettings.storeLogo}
-                            alt={storeSettings.storeName}
-                            style={{ height: '34px', width: '34px', borderRadius: '8px', objectFit: 'contain' }}
-                          />
-                        )}
-                        <span className="font-serif" style={{ fontSize: '1.25rem', fontWeight: 700, color: theme.primary }}>
-                          {storeSettings.storeName}
-                        </span>
+                    <div
+                      className="drawer-panel"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        padding: '1.5rem 1.25rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', borderBottom: '1px solid #EFEAEB', paddingBottom: '0.85rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                            {storeSettings.storeLogo && (
+                              <img
+                                src={storeSettings.storeLogo}
+                                alt={storeSettings.storeName}
+                                style={{ height: '34px', width: '34px', borderRadius: '8px', objectFit: 'contain' }}
+                              />
+                            )}
+                            <span className="font-serif" style={{ fontSize: '1.25rem', fontWeight: 700, color: theme.primary }}>
+                              {storeSettings.storeName}
+                            </span>
+                          </div>
+                          <button onClick={() => setMobileMenuOpen(false)} style={{ background: '#F8FAFC', border: 'none', borderRadius: '8px', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748B' }}>
+                            <X size={20} />
+                          </button>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                          {[
+                            { label: 'Home', ref: heroRef },
+                            { label: 'Shop All Products', ref: productsRef },
+                            { label: 'Browse Categories', ref: categoriesRef },
+                            { label: 'Best Sellers', ref: bestSellersRef },
+                            { label: '🚚 Track Order Status', action: () => { setMobileMenuOpen(false); setTrackingModalOpen(true); } },
+                            { label: 'Contact Seller', ref: footerRef },
+                          ].map((link, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => (link.action ? link.action() : scrollTo(link.ref))}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                textAlign: 'left',
+                                fontSize: '1rem',
+                                fontWeight: 700,
+                                color: theme.primary,
+                                cursor: 'pointer',
+                                padding: '0.35rem 0',
+                              }}
+                            >
+                              {link.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                      <button onClick={() => setMobileMenuOpen(false)} style={{ background: '#F8FAFC', border: 'none', borderRadius: '8px', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748B' }}>
-                        <X size={20} />
-                      </button>
-                    </div>
-                    <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                      <X size={24} />
-                    </button>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      {[
-                        { label: 'Home', ref: heroRef },
-                        { label: 'Shop All Products', ref: productsRef },
-                        { label: 'Browse Categories', ref: categoriesRef },
-                        { label: 'Best Sellers', ref: bestSellersRef },
-                        { label: '🚚 Track Order Status', action: () => { setMobileMenuOpen(false); setTrackingModalOpen(true); } },
-                        { label: 'Contact Seller', ref: footerRef },
-                      ].map((link, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => (link.action ? link.action() : scrollTo(link.ref))}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            textAlign: 'left',
-                            fontSize: '1rem',
-                            fontWeight: 700,
-                            color: theme.primary,
-                            cursor: 'pointer',
-                            padding: '0.35rem 0',
-                          }}
-                        >
-                          {link.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                    {[
-                      { label: 'Home', ref: heroRef },
-                      { label: 'Shop All Products', ref: productsRef },
-                      { label: 'Browse Categories', ref: categoriesRef },
-                      { label: 'Best Sellers', ref: bestSellersRef },
-                      { label: '🚚 Track Order Status', action: () => { setMobileMenuOpen(false); setTrackingModalOpen(true); } },
-                      { label: 'Contact Seller', ref: footerRef },
-                    ].map((link, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => (link.action ? link.action() : scrollTo(link.ref))}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          textAlign: 'left',
-                          fontSize: '1.1rem',
-                          fontWeight: 700,
-                          color: theme.primary,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {link.label}
-                      </button>
-                    ))}
+                        {/* Mobile Menu Bottom Branding & Quick WhatsApp */}
+                        <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid #EFEAEB', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                          <a
+                            href={`https://wa.me/${(storeSettings.whatsapp || '+923065779097').replace(/[^0-9]/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.5rem',
+                              backgroundColor: '#16A34A',
+                              color: '#ffffff',
+                              padding: '0.65rem 1rem',
+                              borderRadius: '10px',
+                              fontWeight: 700,
+                              fontSize: '0.85rem',
+                              textDecoration: 'none',
+                              boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)',
+                            }}
+                          >
+                            <MessageCircle size={16} />
+                            <span>WhatsApp Helpline</span>
+                          </a>
 
-                    {/* Mobile Menu Bottom Branding & Quick WhatsApp */}
-                    <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid #EFEAEB', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <a
-                        href={`https://wa.me/${(storeSettings.whatsapp || '+923065779097').replace(/[^0-9]/g, '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.5rem',
-                          backgroundColor: '#16A34A',
-                          color: '#ffffff',
-                          padding: '0.65rem 1rem',
-                          borderRadius: '10px',
-                          fontWeight: 700,
-                          fontSize: '0.85rem',
-                          textDecoration: 'none',
-                          boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)',
-                        }}
-                      >
-                        <MessageCircle size={16} />
-                        <span>WhatsApp Helpline</span>
-                      </a>
-
-                      <div style={{ fontSize: '0.72rem', color: '#8A8588', textAlign: 'center', lineHeight: 1.4 }}>
-                        🚚 100% Cash on Delivery<br />📦 Open Parcel Delivery Across Pakistan
-                      </div>
+                    <div style={{ fontSize: '0.72rem', color: '#8A8588', textAlign: 'center', lineHeight: 1.4 }}>
+                      🚚 100% Cash on Delivery<br />📦 Open Parcel Delivery Across Pakistan
                     </div>
                   </div>
                 </div>
+              </div>
       )}
 
-                {/* Floating AI Stylist & Shopping Assistant */}
-                <div className="floating-ai-btn-wrap" style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 99 }}>
-                  <button
-                    onClick={() => setAiModalOpen(true)}
-                    style={{
-                      backgroundColor: theme.primary,
-                      color: '#ffffff',
-                      border: 'none',
-                      padding: '0.85rem 1.4rem',
-                      borderRadius: '999px',
-                      fontSize: '0.88rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      boxShadow: '0 8px 24px rgba(109, 14, 59, 0.35)',
-                    }}
-                  >
-                    <Sparkles size={18} />
-                    <span>AI Shop Assistant</span>
-                  </button>
-                </div>
-
-                {/* Customer Mobile Bottom Navigation Bar (Fixed for Mobile Screens) */}
-                <nav className="mobile-bottom-nav" aria-label="Mobile Bottom Navigation">
-                  <button
-                    type="button"
-                    className="mobile-bottom-tab"
-                    onClick={() => scrollTo(heroRef)}
-                  >
-                    <Home size={20} />
-                    <span>Home</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="mobile-bottom-tab"
-                    onClick={() => scrollTo(categoriesRef)}
-                  >
-                    <LayoutGrid size={20} />
-                    <span>Categories</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="mobile-bottom-tab"
-                    onClick={() => scrollTo(productsRef)}
-                  >
-                    <Package size={20} />
-                    <span>Shop</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="mobile-bottom-tab"
-                    onClick={() => setTrackingModalOpen(true)}
-                  >
-                    <Truck size={20} />
-                    <span>Track</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="mobile-bottom-tab"
-                    onClick={() => {
-                      setCartDrawerOpen(true);
-                      setCheckoutStep('cart');
-                    }}
-                  >
-                    <ShoppingBag size={20} />
-                    <span>Bag</span>
-                    {cartItems.length > 0 && (
-                      <span className="mobile-bottom-badge">{cartItems.length}</span>
-                    )}
-                  </button>
-                </nav>
-
-                {aiModalOpen && <AiAssistantModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)} />}
+              {/* Floating AI Stylist & Shopping Assistant */}
+              <div className="floating-ai-btn-wrap" style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 99 }}>
+                <button
+                  onClick={() => setAiModalOpen(true)}
+                  style={{
+                    backgroundColor: theme.primary,
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '0.85rem 1.4rem',
+                    borderRadius: '999px',
+                    fontSize: '0.88rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    boxShadow: '0 8px 24px rgba(109, 14, 59, 0.35)',
+                  }}
+                >
+                  <Sparkles size={18} />
+                  <span>AI Shop Assistant</span>
+                </button>
               </div>
-              );
+
+              {/* Customer Mobile Bottom Navigation Bar (Fixed for Mobile Screens) */}
+              <nav className="mobile-bottom-nav" aria-label="Mobile Bottom Navigation">
+                <button
+                  type="button"
+                  className="mobile-bottom-tab"
+                  onClick={() => scrollTo(heroRef)}
+                >
+                  <Home size={20} />
+                  <span>Home</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="mobile-bottom-tab"
+                  onClick={() => scrollTo(categoriesRef)}
+                >
+                  <LayoutGrid size={20} />
+                  <span>Categories</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="mobile-bottom-tab"
+                  onClick={() => scrollTo(productsRef)}
+                >
+                  <Package size={20} />
+                  <span>Shop</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="mobile-bottom-tab"
+                  onClick={() => setTrackingModalOpen(true)}
+                >
+                  <Truck size={20} />
+                  <span>Track</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="mobile-bottom-tab"
+                  onClick={() => {
+                    setCartDrawerOpen(true);
+                    setCheckoutStep('cart');
+                  }}
+                >
+                  <ShoppingBag size={20} />
+                  <span>Bag</span>
+                  {cartItems.length > 0 && (
+                    <span className="mobile-bottom-badge">{cartItems.length}</span>
+                  )}
+                </button>
+              </nav>
+
+              {aiModalOpen && <AiAssistantModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)} />}
+            </div>
+            );
 }
