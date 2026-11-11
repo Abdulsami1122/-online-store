@@ -165,9 +165,10 @@ export default function SellerDashboardPage() {
 
       {/* 4 Professional Metric Stat Cards */}
       <div
+        className="dashboard-metrics-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '1.25rem',
         }}
       >
@@ -372,7 +373,7 @@ export default function SellerDashboardPage() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
           gap: '1.5rem',
         }}
       >

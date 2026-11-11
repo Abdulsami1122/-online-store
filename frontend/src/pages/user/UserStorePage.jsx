@@ -34,6 +34,8 @@ import {
   Upload,
   Image as ImageIcon,
   CreditCard,
+  Home,
+  LayoutGrid,
 } from 'lucide-react';
 import { fetchProducts } from '../../api/productApi';
 import { createOrder, trackOrder } from '../../api/orderApi';
@@ -715,7 +717,7 @@ export default function UserStorePage({
         display: 'flex',
         flexDirection: 'column',
       }}
-      className="font-sans"
+      className="font-sans storefront-bottom-padding"
     >
       {/* ================================================================= */}
       {/* 1. TOP ADVERTISEMENT MARQUEE CAROUSEL (Text flows from right)     */}
@@ -1318,6 +1320,7 @@ export default function UserStorePage({
 
             {/* Dynamic Category Cards Grid */}
             <div
+              className="category-grid-responsive"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
@@ -4393,7 +4396,7 @@ export default function UserStorePage({
       )}
 
       {/* Floating AI Stylist & Shopping Assistant */}
-      <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 99 }}>
+      <div className="floating-ai-btn-wrap" style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 99 }}>
         <button
           onClick={() => setAiModalOpen(true)}
           style={{
@@ -4416,7 +4419,59 @@ export default function UserStorePage({
         </button>
       </div>
 
+      {/* Customer Mobile Bottom Navigation Bar (Fixed for Mobile Screens) */}
+      <nav className="mobile-bottom-nav" aria-label="Mobile Bottom Navigation">
+        <button
+          type="button"
+          className="mobile-bottom-tab"
+          onClick={() => scrollTo(heroRef)}
+        >
+          <Home size={20} />
+          <span>Home</span>
+        </button>
 
+        <button
+          type="button"
+          className="mobile-bottom-tab"
+          onClick={() => scrollTo(categoriesRef)}
+        >
+          <LayoutGrid size={20} />
+          <span>Categories</span>
+        </button>
+
+        <button
+          type="button"
+          className="mobile-bottom-tab"
+          onClick={() => scrollTo(productsRef)}
+        >
+          <Package size={20} />
+          <span>Shop</span>
+        </button>
+
+        <button
+          type="button"
+          className="mobile-bottom-tab"
+          onClick={() => setTrackingModalOpen(true)}
+        >
+          <Truck size={20} />
+          <span>Track</span>
+        </button>
+
+        <button
+          type="button"
+          className="mobile-bottom-tab"
+          onClick={() => {
+            setCartDrawerOpen(true);
+            setCheckoutStep('cart');
+          }}
+        >
+          <ShoppingBag size={20} />
+          <span>Bag</span>
+          {cartItems.length > 0 && (
+            <span className="mobile-bottom-badge">{cartItems.length}</span>
+          )}
+        </button>
+      </nav>
 
       {aiModalOpen && <AiAssistantModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)} />}
     </div>

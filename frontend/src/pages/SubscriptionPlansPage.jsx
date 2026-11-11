@@ -1182,6 +1182,7 @@ export default function AdminSettingsPage() {
 
         {/* Sticky Save Bar */}
         <div
+          className="admin-sticky-publish-bar"
           style={{
             position: 'sticky',
             bottom: '16px',

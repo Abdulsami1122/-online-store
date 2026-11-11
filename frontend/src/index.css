@@ -493,23 +493,36 @@ input, select, textarea {
     text-align: center;
   }
   .arch-frame {
-    max-width: 320px;
+    max-width: 290px;
     margin: 0 auto;
     border-radius: 120px 120px 24px 24px;
   }
   .grid-responsive-4 {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.75rem !important;
+    gap: 0.65rem !important;
   }
   .grid-responsive-5 {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.75rem !important;
+    gap: 0.65rem !important;
+  }
+  .category-grid-responsive {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.65rem !important;
   }
 }
 
 @media (max-width: 480px) {
   .grid-responsive-4 {
-    grid-template-columns: repeat(1, 1fr) !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+  .grid-responsive-5 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+  .category-grid-responsive {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
   }
 }
 
@@ -748,5 +761,244 @@ input, select, textarea {
   }
   .advertisement-ticker-track {
     animation: none !important;
+  }
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS SUITE (User Storefront & Admin Portal)
+   ========================================================================== */
+
+/* 1. Admin Layout & Mobile Sidebar Drawer */
+.admin-sidebar-desktop {
+  width: 240px;
+  min-height: 100vh;
+  background-color: #ffffff;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem 1rem;
+  position: sticky;
+  top: 0;
+  flex-shrink: 0;
+}
+
+.admin-hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background-color: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-hamburger-btn:hover {
+  background-color: #e2e8f0;
+}
+
+.admin-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1200;
+  animation: fadeIn 0.2s ease;
+}
+
+.admin-sidebar-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 275px;
+  max-width: 85vw;
+  background-color: #ffffff;
+  z-index: 1201;
+  box-shadow: 10px 0 35px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.25rem 1rem;
+  animation: slideInLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 1024px) {
+  .admin-sidebar-desktop {
+    display: none !important;
+  }
+  .admin-hamburger-btn {
+    display: inline-flex !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-header-responsive {
+    padding: 0 1rem !important;
+    height: 60px !important;
+  }
+  .admin-header-title {
+    font-size: 0.82rem !important;
+  }
+  .admin-main-content {
+    padding: 1rem 0.85rem !important;
+  }
+  .admin-quick-store-btn span {
+    display: none !important;
+  }
+  .admin-quick-store-btn {
+    padding: 0.5rem 0.75rem !important;
+  }
+  .admin-user-info-text {
+    display: none !important;
+  }
+}
+
+/* 2. Customer Mobile Bottom Navigation Bar */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 62px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.07);
+  z-index: 950;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 0.5rem;
+  padding-bottom: max(0.2rem, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex !important;
+  }
+  .storefront-bottom-padding {
+    padding-bottom: 74px !important;
+  }
+  .floating-ai-btn-wrap {
+    bottom: 74px !important;
+    right: 12px !important;
+  }
+  .floating-ai-btn-wrap button {
+    padding: 0.65rem 1.05rem !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+.mobile-bottom-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  background: none;
+  border: none;
+  color: #64748B;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  flex: 1;
+  max-width: 75px;
+}
+
+.mobile-bottom-tab:active {
+  transform: scale(0.92);
+}
+
+.mobile-bottom-tab.active {
+  color: #6D0E3B;
+  font-weight: 700;
+}
+
+.mobile-bottom-badge {
+  position: absolute;
+  top: 2px;
+  right: 14px;
+  background-color: #DC2626;
+  color: #ffffff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+}
+
+/* 3. Mobile Drawers and Modals Overrides */
+@media (max-width: 640px) {
+  .drawer-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .modal-overlay {
+    padding: 0.5rem !important;
+  }
+  .modal-content {
+    max-width: 100% !important;
+    max-height: 94vh !important;
+    border-radius: 20px !important;
+    padding: 1.25rem 1rem !important;
+  }
+  .card {
+    padding: 1.15rem !important;
+    border-radius: 14px !important;
+  }
+  .dashboard-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.65rem !important;
+  }
+  .admin-sticky-publish-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    padding: 0.85rem 1rem !important;
+    bottom: 8px !important;
+  }
+  .admin-sticky-publish-bar button {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.92rem !important;
+  }
+}
+
+/* 4. Touch optimizations for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .card-3d:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+  .category-card:hover {
+    transform: none !important;
+  }
+  .luxury-product-card:hover {
+    transform: none !important;
   }
 }

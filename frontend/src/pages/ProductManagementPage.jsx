@@ -163,6 +163,8 @@ export default function ProductManagementPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '1rem',
           marginBottom: '2rem',
         }}
       >
@@ -289,6 +291,7 @@ export default function ProductManagementPage() {
       {/* Add / Edit Product Modal */}
       {modalOpen && (
         <div
+          className="modal-overlay"
           style={{
             position: 'fixed',
             inset: 0,
@@ -298,11 +301,11 @@ export default function ProductManagementPage() {
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 1000,
-            padding: '1.5rem',
+            padding: '1rem',
           }}
         >
           <div
-            className="card"
+            className="card modal-content"
             style={{
               width: '100%',
               maxWidth: '520px',

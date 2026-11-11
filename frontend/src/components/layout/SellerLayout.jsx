@@ -1,20 +1,37 @@
+import { useState } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import SellerSidebar from './SellerSidebar';
 import { useAuth } from '../../context/AuthContext';
-import { ShoppingBag, Eye, ShieldCheck } from 'lucide-react';
+import { ShoppingBag, Menu } from 'lucide-react';
 
 export default function SellerLayout() {
   const { user } = useAuth();
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-app)' }}>
-      {/* Admin Sidebar */}
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-app)', position: 'relative' }}>
+      {/* Desktop Admin Sidebar */}
       <SellerSidebar />
+
+      {/* Mobile Admin Sidebar Drawer */}
+      {mobileSidebarOpen && (
+        <>
+          <div
+            className="admin-sidebar-backdrop"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+          <SellerSidebar
+            isMobile={true}
+            onClose={() => setMobileSidebarOpen(false)}
+          />
+        </>
+      )}
 
       {/* Main Content Pane */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {/* Top Header Bar */}
         <header
+          className="admin-header-responsive"
           style={{
             height: '68px',
             backgroundColor: '#ffffff',
@@ -29,7 +46,17 @@ export default function SellerLayout() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
+            {/* Hamburger Button for Mobile / Tablet */}
+            <button
+              type="button"
+              className="admin-hamburger-btn"
+              onClick={() => setMobileSidebarOpen(true)}
+              aria-label="Toggle navigation menu"
+            >
+              <Menu size={20} />
+            </button>
+
+            <span className="admin-header-title" style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
               Store Management Portal
             </span>
             <span
@@ -40,6 +67,8 @@ export default function SellerLayout() {
                 fontWeight: 700,
                 padding: '0.15rem 0.5rem',
                 borderRadius: '999px',
+                display: 'inline-flex',
+                alignItems: 'center',
               }}
             >
               Active
@@ -50,7 +79,7 @@ export default function SellerLayout() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <Link
               to="/"
-              className="btn btn-sm"
+              className="btn btn-sm admin-quick-store-btn"
               style={{
                 gap: '0.45rem',
                 fontWeight: 700,
@@ -69,7 +98,7 @@ export default function SellerLayout() {
             </Link>
 
             {/* Admin Avatar */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginLeft: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginLeft: '0.25rem' }}>
               <img
                 src={user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=60'}
                 alt="Admin Avatar"
@@ -81,7 +110,7 @@ export default function SellerLayout() {
                   border: '2px solid #e2e8f0',
                 }}
               />
-              <div style={{ fontSize: '0.85rem' }}>
+              <div className="admin-user-info-text" style={{ fontSize: '0.85rem' }}>
                 <p style={{ fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.1 }}>
                   {user?.name || 'Store Administrator'}
                 </p>
@@ -92,7 +121,7 @@ export default function SellerLayout() {
         </header>
 
         {/* Page Body */}
-        <main style={{ flex: 1, padding: '2rem' }}>
+        <main className="admin-main-content" style={{ flex: 1, padding: '2rem' }}>
           <Outlet />
         </main>
       </div>
