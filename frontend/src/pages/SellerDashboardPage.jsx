@@ -128,14 +128,14 @@ export default function SellerDashboardPage() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.45rem',
-              backgroundColor: '#6D0E3B',
-              borderColor: '#6D0E3B',
+              backgroundColor: '#5C3A21',
+              borderColor: '#5C3A21',
               fontWeight: 700,
               fontSize: '0.86rem',
               padding: '0.6rem 1.1rem',
               borderRadius: '8px',
               textDecoration: 'none',
-              boxShadow: '0 4px 12px rgba(109, 14, 59, 0.2)',
+              boxShadow: '0 4px 12px rgba(92, 58, 33, 0.2)',
             }}
           >
             <Plus size={16} /> <span>Add New Product</span>
@@ -158,7 +158,7 @@ export default function SellerDashboardPage() {
               textDecoration: 'none',
             }}
           >
-            <ShoppingBag size={16} color="#6D0E3B" /> <span>Verify Orders</span>
+            <ShoppingBag size={16} color="#5C3A21" /> <span>Verify Orders</span>
           </Link>
         </div>
       </div>
@@ -196,7 +196,7 @@ export default function SellerDashboardPage() {
                 height: '42px',
                 borderRadius: '10px',
                 backgroundColor: '#FCF2F6',
-                color: '#6D0E3B',
+                color: '#5C3A21',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -354,7 +354,7 @@ export default function SellerDashboardPage() {
               to="/admin/products"
               style={{
                 fontSize: '0.78rem',
-                color: '#6D0E3B',
+                color: '#5C3A21',
                 fontWeight: 600,
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -399,7 +399,7 @@ export default function SellerDashboardPage() {
             <span
               style={{
                 fontSize: '0.78rem',
-                color: '#6D0E3B',
+                color: '#5C3A21',
                 backgroundColor: '#FCF2F6',
                 padding: '0.25rem 0.65rem',
                 borderRadius: '6px',
@@ -415,8 +415,8 @@ export default function SellerDashboardPage() {
             <svg viewBox="0 0 500 200" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
               <defs>
                 <linearGradient id="chartGradientLuxury" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#6D0E3B" stopOpacity="0.28" />
-                  <stop offset="100%" stopColor="#6D0E3B" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor="#5C3A21" stopOpacity="0.28" />
+                  <stop offset="100%" stopColor="#5C3A21" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
 
@@ -435,19 +435,19 @@ export default function SellerDashboardPage() {
               <path
                 d="M 20 130 Q 90 80, 160 120 T 300 70 T 420 40 L 480 50"
                 fill="none"
-                stroke="#6D0E3B"
+                stroke="#5C3A21"
                 strokeWidth="3.5"
                 strokeLinecap="round"
               />
 
               {/* Data points */}
-              <circle cx="20" cy="130" r="4.5" fill="#FFFFFF" stroke="#6D0E3B" strokeWidth="2.5" />
-              <circle cx="95" cy="85" r="4.5" fill="#FFFFFF" stroke="#6D0E3B" strokeWidth="2.5" />
-              <circle cx="170" cy="115" r="4.5" fill="#FFFFFF" stroke="#6D0E3B" strokeWidth="2.5" />
-              <circle cx="245" cy="95" r="4.5" fill="#FFFFFF" stroke="#6D0E3B" strokeWidth="2.5" />
-              <circle cx="320" cy="65" r="4.5" fill="#FFFFFF" stroke="#6D0E3B" strokeWidth="2.5" />
-              <circle cx="400" cy="45" r="4.5" fill="#FFFFFF" stroke="#6D0E3B" strokeWidth="2.5" />
-              <circle cx="480" cy="50" r="5.5" fill="#6D0E3B" stroke="#FFFFFF" strokeWidth="2" />
+              <circle cx="20" cy="130" r="4.5" fill="#FFFFFF" stroke="#5C3A21" strokeWidth="2.5" />
+              <circle cx="95" cy="85" r="4.5" fill="#FFFFFF" stroke="#5C3A21" strokeWidth="2.5" />
+              <circle cx="170" cy="115" r="4.5" fill="#FFFFFF" stroke="#5C3A21" strokeWidth="2.5" />
+              <circle cx="245" cy="95" r="4.5" fill="#FFFFFF" stroke="#5C3A21" strokeWidth="2.5" />
+              <circle cx="320" cy="65" r="4.5" fill="#FFFFFF" stroke="#5C3A21" strokeWidth="2.5" />
+              <circle cx="400" cy="45" r="4.5" fill="#FFFFFF" stroke="#5C3A21" strokeWidth="2.5" />
+              <circle cx="480" cy="50" r="5.5" fill="#5C3A21" stroke="#FFFFFF" strokeWidth="2" />
             </svg>
 
             {/* X Axis Labels */}
@@ -506,13 +506,13 @@ export default function SellerDashboardPage() {
                   border: '1px solid #F3D2DF',
                   borderRadius: '12px',
                   textDecoration: 'none',
-                  color: '#260618',
+                  color: '#2C1810',
                   transition: 'transform 0.15s ease',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <ShoppingBag size={20} color="#6D0E3B" />
-                  <ArrowRight size={14} color="#6D0E3B" />
+                  <ShoppingBag size={20} color="#5C3A21" />
+                  <ArrowRight size={14} color="#5C3A21" />
                 </div>
                 <strong style={{ fontSize: '0.92rem', marginTop: '0.2rem' }}>Orders (COD)</strong>
                 <span style={{ fontSize: '0.75rem', color: '#7E757A' }}>Verify & Complete</span>
@@ -641,7 +641,7 @@ export default function SellerDashboardPage() {
             to="/admin/orders"
             style={{
               fontSize: '0.86rem',
-              color: '#6D0E3B',
+              color: '#5C3A21',
               fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
@@ -705,7 +705,7 @@ export default function SellerDashboardPage() {
                           style={{
                             fontSize: '0.78rem',
                             padding: '0.35rem 0.75rem',
-                            color: '#6D0E3B',
+                            color: '#5C3A21',
                             backgroundColor: '#FCF2F6',
                             borderColor: '#F3D2DF',
                             fontWeight: 700,

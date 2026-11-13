@@ -181,15 +181,15 @@ export default function ProductManagementPage() {
           onClick={handleOpenAdd}
           className="btn btn-primary"
           style={{
-            backgroundColor: '#6D0E3B',
-            borderColor: '#6D0E3B',
+            backgroundColor: '#5C3A21',
+            borderColor: '#5C3A21',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.45rem',
             padding: '0.65rem 1.15rem',
             fontWeight: 700,
             borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(109, 14, 59, 0.2)',
+            boxShadow: '0 4px 12px rgba(92, 58, 33, 0.2)',
           }}
         >
           <Plus size={18} /> Add Product
@@ -425,15 +425,15 @@ export default function ProductManagementPage() {
                         height: '74px',
                         borderRadius: '8px',
                         objectFit: 'cover',
-                        border: '1px solid #EFEAEB',
+                        border: '1px solid #EFE7DC',
                         backgroundColor: '#ffffff',
                       }}
                     />
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#260618', marginBottom: '0.2rem' }}>
+                      <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#2C1810', marginBottom: '0.2rem' }}>
                         Image Loaded from Gallery
                       </div>
-                      <span style={{ fontSize: '0.75rem', color: '#7E757A', display: 'block', marginBottom: '0.5rem' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#8C7D73', display: 'block', marginBottom: '0.5rem' }}>
                         {uploadingImage ? 'Processing & uploading image...' : 'Ready to save with product'}
                       </span>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -445,9 +445,9 @@ export default function ProductManagementPage() {
                             fontSize: '0.78rem',
                             fontWeight: 600,
                             borderRadius: '6px',
-                            border: '1px solid #DCD5D8',
+                            border: '1px solid #E8DEC8',
                             backgroundColor: '#ffffff',
-                            color: '#332E38',
+                            color: '#2C1810',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -484,21 +484,21 @@ export default function ProductManagementPage() {
                   <div
                     onClick={() => fileInputRef.current?.click()}
                     style={{
-                      border: '2px dashed #D5CCD0',
+                      border: '2px dashed #E8DEC8',
                       borderRadius: '12px',
                       padding: '1.6rem 1rem',
                       textAlign: 'center',
-                      backgroundColor: '#FAF5F7',
+                      backgroundColor: '#FAF7F2',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#6D0E3B';
-                      e.currentTarget.style.backgroundColor = '#FDF2F5';
+                      e.currentTarget.style.borderColor = '#5C3A21';
+                      e.currentTarget.style.backgroundColor = '#F5EBE0';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#D5CCD0';
-                      e.currentTarget.style.backgroundColor = '#FAF5F7';
+                      e.currentTarget.style.borderColor = '#E8DEC8';
+                      e.currentTarget.style.backgroundColor = '#FAF7F2';
                     }}
                   >
                     <div
@@ -511,16 +511,16 @@ export default function ProductManagementPage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         margin: '0 auto 0.65rem',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                        color: '#6D0E3B',
+                        boxShadow: '0 2px 8px rgba(44, 24, 16, 0.06)',
+                        color: '#5C3A21',
                       }}
                     >
                       <Upload size={20} />
                     </div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#260618', marginBottom: '0.2rem' }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#2C1810', marginBottom: '0.2rem' }}>
                       Click to Select Image from Gallery
                     </div>
-                    <div style={{ fontSize: '0.76rem', color: '#7E757A' }}>
+                    <div style={{ fontSize: '0.76rem', color: '#8C7D73' }}>
                       Supports PNG, JPG, JPEG, WEBP from your phone or PC
                     </div>
                   </div>
@@ -556,12 +556,12 @@ export default function ProductManagementPage() {
                   disabled={saving}
                   className="btn btn-primary"
                   style={{
-                    backgroundColor: '#6D0E3B',
-                    borderColor: '#6D0E3B',
+                    backgroundColor: '#5C3A21',
+                    borderColor: '#5C3A21',
                     fontWeight: 700,
                     padding: '0.65rem 1.25rem',
                     borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(109, 14, 59, 0.25)',
+                    boxShadow: '0 4px 12px rgba(92, 58, 33, 0.25)',
                   }}
                 >
                   {saving ? 'Saving...' : editingProduct ? 'Save Changes' : 'Add Product'}

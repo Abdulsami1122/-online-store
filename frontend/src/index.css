@@ -2,25 +2,25 @@
   --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-heading: 'Outfit', var(--font-family);
 
-  /* Color Palette - Matching AI Order Assistant Design Mockup */
-  --bg-app: #f8fafc;
-  --bg-sidebar: #ffffff;
-  --bg-card: #ffffff;
-  --bg-card-hover: #fcfdfe;
-  --bg-input: #f8fafc;
+  /* Color Palette - Luxury Artisan Mocha Brown & Velvet Cream */
+  --bg-app: #FAF7F2;
+  --bg-sidebar: #FFFFFF;
+  --bg-card: #FDFBF7;
+  --bg-card-hover: #F5EBE0;
+  --bg-input: #F7F4EE;
 
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --primary-light: #eef2ff;
-  --primary-glow: rgba(79, 70, 229, 0.2);
+  --primary: #5C3A21;
+  --primary-hover: #432612;
+  --primary-light: #F5EBE0;
+  --primary-glow: rgba(92, 58, 33, 0.2);
 
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
-  --text-light: #94a3b8;
+  --text-primary: #2C1810;
+  --text-secondary: #6B5D55;
+  --text-muted: #8C7D73;
+  --text-light: #A39489;
 
-  --border-color: #e2e8f0;
-  --border-light: #f1f5f9;
+  --border-color: #E8DEC8;
+  --border-light: #F2EAE0;
 
   /* Status Colors from Mockup */
   --status-new-bg: #fffbeb;
@@ -58,12 +58,46 @@
   padding: 0;
 }
 
+html,
+body {
+  overflow-x: clip;
+}
+
 body {
   font-family: var(--font-family);
   background-color: var(--bg-app);
   color: var(--text-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Storefront Sticky Header - Always visible on scroll down and scroll up */
+.store-sticky-header {
+  position: -webkit-sticky !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 900 !important;
+  transition: background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.9);
+  }
+}
+
+.hero-video-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-video-section video {
+  pointer-events: none;
 }
 
 h1,
@@ -323,11 +357,11 @@ textarea {
 
 /* Smooth luxury shadows */
 .shadow-luxury {
-  box-shadow: 0 10px 35px -5px rgba(109, 14, 59, 0.08), 0 4px 12px -2px rgba(109, 14, 59, 0.04);
+  box-shadow: 0 10px 35px -5px rgba(92, 58, 33, 0.08), 0 4px 12px -2px rgba(92, 58, 33, 0.04);
 }
 
 .shadow-luxury-hover:hover {
-  box-shadow: 0 20px 45px -8px rgba(109, 14, 59, 0.14), 0 8px 18px -4px rgba(109, 14, 59, 0.06);
+  box-shadow: 0 20px 45px -8px rgba(92, 58, 33, 0.14), 0 8px 18px -4px rgba(92, 58, 33, 0.06);
   transform: translateY(-4px);
 }
 
@@ -361,7 +395,7 @@ textarea {
 
   50% {
     opacity: 1;
-    filter: drop-shadow(0 0 12px rgba(163, 31, 89, 0.4));
+    filter: drop-shadow(0 0 12px rgba(197, 143, 88, 0.4));
   }
 }
 
@@ -372,13 +406,13 @@ textarea {
 /* Category Card Styling */
 .category-card {
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  border: 1px solid rgba(109, 14, 59, 0.08);
+  border: 1px solid rgba(92, 58, 33, 0.08);
 }
 
 .category-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(109, 14, 59, 0.25);
-  box-shadow: 0 14px 30px -6px rgba(109, 14, 59, 0.12);
+  border-color: rgba(92, 58, 33, 0.25);
+  box-shadow: 0 14px 30px -6px rgba(92, 58, 33, 0.12);
 }
 
 .category-card:hover .cat-img {
@@ -393,8 +427,8 @@ textarea {
 
 .luxury-product-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(109, 14, 59, 0.18);
-  box-shadow: 0 18px 40px -8px rgba(109, 14, 59, 0.12);
+  border-color: rgba(92, 58, 33, 0.18);
+  box-shadow: 0 18px 40px -8px rgba(92, 58, 33, 0.12);
 }
 
 .luxury-product-card .product-img {
@@ -411,7 +445,7 @@ textarea {
 
 .product-card-image-wrap {
   height: 270px;
-  background-color: #F8F3F5;
+  background-color: #F5EBE0;
   position: relative;
   overflow: hidden;
   cursor: pointer;
@@ -427,7 +461,7 @@ textarea {
 
 .product-card-category {
   font-size: 0.75rem;
-  color: #8A8287;
+  color: #8C7D73;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.35rem;
@@ -436,7 +470,7 @@ textarea {
 .product-card-title {
   font-size: 1.05rem;
   font-weight: 600;
-  color: #260618;
+  color: #2C1810;
   margin-bottom: 0.45rem;
   line-height: 1.3;
 }
@@ -459,11 +493,12 @@ textarea {
 .product-card-price {
   font-size: 1.2rem;
   font-weight: 700;
+  color: var(--primary, #5C3A21);
 }
 
 .product-card-original-price {
   font-size: 0.85rem;
-  color: #A89FA4;
+  color: #A39489;
   text-decoration: line-through;
   margin-left: 0.5rem;
 }
@@ -522,7 +557,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(44, 24, 16, 0.1);
   cursor: pointer;
   transition: transform 0.2s ease;
 }
@@ -532,10 +567,10 @@ textarea {
   bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgba(255, 255, 255, 0.94);
+  background-color: rgba(253, 251, 247, 0.94);
   backdrop-filter: blur(4px);
-  color: #260618;
-  border: none;
+  color: #2C1810;
+  border: 1px solid #EFE7DC;
   padding: 0.35rem 0.85rem;
   border-radius: 999px;
   font-size: 0.78rem;
@@ -543,7 +578,7 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(44, 24, 16, 0.12);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -561,7 +596,8 @@ textarea {
 
 /* Category Cards */
 .category-card {
-  background-color: #FCF9FA;
+  background-color: #FDFBF7;
+  border: 1px solid #EFE7DC;
   border-radius: 16px;
   padding: 1.4rem 1rem;
   text-align: center;
@@ -578,20 +614,21 @@ textarea {
   border-radius: 50%;
   overflow: hidden;
   margin-bottom: 1rem;
-  background-color: #EDE3E7;
+  background-color: #EFE4D6;
+  border: 2px solid #E8DEC8;
   flex-shrink: 0;
 }
 
 .category-card-title {
   font-size: 1.05rem;
   font-weight: 600;
-  color: #260618;
+  color: #2C1810;
   margin-bottom: 0.2rem;
 }
 
 .category-card-subtitle {
   font-size: 0.78rem;
-  color: #8F868C;
+  color: #8C7D73;
   margin-bottom: 0.5rem;
   display: block;
 }
@@ -599,6 +636,7 @@ textarea {
 .category-card-link {
   font-size: 0.8rem;
   font-weight: 600;
+  color: var(--primary, #5C3A21);
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -608,15 +646,17 @@ textarea {
 .trust-section-box {
   border-radius: 24px;
   padding: 3.5rem 2.5rem;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  border: 1px solid #EFE7DC;
+  background-color: #F5EBE0;
 }
 
 .trust-card {
   background-color: #FFFFFF;
   border-radius: 16px;
+  border: 1px solid #EFE7DC;
   padding: 1.75rem 1.25rem;
   text-align: center;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+  box-shadow: 0 4px 16px rgba(44, 24, 16, 0.04);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -644,8 +684,8 @@ textarea {
   background-color: #FFFFFF;
   border-radius: 20px;
   padding: 2rem 1.75rem;
-  border: 1px solid rgba(109, 14, 59, 0.08);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.03);
+  border: 1px solid rgba(92, 58, 33, 0.12);
+  box-shadow: 0 8px 24px rgba(44, 24, 16, 0.04);
   display: flex;
   flex-direction: column;
 }
@@ -662,7 +702,7 @@ textarea {
 .arch-frame {
   border-radius: 200px 200px 32px 32px;
   overflow: hidden;
-  box-shadow: 0 25px 60px -15px rgba(109, 14, 59, 0.2);
+  box-shadow: 0 25px 60px -15px rgba(92, 58, 33, 0.22);
   border: 4px solid #ffffff;
 }
 
@@ -670,7 +710,7 @@ textarea {
 .drawer-backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(20, 5, 12, 0.55);
+  background-color: rgba(35, 20, 12, 0.55);
   backdrop-filter: blur(5px);
   z-index: 1000;
   transition: opacity 0.3s ease;
@@ -709,7 +749,7 @@ textarea {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(15, 3, 9, 0.6);
+  background-color: rgba(30, 16, 10, 0.65);
   backdrop-filter: blur(6px);
   z-index: 1050;
   display: flex;
@@ -722,14 +762,14 @@ textarea {
 }
 
 .modal-content {
-  background: #ffffff;
+  background: #FFFFFF;
   border-radius: 24px;
   max-width: 650px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   overscroll-behavior: contain;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 25px 60px rgba(44, 24, 16, 0.25);
   animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   touch-action: auto;
 }
@@ -758,12 +798,17 @@ textarea {
 
 /* Subtle botanical pattern overlay */
 .bg-botanical {
-  background-image: radial-gradient(rgba(109, 14, 59, 0.035) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image: none;
 }
 
-/* Responsive Utilities */
+/* ==========================================================================
+   ANDROID APP STYLE MOBILE RESPONSIVENESS SUITE (Every Card Like an App)
+   ========================================================================== */
 @media (max-width: 768px) {
+  body {
+    background-color: #FAF7F2;
+  }
+
   .desktop-nav-icon {
     display: none !important;
   }
@@ -779,46 +824,111 @@ textarea {
     border-radius: 120px 120px 24px 24px;
   }
 
-  .grid-responsive-4 {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.65rem !important;
-  }
-
-  .grid-responsive-5 {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.65rem !important;
-  }
-
+  /* Responsive 2-Column Grid on Mobile */
+  .grid-responsive-4,
+  .grid-responsive-5,
   .category-grid-responsive {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 0.65rem !important;
   }
 
-  /* Responsive Product Cards for Mobile / Tablet */
+  /* 1. Android App Product Card */
   .luxury-product-card {
-    border-radius: 14px !important;
-    border: 1px solid #F0E8EC !important;
+    border-radius: 16px !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #EFE7DC !important;
+    box-shadow: 0 2px 8px rgba(44, 24, 16, 0.05) !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
+    position: relative !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .luxury-product-card:active {
+    transform: scale(0.98) !important;
+    box-shadow: 0 1px 4px rgba(44, 24, 16, 0.08) !important;
   }
 
   .product-card-image-wrap {
     height: 175px !important;
+    background-color: #F5EBE0 !important;
+    position: relative !important;
+  }
+
+  .product-card-image-wrap img {
+    object-fit: cover !important;
+  }
+
+  .product-card-badge {
+    top: 8px !important;
+    left: 8px !important;
+    font-size: 0.64rem !important;
+    font-weight: 800 !important;
+    padding: 0.2rem 0.55rem !important;
+    border-radius: 999px !important;
+    letter-spacing: 0.04em !important;
+    box-shadow: 0 2px 6px rgba(44, 24, 16, 0.2) !important;
+  }
+
+  .product-card-action-icons {
+    top: 8px !important;
+    right: 8px !important;
+    gap: 6px !important;
+  }
+
+  .product-card-action-icons button {
+    width: 30px !important;
+    height: 30px !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(4px) !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 6px rgba(44, 24, 16, 0.12) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .product-card-action-icons button:active {
+    transform: scale(0.9) !important;
+  }
+
+  .product-card-action-icons svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .product-card-quickview {
+    bottom: 8px !important;
+    padding: 0.26rem 0.65rem !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    border-radius: 999px !important;
+    box-shadow: 0 2px 8px rgba(44, 24, 16, 0.15) !important;
   }
 
   .product-card-body {
-    padding: 0.75rem 0.65rem !important;
+    padding: 0.75rem 0.65rem 0.85rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
   }
 
   .product-card-category {
-    font-size: 0.68rem !important;
+    font-size: 0.66rem !important;
+    font-weight: 700 !important;
+    color: #8C7D73 !important;
+    letter-spacing: 0.05em !important;
     margin-bottom: 0.2rem !important;
+    text-transform: uppercase !important;
   }
 
   .product-card-title {
-    font-size: 0.88rem !important;
+    font-size: 0.86rem !important;
     line-height: 1.25 !important;
+    font-weight: 600 !important;
+    color: #2C1810 !important;
     margin-bottom: 0.35rem !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
@@ -840,86 +950,96 @@ textarea {
 
   .product-card-rating-val {
     font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    color: #2C1810 !important;
   }
 
   .product-card-stock-tag {
     font-size: 0.65rem !important;
+    font-weight: 700 !important;
   }
 
   .product-card-price-row {
     margin-bottom: 0.6rem !important;
+    display: flex !important;
+    align-items: baseline !important;
+    flex-wrap: wrap !important;
   }
 
   .product-card-price {
     font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: var(--primary, #5C3A21) !important;
   }
 
   .product-card-original-price {
     font-size: 0.76rem !important;
+    color: #A39489 !important;
     margin-left: 0.35rem !important;
   }
 
+  /* Android App Tap Buttons */
   .product-card-cod-btn {
     padding: 0.52rem 0.45rem !important;
     font-size: 0.76rem !important;
-    border-radius: 7px !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    background-color: var(--primary, #5C3A21) !important;
+    color: #FFFFFF !important;
     white-space: nowrap !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15) !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .product-card-cod-btn:active {
+    transform: scale(0.96) !important;
+    background-color: var(--primary-hover, #432612) !important;
   }
 
   .product-card-sub-buttons {
-    gap: 0.3rem !important;
+    gap: 0.35rem !important;
   }
 
   .product-card-sub-buttons button {
-    padding: 0.42rem 0.35rem !important;
+    padding: 0.44rem 0.35rem !important;
     font-size: 0.72rem !important;
-    border-radius: 6px !important;
+    font-weight: 700 !important;
+    border-radius: 7px !important;
     white-space: nowrap !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
 
-  .product-card-action-icons {
-    top: 8px !important;
-    right: 8px !important;
-    gap: 5px !important;
+  .product-card-sub-buttons button:active {
+    transform: scale(0.95) !important;
   }
 
-  .product-card-action-icons button {
-    width: 28px !important;
-    height: 28px !important;
-  }
-
-  .product-card-action-icons svg {
-    width: 14px !important;
-    height: 14px !important;
-  }
-
-  .product-card-badge {
-    top: 8px !important;
-    left: 8px !important;
-    font-size: 0.64rem !important;
-    padding: 0.15rem 0.45rem !important;
-  }
-
-  .product-card-quickview {
-    bottom: 8px !important;
-    padding: 0.25rem 0.6rem !important;
-    font-size: 0.7rem !important;
-  }
-
-  /* Responsive Category Cards on Mobile */
+  /* 2. Android App Category Card */
   .category-card {
     padding: 0.95rem 0.5rem !important;
-    border-radius: 12px !important;
+    border-radius: 14px !important;
+    background-color: #FDFBF7 !important;
+    border: 1px solid #EFE7DC !important;
+    box-shadow: 0 2px 6px rgba(44, 24, 16, 0.04) !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .category-card:active {
+    transform: scale(0.96) !important;
   }
 
   .category-card-img-wrap {
     width: 72px !important;
     height: 72px !important;
     margin-bottom: 0.6rem !important;
+    border-radius: 50% !important;
+    background-color: #EFE4D6 !important;
+    border: 2px solid #E8DEC8 !important;
   }
 
   .category-card-title {
     font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    color: #2C1810 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -928,28 +1048,38 @@ textarea {
 
   .category-card-subtitle {
     font-size: 0.72rem !important;
+    color: #8C7D73 !important;
     margin-bottom: 0.3rem !important;
   }
 
   .category-card-link {
     font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    color: var(--primary, #5C3A21) !important;
   }
 
-  /* Responsive Trust Cards on Mobile */
+  /* 3. Android App Trust / Feature Cards */
   .trust-section-box {
     padding: 1.75rem 1rem !important;
-    border-radius: 16px !important;
+    border-radius: 18px !important;
+    background-color: #F5EBE0 !important;
+    border: 1px solid #EFE7DC !important;
   }
 
   .trust-card {
     padding: 1.15rem 0.65rem !important;
-    border-radius: 12px !important;
+    border-radius: 14px !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #EFE7DC !important;
+    box-shadow: 0 2px 6px rgba(44, 24, 16, 0.04) !important;
   }
 
   .trust-card-icon {
     width: 42px !important;
     height: 42px !important;
     margin-bottom: 0.65rem !important;
+    background-color: #F5EBE0 !important;
+    color: var(--primary, #5C3A21) !important;
   }
 
   .trust-card-icon svg {
@@ -959,15 +1089,18 @@ textarea {
 
   .trust-card h3 {
     font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    color: #2C1810 !important;
     margin-bottom: 0.25rem !important;
   }
 
   .trust-card p {
     font-size: 0.72rem !important;
     line-height: 1.35 !important;
+    color: #6B5D55 !important;
   }
 
-  /* Responsive Customer Reviews on Mobile */
+  /* 4. Android App Customer Reviews */
   .reviews-grid-responsive {
     grid-template-columns: 1fr !important;
     gap: 0.85rem !important;
@@ -975,16 +1108,20 @@ textarea {
 
   .review-card {
     padding: 1.25rem 1rem !important;
-    border-radius: 14px !important;
+    border-radius: 16px !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #EFE7DC !important;
+    box-shadow: 0 4px 14px rgba(44, 24, 16, 0.05) !important;
   }
 
   .review-card p {
     font-size: 0.88rem !important;
     line-height: 1.5 !important;
+    color: #544840 !important;
     margin-bottom: 1rem !important;
   }
 
-  /* Flash Sale Box on Mobile */
+  /* 5. Flash Sale Box on Mobile */
   .flash-sale-box {
     padding: 2rem 1.25rem !important;
     text-align: center !important;
@@ -993,16 +1130,8 @@ textarea {
 }
 
 @media (max-width: 480px) {
-  .grid-responsive-4 {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.5rem !important;
-  }
-
-  .grid-responsive-5 {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.5rem !important;
-  }
-
+  .grid-responsive-4,
+  .grid-responsive-5,
   .category-grid-responsive {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 0.5rem !important;
@@ -1013,7 +1142,7 @@ textarea {
   }
 
   .product-card-body {
-    padding: 0.6rem 0.5rem !important;
+    padding: 0.6rem 0.5rem 0.75rem !important;
   }
 
   .product-card-title {
@@ -1026,7 +1155,7 @@ textarea {
   }
 
   .product-card-cod-btn {
-    padding: 0.45rem 0.35rem !important;
+    padding: 0.46rem 0.35rem !important;
     font-size: 0.72rem !important;
   }
 
@@ -1050,7 +1179,7 @@ textarea {
   overflow: hidden;
   white-space: nowrap;
   position: relative;
-  background: linear-gradient(90deg, #56092E 0%, #6D0E3B 50%, #56092E 100%);
+  background: var(--primary, #5C3A21);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
   display: flex;
@@ -1095,10 +1224,10 @@ textarea {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: #FBBF24;
+  background-color: #D4A373;
   margin-left: 2.5rem;
   display: inline-block;
-  box-shadow: 0 0 8px #FBBF24;
+  box-shadow: 0 0 8px #D4A373;
 }
 
 /* ==========================================================================
@@ -1117,8 +1246,8 @@ textarea {
 }
 
 .card-3d:hover {
-  box-shadow: 0 24px 48px -12px rgba(109, 14, 59, 0.2), 0 0 25px -5px rgba(109, 14, 59, 0.08);
-  border-color: rgba(109, 14, 59, 0.25) !important;
+  box-shadow: 0 24px 48px -12px rgba(92, 58, 33, 0.2), 0 0 25px -5px rgba(92, 58, 33, 0.08);
+  border-color: rgba(92, 58, 33, 0.25) !important;
 }
 
 /* 3D Specular Highlight on Card */
@@ -1176,7 +1305,7 @@ textarea {
 
 .depth-button:hover {
   transform: translateZ(36px) translateY(-2px);
-  box-shadow: 0 8px 20px rgba(109, 14, 59, 0.35);
+  box-shadow: 0 8px 20px rgba(92, 58, 33, 0.35);
 }
 
 /* Light sweep across cards */
@@ -1402,11 +1531,11 @@ textarea {
   left: 0;
   right: 0;
   height: 62px;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(253, 251, 247, 0.97);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.07);
+  border-top: 1px solid #EFE7DC;
+  box-shadow: 0 -4px 20px rgba(44, 24, 16, 0.08);
   z-index: 950;
   justify-content: space-around;
   align-items: center;
@@ -1442,7 +1571,7 @@ textarea {
   gap: 0.2rem;
   background: none;
   border: none;
-  color: #64748B;
+  color: #8C7D73;
   font-size: 0.68rem;
   font-weight: 600;
   padding: 0.35rem 0.5rem;
@@ -1459,7 +1588,7 @@ textarea {
 }
 
 .mobile-bottom-tab.active {
-  color: #6D0E3B;
+  color: var(--primary, #5C3A21);
   font-weight: 700;
 }
 
@@ -1467,7 +1596,7 @@ textarea {
   position: absolute;
   top: 2px;
   right: 14px;
-  background-color: #DC2626;
+  background-color: var(--primary, #5C3A21);
   color: #ffffff;
   font-size: 0.62rem;
   font-weight: 800;
@@ -1477,7 +1606,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 /* 3. Mobile Drawers and Modals Overrides */
@@ -1548,5 +1677,463 @@ textarea {
 
   .luxury-product-card:hover {
     transform: none !important;
+  }
+}
+
+/* ==========================================================================
+   FOOTER (100% RECREATION OF REFERENCE SCREENSHOT 2)
+   ========================================================================== */
+
+.site-footer {
+  background-color: var(--footer-bg, #2A160C);
+  color: #ffffff;
+  padding: 3rem 1.5rem 1.75rem;
+  margin-top: auto;
+  position: relative;
+  z-index: 10;
+}
+
+.site-footer a,
+.site-footer button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 1. Newsletter Row */
+.footer-newsletter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 2.25rem;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.footer-newsletter-subtitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.footer-newsletter-title {
+  font-family: var(--font-heading, 'Playfair Display', Georgia, serif);
+  font-size: clamp(1.45rem, 2.6vw, 1.95rem);
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.footer-newsletter-form {
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
+  padding: 3px;
+  background-color: rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 440px;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.footer-newsletter-form:focus-within {
+  border-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.footer-newsletter-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 0.86rem;
+  padding: 0.5rem 0.85rem;
+  min-width: 0;
+}
+
+.footer-newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.footer-newsletter-btn {
+  background-color: #ffffff;
+  color: #2A160C;
+  border: none;
+  border-radius: 4px;
+  padding: 0.52rem 1.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.footer-newsletter-btn:hover {
+  background-color: #FDFBF7;
+  transform: translateY(-1px);
+}
+
+.footer-newsletter-btn:active {
+  transform: scale(0.97);
+}
+
+/* 2. Thin Divider */
+.footer-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.16);
+  width: 100%;
+  margin: 0;
+}
+
+/* 3. Main Footer Grid */
+.footer-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 4rem;
+  padding: 2.75rem 0 2.25rem;
+  align-items: start;
+}
+
+.footer-brand-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.footer-logo-img {
+  max-height: 44px;
+  max-width: 54px;
+  object-fit: contain;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 3px;
+  border-radius: 8px;
+}
+
+.footer-logo-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-brand-name {
+  font-family: var(--font-heading, 'Playfair Display', Georgia, serif);
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  display: block;
+}
+
+.footer-brand-sub {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+.footer-about-text {
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 1.35rem 0;
+  max-width: 440px;
+}
+
+.footer-learn-more-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 0;
+  display: inline;
+}
+
+.footer-learn-more-btn:hover {
+  opacity: 0.9;
+}
+
+.footer-follow-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.footer-follow-label {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.footer-social-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-social-link {
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+  transition: opacity 0.2s, transform 0.2s;
+  padding: 2px;
+}
+
+.footer-social-link:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.footer-whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background-color: #25D366;
+  color: #ffffff;
+  padding: 0.5rem 1.15rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s, box-shadow 0.2s;
+  width: fit-content;
+}
+
+.footer-whatsapp-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.footer-whatsapp-btn:active {
+  transform: scale(0.97);
+}
+
+/* Right Section Links */
+.footer-links-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-links-header {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 1.35rem;
+}
+
+.footer-links-subgrid {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 1.35fr;
+  gap: 2.25rem;
+}
+
+.footer-links-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.68rem;
+}
+
+.footer-nav-link {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  transition: color 0.2s, transform 0.2s;
+  display: inline-block;
+}
+
+.footer-nav-link:hover {
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+.footer-nav-item {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.88rem;
+  display: block;
+  line-height: 1.4;
+}
+
+.footer-contact-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  font-size: 0.86rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.footer-contact-title {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 0.3rem;
+}
+
+.footer-contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  line-height: 1.4;
+}
+
+/* 4. Bottom Row */
+.footer-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  padding-top: 1.35rem;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.footer-copyright {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.footer-payment-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.footer-pay-pill {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  padding: 0.22rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.footer-legal-links {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.footer-legal-link {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.footer-legal-link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   MOBILE FOOTER OVERRIDES (EXACT MATCH FOR MOBILE SCREENSHOT 2)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .site-footer {
+    padding: 2.25rem 1.15rem calc(65px + 1.25rem) !important;
+  }
+
+  .footer-newsletter-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1.15rem !important;
+    padding-bottom: 1.75rem !important;
+  }
+
+  .footer-newsletter-title {
+    font-size: 1.35rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .footer-newsletter-form {
+    max-width: 100% !important;
+    width: 100% !important;
+    border-radius: 6px !important;
+  }
+
+  .footer-main-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+    padding: 2rem 0 1.75rem !important;
+  }
+
+  .footer-about-text {
+    max-width: 100% !important;
+    font-size: 0.85rem !important;
+    line-height: 1.55 !important;
+    margin-bottom: 1.15rem !important;
+  }
+
+  .footer-follow-row {
+    margin-bottom: 1.15rem !important;
+  }
+
+  .footer-links-subgrid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1.5rem 1rem !important;
+  }
+
+  .footer-contact-block {
+    grid-column: span 2 !important;
+    border-top: 1px dashed rgba(255, 255, 255, 0.18) !important;
+    padding-top: 1.25rem !important;
+    margin-top: 0.5rem !important;
+  }
+
+  .footer-bottom-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.85rem !important;
+    padding-top: 1.15rem !important;
+  }
+
+  .footer-legal-links {
+    gap: 1.15rem !important;
   }
 }

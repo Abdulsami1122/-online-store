@@ -123,9 +123,9 @@ export default function OrdersDashboardPage() {
                   borderRadius: 'var(--radius-full)',
                   fontSize: '0.85rem',
                   fontWeight: 600,
-                  backgroundColor: isActive ? '#6D0E3B' : '#ffffff',
+                  backgroundColor: isActive ? '#5C3A21' : '#ffffff',
                   color: isActive ? '#ffffff' : '#64748b',
-                  border: isActive ? '1px solid #6D0E3B' : '1px solid #e2e8f0',
+                  border: isActive ? '1px solid #5C3A21' : '1px solid #e2e8f0',
                   boxShadow: isActive ? '0 2px 6px rgba(109, 14, 59, 0.25)' : 'none',
                   transition: 'var(--transition)',
                 }}
@@ -377,7 +377,7 @@ export default function OrdersDashboardPage() {
                             style={{
                               fontSize: '0.8rem',
                               padding: '0.35rem 0.75rem',
-                              color: '#6D0E3B',
+                              color: '#5C3A21',
                               borderColor: '#F3D2DF',
                               backgroundColor: '#FCF2F6',
                               borderRadius: '6px',
@@ -459,9 +459,9 @@ export default function OrdersDashboardPage() {
                     disabled={updating}
                     className="btn btn-sm"
                     style={{
-                      backgroundColor: selectedOrder.status === st ? '#6D0E3B' : '#ffffff',
+                      backgroundColor: selectedOrder.status === st ? '#5C3A21' : '#ffffff',
                       color: selectedOrder.status === st ? '#ffffff' : '#475569',
-                      border: selectedOrder.status === st ? '1px solid #6D0E3B' : '1px solid #cbd5e1',
+                      border: selectedOrder.status === st ? '1px solid #5C3A21' : '1px solid #cbd5e1',
                       fontSize: '0.8rem',
                       fontWeight: 600,
                     }}
@@ -480,7 +480,7 @@ export default function OrdersDashboardPage() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <span style={{ fontWeight: 700, width: '130px', color: '#64748b' }}>Phone / Contact:</span>
-                <a href={`tel:${selectedOrder.customerPhone}`} style={{ color: '#6D0E3B', fontWeight: 600 }}>
+                <a href={`tel:${selectedOrder.customerPhone}`} style={{ color: '#5C3A21', fontWeight: 600 }}>
                   {selectedOrder.customerPhone}
                 </a>
                 <a
@@ -516,7 +516,7 @@ export default function OrdersDashboardPage() {
                   href={`/track/${selectedOrder.orderNumber}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: '#6D0E3B', textDecoration: 'underline', fontWeight: 600 }}
+                  style={{ color: '#5C3A21', textDecoration: 'underline', fontWeight: 600 }}
                 >
                   /track/{selectedOrder.orderNumber} ↗
                 </a>
@@ -709,7 +709,7 @@ export default function OrdersDashboardPage() {
               }}
             >
               <span>Total Amount:</span>
-              <span style={{ color: '#6D0E3B' }}>{formatCurrency(selectedOrder.totalPrice)}</span>
+              <span style={{ color: '#5C3A21' }}>{formatCurrency(selectedOrder.totalPrice)}</span>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.75rem' }}>

@@ -48,12 +48,12 @@ export default function SellerSidebar({ onClose, isMobile = false }) {
                 width: '36px',
                 height: '36px',
                 borderRadius: '10px',
-                backgroundColor: '#6D0E3B',
+                backgroundColor: '#5C3A21',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#ffffff',
-                boxShadow: '0 4px 10px rgba(109, 14, 59, 0.3)',
+                boxShadow: '0 4px 10px rgba(92, 58, 33, 0.3)',
               }}
             >
               <Store size={19} />
@@ -108,8 +108,8 @@ export default function SellerSidebar({ onClose, isMobile = false }) {
                   borderRadius: 'var(--radius-md)',
                   fontSize: '0.92rem',
                   fontWeight: 600,
-                  color: isActive ? '#6D0E3B' : '#475569',
-                  backgroundColor: isActive ? '#FCF2F6' : 'transparent',
+                  color: isActive ? '#5C3A21' : '#475569',
+                  backgroundColor: isActive ? '#F5EBE0' : 'transparent',
                   transition: 'var(--transition)',
                 })}
               >
@@ -134,9 +134,9 @@ export default function SellerSidebar({ onClose, isMobile = false }) {
             borderRadius: 'var(--radius-md)',
             fontSize: '0.85rem',
             fontWeight: 700,
-            color: '#6D0E3B',
-            backgroundColor: '#FCF2F6',
-            border: '1px solid #F3D2DF',
+            color: '#5C3A21',
+            backgroundColor: '#F5EBE0',
+            border: '1px solid #E8DEC8',
             textDecoration: 'none',
           }}
         >

@@ -36,6 +36,11 @@ import {
   CreditCard,
   Home,
   LayoutGrid,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  ChevronLeft,
 } from 'lucide-react';
 import { fetchProducts } from '../../api/productApi';
 import { createOrder, trackOrder } from '../../api/orderApi';
@@ -105,6 +110,44 @@ function FacebookIcon({ size = 20, color = 'currentColor', ...props }) {
       {...props}
     >
       <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  );
+}
+
+function TwitterIcon({ size = 20, color = 'currentColor', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+    </svg>
+  );
+}
+
+function LinkedinIcon({ size = 20, color = 'currentColor', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+      <rect width="4" height="12" x="2" y="9" />
+      <circle cx="4" cy="4" r="2" />
     </svg>
   );
 }
@@ -216,6 +259,54 @@ function ScrollRevealSection({
   );
 }
 
+// Multi-scene Mixed Video Showcase (Girls Shopping, Pure Honey, Luxury Cars, Shopping Spree)
+const HERO_SCENES = [
+  {
+    id: 'girls-shopping',
+    pillLabel: 'Girls Shopping',
+    icon: '🛍️',
+    title: 'Trending Girls Fashion & Boutique Style',
+    subtitle: 'Chic designer streetwear, luxury accessories, footwear, and trending boutique fashion.',
+    badge: '✨ Exclusive Fashion Drop',
+    videoUrl: 'https://assets.mixkit.co/videos/49137/49137-720.mp4',
+    poster: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1600&q=80',
+    tag: 'Girls Fashion',
+  },
+  {
+    id: 'honey',
+    pillLabel: 'Pure Honey',
+    icon: '🍯',
+    title: '100% Pure Natural Sidr & Wildflower Honey',
+    subtitle: 'Raw, unpasteurized honey directly harvested from mountain hives. 100% pure guarantee.',
+    badge: '🍯 100% Organic Honey',
+    videoUrl: 'https://assets.mixkit.co/videos/2801/2801-1080.mp4',
+    poster: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=1600&q=80',
+    tag: 'Pure Honey',
+  },
+  {
+    id: 'cars',
+    pillLabel: 'Luxury Cars',
+    icon: '🏎️',
+    title: 'Exquisite Luxury Car Accessories & Detailing',
+    subtitle: 'Premium automotive interior upgrades, ambient styling, and performance car essentials.',
+    badge: '🏎️ Luxury Automotive',
+    videoUrl: 'https://assets.mixkit.co/videos/74/74-1080.mp4',
+    poster: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80',
+    tag: 'Car Styling',
+  },
+  {
+    id: 'shopping',
+    pillLabel: 'Shopping Spree',
+    icon: '✨',
+    title: 'Premium Quality Products for Everyday Life',
+    subtitle: 'Shop pure natural honey, luxury car decoration, premium footwear, trending fashion, and daily essentials.',
+    badge: '✨ Verified Verified Sellers',
+    videoUrl: 'https://assets.mixkit.co/videos/25516/25516-720.mp4',
+    poster: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=80',
+    tag: 'Shopping Spree',
+  },
+];
+
 export default function UserStorePage({
   defaultOpenCart = false,
   defaultSection = null,
@@ -276,9 +367,48 @@ export default function UserStorePage({
       .catch(() => { });
   }, []);
 
+  // Live sync with Admin Settings publication
+  useEffect(() => {
+    const handleSync = (e) => {
+      if (e?.detail) {
+        setStoreSettings((prev) => ({ ...prev, ...e.detail }));
+      } else {
+        try {
+          const saved = localStorage.getItem('user_store_custom_info');
+          if (saved) setStoreSettings((prev) => ({ ...prev, ...JSON.parse(saved) }));
+        } catch { }
+      }
+    };
+
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('store-settings-updated', handleSync);
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('store-settings-updated', handleSync);
+    };
+  }, []);
+
   // Color Theme: Dynamically loaded from Published Admin Settings (or defaults to luxury-boutique)
   const theme = getTheme(storeSettings.selectedTemplate);
   const deliveryFee = Number(storeSettings.deliveryCharges !== undefined ? storeSettings.deliveryCharges : 199);
+
+  // Dynamically apply published theme variables across the entire website
+  useEffect(() => {
+    if (!theme) return;
+    const root = document.documentElement;
+    root.style.setProperty('--primary', theme.primary);
+    root.style.setProperty('--primary-hover', theme.primaryHover || theme.primary);
+    root.style.setProperty('--primary-light', theme.primaryLight || '#F5EBE0');
+    root.style.setProperty('--primary-border', theme.primaryBorder || '#E8DEC8');
+    root.style.setProperty('--accent', theme.accent || theme.primary);
+    root.style.setProperty('--bg-app', theme.heroBg || '#FAF7F2');
+    root.style.setProperty('--bg-card', theme.cardBg || '#FFFFFF');
+    root.style.setProperty('--border-color', theme.cardBorder || '#EFE7DC');
+    root.style.setProperty('--text-primary', theme.textPrimary || '#2C1810');
+    root.style.setProperty('--text-muted', theme.textMuted || '#8C7D73');
+    root.style.setProperty('--footer-bg', theme.footerBg || '#2A160C');
+    root.style.setProperty('--badge-bg', theme.badgeBg || theme.primary);
+  }, [theme]);
 
   // ----------------------------------------------------------------------
   // Products from Backend & Catalog
@@ -306,6 +436,45 @@ export default function UserStorePage({
   const [addedNoticeId, setAddedNoticeId] = useState(null);
   const [copyLinkNotice, setCopyLinkNotice] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Mixed Hero Video & Transparent Navbar Controls
+  const [activeSceneIdx, setActiveSceneIdx] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
+  const [isVideoMuted, setIsVideoMuted] = useState(true);
+  const videoRef = useRef(null);
+
+  // Auto-switch video scene every 7 seconds seamlessly
+  useEffect(() => {
+    if (!isVideoPlaying) return;
+    const interval = setInterval(() => {
+      setActiveSceneIdx((prev) => (prev + 1) % HERO_SCENES.length);
+    }, 7000);
+    return () => clearInterval(interval);
+  }, [isVideoPlaying]);
+
+  // Sync video play state whenever active scene changes
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.load();
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay fallback
+        });
+      }
+    }
+  }, [activeSceneIdx]);
+
+  // Window scroll listener for transparent navbar transitioning to solid sticky
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Cart & Checkout
   const [cartDrawerOpen, setCartDrawerOpen] = useState(defaultOpenCart);
@@ -380,6 +549,16 @@ export default function UserStorePage({
   // Newsletter
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSuccess, setNewsletterSuccess] = useState(false);
+
+  const handleNewsletterSubmit = (e) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) return;
+    setNewsletterSuccess(true);
+    setTimeout(() => {
+      setNewsletterSuccess(false);
+      setNewsletterEmail('');
+    }, 4000);
+  };
 
   // AI Assistant
   const [aiModalOpen, setAiModalOpen] = useState(defaultOpenAi);
@@ -713,7 +892,7 @@ export default function UserStorePage({
         color: '#1E1E24',
         minHeight: '100vh',
         width: '100%',
-        overflowX: 'hidden',
+        overflowX: 'clip',
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -752,16 +931,24 @@ export default function UserStorePage({
       )}
 
       {/* ================================================================= */}
-      {/* 2. MAIN HEADER (Logo, Nav Links, Search, Wishlist, Cart)          */}
+      {/* 2. MAIN HEADER (Transparent on Hero Video, Solid when Scrolled)   */}
       {/* ================================================================= */}
       <header
+        className="store-sticky-header"
         style={{
           position: 'sticky',
           top: 0,
-          backgroundColor: '#FFFFFF',
-          zIndex: 100,
-          boxShadow: '0 2px 14px rgba(0, 0, 0, 0.05)',
-          borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
+          backgroundColor: isScrolled
+            ? 'rgba(255, 255, 255, 0.98)'
+            : 'rgba(21, 12, 7, 0.22)',
+          backdropFilter: isScrolled ? 'blur(14px)' : 'blur(4px)',
+          WebkitBackdropFilter: isScrolled ? 'blur(14px)' : 'blur(4px)',
+          zIndex: 900,
+          boxShadow: isScrolled ? '0 2px 14px rgba(0, 0, 0, 0.08)' : 'none',
+          borderBottom: isScrolled
+            ? '1px solid rgba(0, 0, 0, 0.06)'
+            : '1px solid rgba(255, 255, 255, 0.15)',
+          transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
         <div
@@ -802,12 +989,13 @@ export default function UserStorePage({
                   width: '42px',
                   height: '42px',
                   borderRadius: '12px',
-                  backgroundColor: theme.primaryLight,
-                  color: theme.primary,
+                  backgroundColor: isScrolled ? theme.primaryLight : 'rgba(255, 255, 255, 0.22)',
+                  color: isScrolled ? theme.primary : '#FFFFFF',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  transition: 'all 0.3s ease',
                 }}
               >
                 <Store size={22} strokeWidth={2.2} />
@@ -820,10 +1008,12 @@ export default function UserStorePage({
                     fontFamily: theme.headingFont,
                     fontSize: '1.4rem',
                     fontWeight: 700,
-                    color: theme.primary,
+                    color: isScrolled ? theme.primary : '#FFFFFF',
                     letterSpacing: '-0.02em',
                     display: 'block',
                     lineHeight: 1.1,
+                    textShadow: isScrolled ? 'none' : '0 2px 10px rgba(0, 0, 0, 0.75)',
+                    transition: 'color 0.3s ease',
                   }}
                 >
                   {storeSettings.storeName}
@@ -832,9 +1022,11 @@ export default function UserStorePage({
               <span
                 style={{
                   fontSize: '0.68rem',
-                  color: '#8A8588',
+                  color: isScrolled ? '#8C7D73' : 'rgba(255, 255, 255, 0.85)',
                   letterSpacing: '0.04em',
                   fontWeight: 600,
+                  textShadow: isScrolled ? 'none' : '0 1px 4px rgba(0, 0, 0, 0.7)',
+                  transition: 'color 0.3s ease',
                 }}
               >
                 {storeSettings.storeTagline}
@@ -866,20 +1058,21 @@ export default function UserStorePage({
                   border: 'none',
                   fontSize: '0.96rem',
                   fontWeight: 600,
-                  color: theme.primary,
+                  color: isScrolled ? theme.primary : '#FFFFFF',
                   cursor: 'pointer',
                   padding: '0.35rem 0',
                   whiteSpace: 'nowrap',
                   letterSpacing: '0.01em',
                   transition: 'all 0.2s ease',
                   position: 'relative',
+                  textShadow: isScrolled ? 'none' : '0 1px 6px rgba(0, 0, 0, 0.7)',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = theme.primaryHover;
+                  e.currentTarget.style.color = isScrolled ? theme.primaryHover : '#F4C472';
                   e.currentTarget.style.transform = 'translateY(-1px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = theme.primary;
+                  e.currentTarget.style.color = isScrolled ? theme.primary : '#FFFFFF';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
@@ -888,7 +1081,7 @@ export default function UserStorePage({
             ))}
           </nav>
 
-          {/* Right: Search, Wishlist, Account, Cart */}
+          {/* Right: Search, Wishlist, Cart, Mobile Toggle */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
             {/* Search */}
             <button
@@ -896,12 +1089,13 @@ export default function UserStorePage({
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#2B2830',
+                color: isScrolled ? '#2C1810' : '#FFFFFF',
                 padding: '0.45rem',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 cursor: 'pointer',
+                transition: 'color 0.3s ease',
               }}
               title="Search products"
             >
@@ -915,13 +1109,14 @@ export default function UserStorePage({
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#2B2830',
+                color: isScrolled ? '#2C1810' : '#FFFFFF',
                 padding: '0.45rem',
                 borderRadius: '50%',
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
                 cursor: 'pointer',
+                transition: 'color 0.3s ease',
               }}
               title="Saved items"
             >
@@ -932,7 +1127,7 @@ export default function UserStorePage({
                     position: 'absolute',
                     top: '2px',
                     right: '2px',
-                    backgroundColor: theme.primary,
+                    backgroundColor: isScrolled ? theme.primary : '#C58F58',
                     color: '#ffffff',
                     fontSize: '0.68rem',
                     fontWeight: 700,
@@ -942,6 +1137,7 @@ export default function UserStorePage({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
                   }}
                 >
                   {wishlist.length}
@@ -959,13 +1155,14 @@ export default function UserStorePage({
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#2B2830',
+                color: isScrolled ? '#2C1810' : '#FFFFFF',
                 padding: '0.45rem',
                 borderRadius: '50%',
                 position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
                 cursor: 'pointer',
+                transition: 'color 0.3s ease',
               }}
               title="Shopping Bag"
             >
@@ -975,7 +1172,7 @@ export default function UserStorePage({
                   position: 'absolute',
                   top: '2px',
                   right: '2px',
-                  backgroundColor: theme.primary,
+                  backgroundColor: isScrolled ? theme.primary : '#C58F58',
                   color: '#ffffff',
                   fontSize: '0.68rem',
                   fontWeight: 700,
@@ -985,6 +1182,7 @@ export default function UserStorePage({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
                 }}
               >
                 {itemsCount}
@@ -1000,9 +1198,11 @@ export default function UserStorePage({
                 border: 'none',
                 padding: '0.4rem',
                 cursor: 'pointer',
-                color: '#2B2830',
+                color: isScrolled ? '#2C1810' : '#FFFFFF',
+                transition: 'color 0.3s ease',
               }}
               className="mobile-nav-toggle"
+              aria-label="Open menu"
             >
               <Menu size={24} />
             </button>
@@ -1022,275 +1222,307 @@ export default function UserStorePage({
       </header>
 
       {/* ================================================================= */}
-      {/* 3. HERO SECTION (Universal All-in-One Multi-Product Store Hero)     */}
+      {/* 3. HERO SECTION (Mixed Video: Girls Shopping, Honey, Cars, Spree) */}
       {/* ================================================================= */}
       <section
         ref={heroRef}
         style={{
-          background: theme.heroBg,
-          padding: '4rem 1.25rem 3.5rem',
+          marginTop: '-72px',
+          paddingTop: 'calc(72px + 3.5rem)',
+          paddingBottom: '4.5rem',
           position: 'relative',
           overflow: 'hidden',
+          minHeight: '88vh',
+          display: 'flex',
+          alignItems: 'center',
+          backgroundColor: '#150C07',
         }}
-        className="bg-botanical hero-fade-in"
+        className="hero-fade-in hero-video-section"
       >
-        <div
-          className="container hero-split"
+        {/* Background Looping Video with Smooth Scene Crossfade */}
+        <video
+          ref={videoRef}
+          key={HERO_SCENES[activeSceneIdx].videoUrl}
+          autoPlay
+          muted={isVideoMuted}
+          loop
+          playsInline
+          poster={HERO_SCENES[activeSceneIdx].poster}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '3.5rem',
-            position: 'relative',
-            zIndex: 2,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 1,
+            filter: 'brightness(0.78) contrast(1.08)',
+            transform: 'scale(1.02)',
+            transition: 'opacity 0.6s ease',
           }}
         >
-          {/* Left Column: Heading, Subtitle, CTA Button, and 3 Features */}
-          <div style={{ flex: 1.15, maxWidth: '600px' }}>
-            <div
-              className={theme.hasScriptFont ? 'font-script' : ''}
-              style={{
-                fontSize: theme.hasScriptFont ? '2rem' : '0.92rem',
-                fontWeight: theme.hasScriptFont ? 400 : 700,
-                color: theme.accentScriptColor,
-                lineHeight: 1.2,
-                marginBottom: '0.65rem',
-                letterSpacing: theme.hasScriptFont ? 'normal' : '0.05em',
-                textTransform: theme.hasScriptFont ? 'none' : 'uppercase',
-              }}
-            >
-              {storeSettings.heroBadgeText || '✨ Direct From Verified Sellers'}
-            </div>
+          <source src={HERO_SCENES[activeSceneIdx].videoUrl} type="video/mp4" />
+        </video>
 
-            <h1
-              style={{
-                fontFamily: theme.headingFont,
-                fontSize: 'clamp(2.3rem, 4.6vw, 3.6rem)',
-                fontWeight: 700,
-                color: '#260618',
-                lineHeight: 1.15,
-                letterSpacing: '-0.02em',
-                marginBottom: '1.25rem',
-              }}
-            >
-              {storeSettings.heroTitle || 'Premium Quality Products for Everyday Life'}
-            </h1>
+        {/* Ambient Dark & Warm Luxury Scrim Overlay for 100% Crisp Centered Legibility */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background:
+              'linear-gradient(180deg, rgba(20, 10, 6, 0.65) 0%, rgba(20, 10, 6, 0.78) 50%, rgba(20, 10, 6, 0.88) 100%)',
+            zIndex: 2,
+            pointerEvents: 'none',
+          }}
+        />
 
-            <p
+        {/* Hero Content Container - 100% Centered & Ultra Professional */}
+        <div
+          className="container"
+          style={{
+            position: 'relative',
+            zIndex: 3,
+            width: '100%',
+            maxWidth: '920px',
+            margin: '0 auto',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '2.5rem 1.25rem 1.5rem',
+          }}
+        >
+          {/* Cursive / Script Accent Badge */}
+          <div
+            className={theme.hasScriptFont ? 'font-script' : ''}
+            style={{
+              fontSize: theme.hasScriptFont ? '2.4rem' : '1rem',
+              fontWeight: theme.hasScriptFont ? 400 : 700,
+              color: '#F4C472',
+              lineHeight: 1.2,
+              marginBottom: '0.85rem',
+              letterSpacing: theme.hasScriptFont ? 'normal' : '0.08em',
+              textTransform: theme.hasScriptFont ? 'none' : 'uppercase',
+              textShadow: '0 2px 14px rgba(0, 0, 0, 0.75)',
+            }}
+          >
+            {storeSettings.heroBadgeText || '✨ Direct From Verified Sellers'}
+          </div>
+
+          {/* Main Headline */}
+          <h1
+            style={{
+              fontFamily: theme.headingFont,
+              fontSize: 'clamp(2.5rem, 5.2vw, 4.2rem)',
+              fontWeight: 800,
+              color: '#FFFFFF',
+              lineHeight: 1.15,
+              letterSpacing: '-0.025em',
+              marginBottom: '1.35rem',
+              maxWidth: '850px',
+              textShadow: '0 4px 24px rgba(0, 0, 0, 0.85)',
+            }}
+          >
+            {storeSettings.heroTitle || 'Premium Quality Products for Everyday Life'}
+          </h1>
+
+          {/* Subtitle Paragraph */}
+          <p
+            style={{
+              fontSize: 'clamp(1.02rem, 2vw, 1.22rem)',
+              color: 'rgba(255, 255, 255, 0.92)',
+              lineHeight: 1.7,
+              marginBottom: '2.5rem',
+              textShadow: '0 2px 12px rgba(0, 0, 0, 0.75)',
+              maxWidth: '700px',
+              margin: '0 auto 2.5rem auto',
+            }}
+          >
+            {storeSettings.heroSubtitle ||
+              'Shop pure natural honey, luxury car decoration, premium footwear, trending fashion, and daily essentials. Order with 100% Cash on Delivery and open parcel delivery.'}
+          </p>
+
+          {/* Action Buttons & Social Icons - Centered */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '1rem',
+              flexWrap: 'wrap',
+              marginBottom: '3.25rem',
+            }}
+          >
+            <button
+              onClick={() => scrollTo(productsRef)}
               style={{
+                backgroundColor: '#C58F58',
+                color: '#ffffff',
+                padding: '1rem 2.6rem',
+                borderRadius: '12px',
                 fontSize: '1.05rem',
-                color: '#635961',
-                lineHeight: 1.65,
-                marginBottom: '2rem',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                boxShadow: '0 10px 30px rgba(197, 143, 88, 0.45)',
+                cursor: 'pointer',
+                border: 'none',
+                transition: 'all 0.25s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#B37D46';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 14px 36px rgba(197, 143, 88, 0.55)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#C58F58';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 10px 30px rgba(197, 143, 88, 0.45)';
               }}
             >
-              {storeSettings.heroSubtitle ||
-                'Shop pure natural honey, luxury car decoration, premium footwear, trending fashion, and daily essentials. Order with 100% Cash on Delivery and open parcel delivery.'}
-            </p>
+              <span>{storeSettings.heroButtonText || 'Shop All Products'}</span>
+              <ArrowRight size={20} />
+            </button>
 
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
-              <button
-                onClick={() => scrollTo(productsRef)}
+            {/* Social Icons */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.65rem' }}>
+              <a
+                href={storeSettings.instagram || 'https://instagram.com'}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
-                  backgroundColor: theme.primary,
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '14px',
+                  border: '1.5px solid rgba(255, 255, 255, 0.28)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                  backdropFilter: 'blur(10px)',
                   color: '#ffffff',
-                  padding: '0.9rem 2.2rem',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontWeight: 600,
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.6rem',
-                  boxShadow: `0 8px 24px ${theme.primary}35`,
+                  justifyContent: 'center',
                   cursor: 'pointer',
-                  border: 'none',
-                  transition: 'all 0.2s ease',
+                  transition: 'all 0.25s ease',
+                  boxShadow: '0 4px 14px rgba(0, 0, 0, 0.2)',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = theme.primaryHover)}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = theme.primary)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#E1306C';
+                  e.currentTarget.style.borderColor = '#E1306C';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.16)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.28)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+                title="Follow on Instagram"
+                aria-label="Instagram"
               >
-                <span>{storeSettings.heroButtonText || 'Shop All Products'}</span>
-                <ArrowRight size={18} />
-              </button>
+                <InstagramIcon size={24} color="#ffffff" />
+              </a>
 
-              {/* Instagram & Facebook Social Icons */}
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.65rem' }}>
-                <a
-                  href={storeSettings.instagram || 'https://instagram.com'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    width: '46px',
-                    height: '46px',
-                    borderRadius: '12px',
-                    border: `1.5px solid ${theme.primaryBorder}`,
-                    backgroundColor: theme.primaryLight,
-                    color: theme.primary,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 2px 8px rgba(109, 14, 59, 0.08)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#E1306C';
-                    e.currentTarget.style.borderColor = '#E1306C';
-                    e.currentTarget.style.color = '#ffffff';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(225, 48, 108, 0.35)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = theme.primaryLight;
-                    e.currentTarget.style.borderColor = theme.primaryBorder;
-                    e.currentTarget.style.color = theme.primary;
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(109, 14, 59, 0.08)';
-                  }}
-                  title="Follow on Instagram"
-                  aria-label="Instagram"
-                >
-                  <InstagramIcon size={22} />
-                </a>
-
-                <a
-                  href={storeSettings.facebook || 'https://facebook.com'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    width: '46px',
-                    height: '46px',
-                    borderRadius: '12px',
-                    border: `1.5px solid ${theme.primaryBorder}`,
-                    backgroundColor: theme.primaryLight,
-                    color: theme.primary,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 2px 8px rgba(109, 14, 59, 0.08)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#1877F2';
-                    e.currentTarget.style.borderColor = '#1877F2';
-                    e.currentTarget.style.color = '#ffffff';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(24, 119, 242, 0.35)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = theme.primaryLight;
-                    e.currentTarget.style.borderColor = theme.primaryBorder;
-                    e.currentTarget.style.color = theme.primary;
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(109, 14, 59, 0.08)';
-                  }}
-                  title="Follow on Facebook"
-                  aria-label="Facebook"
-                >
-                  <FacebookIcon size={22} />
-                </a>
-              </div>
-            </div>
-
-            {/* Horizontal 3 Feature Badges row */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '1rem',
-                borderTop: '1px solid rgba(109, 14, 59, 0.1)',
-                paddingTop: '1.5rem',
-              }}
-            >
-              {[
-                { title: 'Cash on Delivery', subtitle: 'Pay when parcel arrives', icon: 'truck' },
-                { title: '7-Day Return', subtitle: 'Hassle-free guarantee', icon: 'rotate' },
-                { title: 'WhatsApp Help', subtitle: storeSettings.whatsapp, icon: 'headset' },
-              ].map((feat, idx) => (
-                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <div
-                    style={{
-                      width: '38px',
-                      height: '38px',
-                      borderRadius: '50%',
-                      backgroundColor: '#ffffff',
-                      color: theme.primary,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {feat.icon === 'truck' ? (
-                      <Truck size={18} />
-                    ) : feat.icon === 'rotate' ? (
-                      <RotateCcw size={18} />
-                    ) : (
-                      <Headphones size={18} />
-                    )}
-                  </div>
-                  <div>
-                    <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#260618', margin: 0 }}>
-                      {feat.title}
-                    </h4>
-                    <span style={{ fontSize: '0.72rem', color: '#7E757A' }}>{feat.subtitle}</span>
-                  </div>
-                </div>
-              ))}
+              <a
+                href={storeSettings.facebook || 'https://facebook.com'}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  width: '50px',
+                  height: '50px',
+                  borderRadius: '14px',
+                  border: '1.5px solid rgba(255, 255, 255, 0.28)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                  backdropFilter: 'blur(10px)',
+                  color: '#ffffff',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s ease',
+                  boxShadow: '0 4px 14px rgba(0, 0, 0, 0.2)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#1877F2';
+                  e.currentTarget.style.borderColor = '#1877F2';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.16)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.28)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+                title="Follow on Facebook"
+                aria-label="Facebook"
+              >
+                <FacebookIcon size={24} color="#ffffff" />
+              </a>
             </div>
           </div>
 
-          {/* Right Column: Hero Collage Photo Frame + Floating Badge */}
-          <div style={{ flex: 0.85, position: 'relative', display: 'flex', justifyContent: 'center' }}>
-            <div
-              className="arch-frame hero-3d-frame"
-              style={{
-                width: '100%',
-                maxWidth: '430px',
-                height: '520px',
-                position: 'relative',
-              }}
-            >
-              <img
-                src={
-                  storeSettings.heroBannerImage ||
-                  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=900&q=80'
-                }
-                alt={storeSettings.heroTitle || 'Online Store Showcase'}
+          {/* Horizontal 3 Feature Badges Row - Centered Professional Luxury Cards */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '1rem',
+              width: '100%',
+              maxWidth: '820px',
+              borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+              paddingTop: '2rem',
+            }}
+          >
+            {[
+              { title: 'Cash on Delivery', subtitle: 'Pay when parcel arrives', icon: 'truck' },
+              { title: '7-Day Return', subtitle: 'Hassle-free guarantee', icon: 'rotate' },
+              { title: 'WhatsApp Help', subtitle: storeSettings.whatsapp, icon: 'headset' },
+            ].map((feat, idx) => (
+              <div
+                key={idx}
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  display: 'block',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.75rem',
+                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '14px',
+                  padding: '0.85rem 1.15rem',
+                  textAlign: 'left',
                 }}
-              />
-            </div>
-
-            {/* Floating Badge */}
-            <div
-              className={`animate-float depth-badge ${theme.hasScriptFont ? 'font-script' : ''}`}
-              style={{
-                position: 'absolute',
-                top: '30px',
-                right: '-15px',
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                backdropFilter: 'blur(8px)',
-                color: theme.primary,
-                padding: '0.65rem 1.4rem',
-                borderRadius: '999px',
-                fontSize: theme.hasScriptFont ? '1.45rem' : '0.88rem',
-                fontWeight: 700,
-                boxShadow: `0 12px 30px ${theme.primary}25`,
-                border: '1px solid rgba(255, 255, 255, 0.8)',
-                zIndex: 5,
-                transform: 'rotate(2deg)',
-              }}
-            >
-              {storeSettings.heroFloatingBadge || '100% Genuine Quality'}
-            </div>
+              >
+                <div
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  {feat.icon === 'truck' ? (
+                    <Truck size={19} />
+                  ) : feat.icon === 'rotate' ? (
+                    <RotateCcw size={19} />
+                  ) : (
+                    <Headphones size={19} />
+                  )}
+                </div>
+                <div>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff', margin: 0, lineHeight: 1.25 }}>
+                    {feat.title}
+                  </h4>
+                  <span style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.82)', display: 'block' }}>
+                    {feat.subtitle}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -1313,13 +1545,13 @@ export default function UserStorePage({
                 style={{
                   fontSize: '2.2rem',
                   fontWeight: 700,
-                  color: '#260618',
+                  color: '#2C1810',
                   marginBottom: '0.4rem',
                 }}
               >
                 Shop by Category
               </h2>
-              <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+              <p style={{ fontSize: '0.95rem', color: '#8C7D73' }}>
                 Explore versatile collections curated directly for social commerce buyers
               </p>
             </div>
@@ -1552,13 +1784,13 @@ export default function UserStorePage({
                 style={{
                   fontSize: '2.2rem',
                   fontWeight: 700,
-                  color: '#260618',
+                  color: '#2C1810',
                   marginBottom: '0.4rem',
                 }}
               >
                 Featured Collection
               </h2>
-              <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+              <p style={{ fontSize: '0.95rem', color: '#8C7D73' }}>
                 Handpicked items ready for immediate dispatch across the country
               </p>
             </div>
@@ -1662,7 +1894,7 @@ export default function UserStorePage({
                         <button
                           onClick={(e) => toggleWishlist(product, e)}
                           style={{
-                            color: inWishlist ? '#DC2626' : '#6A6369',
+                            color: inWishlist ? '#DC2626' : '#8C7D73',
                           }}
                           title={inWishlist ? 'Remove from Wishlist' : 'Save to Wishlist'}
                         >
@@ -1674,7 +1906,7 @@ export default function UserStorePage({
                           onClick={(e) => handleCopyProductLink(product, e)}
                           style={{
                             backgroundColor: isLinkCopied ? '#10B981' : '#ffffff',
-                            color: isLinkCopied ? '#ffffff' : '#6A6369',
+                            color: isLinkCopied ? '#ffffff' : '#8C7D73',
                           }}
                           title="Copy direct product link for Facebook / Daraz post"
                         >
@@ -1757,7 +1989,7 @@ export default function UserStorePage({
                           style={{
                             backgroundColor: theme.primary,
                             color: '#ffffff',
-                            boxShadow: '0 4px 12px rgba(109, 14, 59, 0.2)',
+                            boxShadow: '0 4px 12px rgba(92, 58, 33, 0.2)',
                           }}
                         >
                           <Lock size={13} />
@@ -1827,7 +2059,7 @@ export default function UserStorePage({
                     style={{
                       fontSize: '1.25rem',
                       fontWeight: 700,
-                      color: '#260618',
+                      color: '#2C1810',
                       marginBottom: '0.4rem',
                     }}
                   >
@@ -1838,7 +2070,7 @@ export default function UserStorePage({
                   <p
                     style={{
                       fontSize: '0.9rem',
-                      color: '#7E757A',
+                      color: '#8C7D73',
                       maxWidth: '420px',
                       margin: '0 auto 1.5rem',
                       lineHeight: 1.5,
@@ -1891,13 +2123,13 @@ export default function UserStorePage({
                   style={{
                     fontSize: '2.2rem',
                     fontWeight: 700,
-                    color: '#260618',
+                    color: '#2C1810',
                     marginBottom: '0.4rem',
                   }}
                 >
                   Why Order From Us?
                 </h2>
-                <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+                <p style={{ fontSize: '0.95rem', color: '#8C7D73' }}>
                   Complete peace of mind for online buyers across Facebook Marketplace, Daraz, and social platforms
                 </p>
               </div>
@@ -1960,14 +2192,14 @@ export default function UserStorePage({
                         style={{
                           fontSize: '1.1rem',
                           fontWeight: 600,
-                          color: '#260618',
+                          color: '#2C1810',
                           marginBottom: '0.5rem',
                         }}
                       >
                         {p.title}
                       </h3>
 
-                      <p style={{ fontSize: '0.85rem', color: '#786E75', lineHeight: 1.5 }}>
+                      <p style={{ fontSize: '0.85rem', color: '#8C7D73', lineHeight: 1.5 }}>
                         {p.desc}
                       </p>
                     </div>
@@ -1998,13 +2230,13 @@ export default function UserStorePage({
                   style={{
                     fontSize: '2.2rem',
                     fontWeight: 700,
-                    color: '#260618',
+                    color: '#2C1810',
                     marginBottom: '0.4rem',
                   }}
                 >
                   Best Sellers
                 </h2>
-                <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+                <p style={{ fontSize: '0.95rem', color: '#8C7D73' }}>
                   Most loved products ordered by thousands of happy buyers this month
                 </p>
               </div>
@@ -2051,7 +2283,7 @@ export default function UserStorePage({
                           <button
                             onClick={(e) => toggleWishlist(item, e)}
                             style={{
-                              color: inWishlist ? '#DC2626' : '#6A6369',
+                              color: inWishlist ? '#DC2626' : '#8C7D73',
                             }}
                           >
                             <Heart size={16} fill={inWishlist ? '#DC2626' : 'none'} strokeWidth={2} />
@@ -2214,13 +2446,13 @@ export default function UserStorePage({
                 style={{
                   fontSize: '2.2rem',
                   fontWeight: 700,
-                  color: '#260618',
+                  color: '#2C1810',
                   marginBottom: '0.4rem',
                 }}
               >
                 What Our Customers Say
               </h2>
-              <p style={{ fontSize: '0.95rem', color: '#7E757A' }}>
+              <p style={{ fontSize: '0.95rem', color: '#8C7D73' }}>
                 Verified reviews from Facebook Marketplace, Daraz & direct store buyers
               </p>
             </div>
@@ -2262,7 +2494,7 @@ export default function UserStorePage({
                     <p
                       style={{
                         fontSize: '0.95rem',
-                        color: '#4A4248',
+                        color: '#6B5D55',
                         lineHeight: 1.65,
                         fontStyle: 'italic',
                         marginBottom: '1.75rem',
@@ -2284,7 +2516,7 @@ export default function UserStorePage({
                         }}
                       />
                       <div>
-                        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#260618', margin: 0 }}>
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#2C1810', margin: 0 }}>
                           {test.name}
                         </h4>
                         <span
@@ -2316,252 +2548,257 @@ export default function UserStorePage({
       <ScrollRevealSection direction="up">
         <footer
           ref={footerRef}
+          className="site-footer"
           style={{
-            backgroundColor: theme.footerBg,
-            color: '#E8DDE3',
-            padding: '4.5rem 1.25rem 2rem',
-            marginTop: 'auto',
+            backgroundColor: theme.footerBg || '#2A160C',
           }}
         >
-          <div className="container">
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1.6fr 1fr 1.2fr 1.2fr',
-                gap: '3rem',
-                marginBottom: '3.5rem',
-              }}
-              className="grid-responsive-4"
-            >
-              {/* Column 1: Store Brand Info */}
+          <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            {/* 1. TOP NEWSLETTER ALERT ROW (MATCHING SCREENSHOT 2) */}
+            <div className="footer-newsletter-row">
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem' }}>
+                <span className="footer-newsletter-subtitle">
+                  JOIN OUR NEWSLETTER
+                </span>
+                <h3 className="footer-newsletter-title">
+                  Subscribe to our email alerts
+                </h3>
+              </div>
+
+              <form
+                onSubmit={handleNewsletterSubmit}
+                className="footer-newsletter-form"
+              >
+                <input
+                  type="email"
+                  required
+                  placeholder="write your email address here"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  className="footer-newsletter-input"
+                />
+                <button
+                  type="submit"
+                  className="footer-newsletter-btn"
+                >
+                  {newsletterSuccess ? 'Subscribed ✓' : 'Subscribe'}
+                </button>
+              </form>
+            </div>
+
+            {/* 2. THIN HORIZONTAL DIVIDER */}
+            <div className="footer-divider" />
+
+            {/* 3. MAIN FOOTER CONTENT (SPLIT: BRAND/ABOUT ON LEFT, QUICK LINKS ON RIGHT) */}
+            <div className="footer-main-grid">
+              {/* LEFT COLUMN: BRAND, ABOUT, FOLLOW US, WHATSAPP */}
+              <div className="footer-brand-col">
+                <div className="footer-brand-header">
                   {storeSettings.storeLogo ? (
                     <img
                       src={storeSettings.storeLogo}
                       alt={storeSettings.storeName}
-                      style={{
-                        maxHeight: '40px',
-                        maxWidth: '50px',
-                        objectFit: 'contain',
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                        padding: '2px 4px',
-                        borderRadius: '8px',
-                        display: 'block',
-                      }}
+                      className="footer-logo-img"
                     />
                   ) : (
-                    <div
-                      style={{
-                        width: '38px',
-                        height: '38px',
-                        borderRadius: '8px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        color: '#ffffff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Store size={20} />
+                    <div className="footer-logo-icon">
+                      <Store size={22} />
                     </div>
                   )}
-                  <span
-                    style={{
-                      fontFamily: theme.headingFont,
-                      fontSize: '1.35rem',
-                      fontWeight: 700,
-                      color: '#ffffff',
-                    }}
-                  >
-                    {storeSettings.storeName}
-                  </span>
+                  <div>
+                    <span className="footer-brand-name">
+                      {storeSettings.storeName}
+                    </span>
+                    <div className="footer-brand-sub">
+                      {storeSettings.storeTagline || 'Quality Products • Best Prices'}
+                    </div>
+                  </div>
                 </div>
 
-                <p
-                  style={{
-                    fontSize: '0.88rem',
-                    lineHeight: 1.65,
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    marginBottom: '1.5rem',
-                  }}
-                >
-                  {storeSettings.storeTagline}. Connecting customers directly with verified online sellers across Pakistan.
+                <p className="footer-about-text">
+                  {storeSettings.storeTagline ? `${storeSettings.storeTagline}. ` : ''}Connecting customers directly with verified online sellers across Pakistan.{' '}
+                  <button
+                    type="button"
+                    onClick={() => scrollTo(whyUsRef)}
+                    className="footer-learn-more-btn"
+                  >
+                    Learn more
+                  </button>
                 </p>
 
-                {/* Direct WhatsApp Action in Footer */}
-                <a
-                  href={`https://wa.me/${(storeSettings.whatsapp || '+923001234567').replace(/[^0-9]/g, '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    backgroundColor: '#25D366',
-                    color: '#ffffff',
-                    padding: '0.55rem 1.1rem',
-                    borderRadius: '8px',
-                    fontWeight: 700,
-                    fontSize: '0.85rem',
-                  }}
-                >
-                  <MessageCircle size={16} />
-                  <span>Chat on WhatsApp</span>
-                </a>
+                {/* FOLLOW US : with social media icons */}
+                <div className="footer-follow-row">
+                  <span className="footer-follow-label">
+                    FOLLOW US :
+                  </span>
+                  <div className="footer-social-icons">
+                    <a
+                      href={storeSettings.facebook || 'https://facebook.com'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Facebook"
+                      className="footer-social-link"
+                    >
+                      <FacebookIcon size={16} />
+                    </a>
+                    <a
+                      href={storeSettings.instagram || 'https://instagram.com'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Instagram"
+                      className="footer-social-link"
+                    >
+                      <InstagramIcon size={16} />
+                    </a>
+                    <a
+                      href="https://twitter.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Twitter / X"
+                      className="footer-social-link"
+                    >
+                      <TwitterIcon size={16} />
+                    </a>
+                    <a
+                      href="https://linkedin.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="LinkedIn"
+                      className="footer-social-link"
+                    >
+                      <LinkedinIcon size={16} />
+                    </a>
+                  </div>
+                </div>
+
+                {/* Direct WhatsApp Helpline */}
+                <div>
+                  <a
+                    href={`https://wa.me/${(storeSettings.whatsapp || '+923065779097').replace(/[^0-9]/g, '')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="footer-whatsapp-btn"
+                  >
+                    <MessageCircle size={15} />
+                    <span>Chat on WhatsApp</span>
+                  </a>
+                </div>
               </div>
 
-              {/* Column 2: Quick Links */}
-              <div>
-                <h4
-                  className="font-serif"
-                  style={{
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    color: '#ffffff',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  Quick Links
-                </h4>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                  {[
-                    { label: 'Home', ref: heroRef },
-                    { label: 'Shop All Products', ref: productsRef },
-                    { label: 'Categories', ref: categoriesRef },
-                    { label: 'Best Sellers', ref: bestSellersRef },
-                    { label: 'Why Order From Us', ref: whyUsRef },
-                    { label: 'Customer Reviews', ref: reviewsRef },
-                  ].map((item, idx) => (
-                    <li key={idx}>
+              {/* RIGHT COLUMN: QUICK LINKS, CUSTOMER SERVICE & CONTACT DETAILS */}
+              <div className="footer-links-col">
+                <div className="footer-links-header">
+                  QUICK LINKS
+                </div>
+
+                <div className="footer-links-subgrid">
+                  {/* Subcolumn 1: Primary Navigation */}
+                  <ul className="footer-links-list">
+                    {[
+                      { label: 'Home', ref: heroRef },
+                      { label: 'Shop All Products', ref: productsRef },
+                      { label: 'Categories', ref: categoriesRef },
+                      { label: 'Best Sellers', ref: bestSellersRef },
+                      { label: 'Why Order From Us', ref: whyUsRef },
+                      { label: 'Customer Reviews', ref: reviewsRef },
+                    ].map((item, idx) => (
+                      <li key={idx}>
+                        <button
+                          type="button"
+                          onClick={() => scrollTo(item.ref)}
+                          className="footer-nav-link"
+                        >
+                          {item.label}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Subcolumn 2: Customer Service & Policies */}
+                  <ul className="footer-links-list">
+                    <li>
                       <button
-                        onClick={() => scrollTo(item.ref)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: 'rgba(255, 255, 255, 0.75)',
-                          fontSize: '0.88rem',
-                          cursor: 'pointer',
-                          padding: 0,
-                        }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.75)')}
+                        type="button"
+                        onClick={() => setTrackingModalOpen(true)}
+                        className="footer-nav-link"
+                        style={{ color: '#FDE047', fontWeight: 700 }}
                       >
-                        {item.label}
+                        🔍 Track Your Order Status
                       </button>
                     </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Column 3: Customer Care & Order Tracking */}
-              <div>
-                <h4
-                  className="font-serif"
-                  style={{
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    color: '#ffffff',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  Customer Service
-                </h4>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                  <li>
-                    <button
-                      onClick={() => setTrackingModalOpen(true)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#38BDF8',
-                        fontWeight: 600,
-                        fontSize: '0.88rem',
-                        cursor: 'pointer',
-                        padding: 0,
-                      }}
-                    >
-                      🔍 Track Your Order Status
-                    </button>
-                  </li>
-                  {['Cash on Delivery Policy', 'Open Parcel Rules', 'Return & Replacement (7 Days)', 'Shipping Charges', 'Privacy Policy'].map(
-                    (text, idx) => (
+                    {[
+                      'Cash on Delivery Policy',
+                      'Open Parcel Rules',
+                      'Return & Replacement (7 Days)',
+                      'Shipping Charges',
+                      'Privacy Policy',
+                    ].map((text, idx) => (
                       <li key={idx}>
-                        <span style={{ color: 'rgba(255, 255, 255, 0.75)', fontSize: '0.88rem' }}>
+                        <span className="footer-nav-item">
                           {text}
                         </span>
                       </li>
-                    )
-                  )}
-                </ul>
-              </div>
+                    ))}
+                  </ul>
 
-              {/* Column 4: Contact Info */}
-              <div>
-                <h4
-                  className="font-serif"
-                  style={{
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    color: '#ffffff',
-                    marginBottom: '1.25rem',
-                  }}
-                >
-                  Contact Seller
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', fontSize: '0.88rem', color: 'rgba(255, 255, 255, 0.75)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Phone size={15} style={{ color: '#ffffff' }} />
-                    <span>{storeSettings.phone || storeSettings.whatsapp}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <HelpCircle size={15} style={{ color: '#ffffff' }} />
-                    <span>{storeSettings.email}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-                    <MapPin size={15} style={{ color: '#ffffff', flexShrink: 0, marginTop: '2px' }} />
-                    <span>{storeSettings.address}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Clock size={15} style={{ color: '#ffffff' }} />
-                    <span>Delivery in 2 - 4 business days nationwide</span>
+                  {/* Subcolumn 3: Contact Seller Details */}
+                  <div className="footer-contact-block">
+                    <div className="footer-contact-title">
+                      Contact Seller
+                    </div>
+                    <div className="footer-contact-item">
+                      <Phone size={14} style={{ flexShrink: 0, marginTop: '3px' }} />
+                      <span>{storeSettings.phone || storeSettings.whatsapp}</span>
+                    </div>
+                    <div className="footer-contact-item">
+                      <HelpCircle size={14} style={{ flexShrink: 0, marginTop: '3px' }} />
+                      <span>{storeSettings.email}</span>
+                    </div>
+                    <div className="footer-contact-item">
+                      <MapPin size={14} style={{ flexShrink: 0, marginTop: '3px' }} />
+                      <span>{storeSettings.address}</span>
+                    </div>
+                    <div className="footer-contact-item">
+                      <Clock size={14} style={{ flexShrink: 0, marginTop: '3px' }} />
+                      <span>Delivery in 2 - 4 business days nationwide</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div
-              style={{
-                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                paddingTop: '1.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '1rem',
-                fontSize: '0.82rem',
-                color: 'rgba(255, 255, 255, 0.6)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
-                <span>© 2026 {storeSettings.storeName}. All rights reserved.</span>
+            {/* 4. THIN HORIZONTAL DIVIDER */}
+            <div className="footer-divider" />
+
+            {/* 5. BOTTOM BAR (COPYRIGHT, PAYMENT BADGES & TERMS/PRIVACY) */}
+            <div className="footer-bottom-row">
+              <div className="footer-copyright">
+                © 2026 {storeSettings.storeName}. All Right Reserved.
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+
+              <div className="footer-payment-badges">
                 {['Cash on Delivery', 'EasyPaisa', 'JazzCash', 'Bank Transfer'].map((pay, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                      color: '#ffffff',
-                      padding: '0.2rem 0.55rem',
-                      borderRadius: '4px',
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                    }}
-                  >
+                  <span key={i} className="footer-pay-pill">
                     {pay}
                   </span>
                 ))}
+              </div>
+
+              <div className="footer-legal-links">
+                <button
+                  type="button"
+                  onClick={() => scrollTo(footerRef)}
+                  className="footer-legal-link"
+                >
+                  Terms of Service
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollTo(footerRef)}
+                  className="footer-legal-link"
+                >
+                  Privacy Policy
+                </button>
               </div>
             </div>
           </div>
@@ -2593,14 +2830,14 @@ export default function UserStorePage({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '1.2rem 1.5rem',
-                borderBottom: '1px solid #EFEAEB',
+                borderBottom: '1px solid #EFE7DC',
                 backgroundColor: '#ffffff',
                 flexShrink: 0,
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <ShoppingBag size={20} style={{ color: theme.primary }} />
-                <h3 className="font-serif" style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#260618' }}>
+                <h3 className="font-serif" style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: '#2C1810' }}>
                   {checkoutStep === 'cart'
                     ? `Shopping Bag (${itemsCount})`
                     : checkoutStep === 'checkout'
@@ -2622,9 +2859,9 @@ export default function UserStorePage({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '0.35rem',
-                    backgroundColor: '#FDF2F6',
+                    backgroundColor: '#F5EBE0',
                     color: theme.primary,
-                    border: '1px solid #F2D3DF',
+                    border: '1px solid #E8DEC8',
                     padding: '0.35rem 0.75rem',
                     borderRadius: '999px',
                     fontSize: '0.78rem',
@@ -2643,7 +2880,7 @@ export default function UserStorePage({
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: '#6A6367',
+                    color: '#6B5D55',
                     cursor: 'pointer',
                     padding: '0.25rem',
                     display: 'flex',
@@ -2668,7 +2905,7 @@ export default function UserStorePage({
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '0.55rem 1.5rem',
-                backgroundColor: '#FDF2F6',
+                backgroundColor: '#F5EBE0',
                 borderBottom: '1px solid #F9E2EC',
                 cursor: 'pointer',
                 fontSize: '0.78rem',
@@ -2689,9 +2926,9 @@ export default function UserStorePage({
             {checkoutStep === 'cart' && (
               <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                 {cartItems.length === 0 ? (
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#8A8287', textAlign: 'center', padding: '2rem 1.5rem' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#8C7D73', textAlign: 'center', padding: '2rem 1.5rem' }}>
                     <ShoppingBag size={48} strokeWidth={1.2} style={{ marginBottom: '1rem', color: '#D4CCD0' }} />
-                    <h4 style={{ fontSize: '1.1rem', color: '#260618', marginBottom: '0.4rem' }}>Your bag is empty</h4>
+                    <h4 style={{ fontSize: '1.1rem', color: '#2C1810', marginBottom: '0.4rem' }}>Your bag is empty</h4>
                     <p style={{ fontSize: '0.88rem', maxWidth: '240px', marginBottom: '1.5rem' }}>
                       Add any product from the store to order with Cash on Delivery.
                     </p>
@@ -2747,9 +2984,9 @@ export default function UserStorePage({
                             display: 'flex',
                             gap: '0.85rem',
                             padding: '0.75rem',
-                            backgroundColor: '#FCF9FA',
+                            backgroundColor: '#FDFBF7',
                             borderRadius: '12px',
-                            border: '1px solid #EFEAEB',
+                            border: '1px solid #EFE7DC',
                           }}
                         >
                           <img
@@ -2758,14 +2995,14 @@ export default function UserStorePage({
                             style={{ width: '68px', height: '68px', borderRadius: '8px', objectFit: 'cover' }}
                           />
                           <div style={{ flex: 1 }}>
-                            <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#260618', marginBottom: '0.25rem' }}>
+                            <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#2C1810', marginBottom: '0.25rem' }}>
                               {item.title}
                             </h4>
                             <div style={{ fontSize: '0.88rem', fontWeight: 700, color: theme.primary, marginBottom: '0.5rem' }}>
                               {formatPrice(item.price)}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #DCD5D8', borderRadius: '6px', backgroundColor: '#ffffff' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #E8DEC8', borderRadius: '6px', backgroundColor: '#ffffff' }}>
                                 <button
                                   onClick={() => updateQty(item._id, item.qty - 1)}
                                   style={{ background: 'none', border: 'none', padding: '0.2rem 0.5rem', cursor: 'pointer', fontWeight: 700 }}
@@ -2792,16 +3029,16 @@ export default function UserStorePage({
                       ))}
                     </div>
 
-                    <div style={{ flexShrink: 0, borderTop: '1px solid #EFEAEB', padding: '1rem 1.5rem', backgroundColor: '#ffffff', boxShadow: '0 -4px 16px rgba(0,0,0,0.04)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', color: '#6A6367', marginBottom: '0.35rem' }}>
+                    <div style={{ flexShrink: 0, borderTop: '1px solid #EFE7DC', padding: '1rem 1.5rem', backgroundColor: '#ffffff', boxShadow: '0 -4px 16px rgba(0,0,0,0.04)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', color: '#6B5D55', marginBottom: '0.35rem' }}>
                         <span>Subtotal</span>
                         <span>{formatPrice(totalPrice)}</span>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', color: '#6A6367', marginBottom: '0.65rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', color: '#6B5D55', marginBottom: '0.65rem' }}>
                         <span>Delivery (Courier COD)</span>
                         <span style={{ color: '#059669', fontWeight: 600 }}>Rs. {deliveryFee}</span>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.15rem', fontWeight: 700, color: '#260618', marginBottom: '1rem', borderTop: '1px dashed #EFEAEB', paddingTop: '0.65rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.15rem', fontWeight: 700, color: '#2C1810', marginBottom: '1rem', borderTop: '1px dashed #EFE7DC', paddingTop: '0.65rem' }}>
                         <span>Total (Cash on Delivery)</span>
                         <span style={{ color: theme.primary }}>{formatPrice(totalPrice + deliveryFee)}</span>
                       </div>
@@ -2824,7 +3061,7 @@ export default function UserStorePage({
                           justifyContent: 'center',
                           gap: '0.5rem',
                           border: 'none',
-                          boxShadow: '0 4px 14px rgba(109, 14, 59, 0.25)',
+                          boxShadow: '0 4px 14px rgba(92, 58, 33, 0.25)',
                         }}
                       >
                         <Lock size={16} />
@@ -2868,7 +3105,7 @@ export default function UserStorePage({
                   )}
 
                   <div>
-                    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#4A4248', display: 'block', marginBottom: '0.25rem' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#6B5D55', display: 'block', marginBottom: '0.25rem' }}>
                       Your Full Name *
                     </label>
                     <input
@@ -2881,7 +3118,7 @@ export default function UserStorePage({
                         width: '100%',
                         padding: '0.65rem 0.85rem',
                         borderRadius: '6px',
-                        border: '1px solid #DCD5D8',
+                        border: '1px solid #E8DEC8',
                         fontSize: '0.9rem',
                         outline: 'none',
                       }}
@@ -2889,7 +3126,7 @@ export default function UserStorePage({
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#4A4248', display: 'block', marginBottom: '0.25rem' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#6B5D55', display: 'block', marginBottom: '0.25rem' }}>
                       WhatsApp / Mobile Number * (Courier calls this number)
                     </label>
                     <input
@@ -2902,7 +3139,7 @@ export default function UserStorePage({
                         width: '100%',
                         padding: '0.65rem 0.85rem',
                         borderRadius: '6px',
-                        border: '1px solid #DCD5D8',
+                        border: '1px solid #E8DEC8',
                         fontSize: '0.9rem',
                         outline: 'none',
                       }}
@@ -2910,7 +3147,7 @@ export default function UserStorePage({
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#4A4248', display: 'block', marginBottom: '0.25rem' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#6B5D55', display: 'block', marginBottom: '0.25rem' }}>
                       Complete Delivery Address *
                     </label>
                     <textarea
@@ -2923,7 +3160,7 @@ export default function UserStorePage({
                         width: '100%',
                         padding: '0.65rem 0.85rem',
                         borderRadius: '6px',
-                        border: '1px solid #DCD5D8',
+                        border: '1px solid #E8DEC8',
                         fontSize: '0.9rem',
                         outline: 'none',
                         resize: 'none',
@@ -2933,7 +3170,7 @@ export default function UserStorePage({
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                     <div>
-                      <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#4A4248', display: 'block', marginBottom: '0.25rem' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#6B5D55', display: 'block', marginBottom: '0.25rem' }}>
                         City *
                       </label>
                       <input
@@ -2946,14 +3183,14 @@ export default function UserStorePage({
                           width: '100%',
                           padding: '0.65rem 0.85rem',
                           borderRadius: '6px',
-                          border: '1px solid #DCD5D8',
+                          border: '1px solid #E8DEC8',
                           fontSize: '0.9rem',
                           outline: 'none',
                         }}
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#4A4248', display: 'block', marginBottom: '0.25rem' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#6B5D55', display: 'block', marginBottom: '0.25rem' }}>
                         Payment Method
                       </label>
                       <select
@@ -2963,7 +3200,7 @@ export default function UserStorePage({
                           width: '100%',
                           padding: '0.65rem 0.85rem',
                           borderRadius: '6px',
-                          border: '1px solid #DCD5D8',
+                          border: '1px solid #E8DEC8',
                           fontSize: '0.9rem',
                           outline: 'none',
                           backgroundColor: '#ffffff',
@@ -3238,7 +3475,7 @@ export default function UserStorePage({
                               gap: '0.4rem',
                               padding: '1.35rem 1rem',
                               backgroundColor: '#FFFFFF',
-                              border: '2px dashed #6D0E3B',
+                              border: '2px dashed #5C3A21',
                               borderRadius: '10px',
                               cursor: 'pointer',
                               transition: 'all 0.2s ease',
@@ -3250,7 +3487,7 @@ export default function UserStorePage({
                                 width: '44px',
                                 height: '44px',
                                 borderRadius: '50%',
-                                backgroundColor: '#FDF2F5',
+                                backgroundColor: '#F5EBE0',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -3268,9 +3505,9 @@ export default function UserStorePage({
                             <span
                               style={{
                                 marginTop: '0.4rem',
-                                backgroundColor: '#FDF2F5',
+                                backgroundColor: '#F5EBE0',
                                 color: theme.primary,
-                                border: '1px solid #F2D3DF',
+                                border: '1px solid #E8DEC8',
                                 padding: '0.4rem 1rem',
                                 borderRadius: '6px',
                                 fontSize: '0.8rem',
@@ -3384,7 +3621,7 @@ export default function UserStorePage({
                   )}
 
                   <div>
-                    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#4A4248', display: 'block', marginBottom: '0.25rem' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#6B5D55', display: 'block', marginBottom: '0.25rem' }}>
                       Order Special Instructions (Optional)
                     </label>
                     <input
@@ -3396,7 +3633,7 @@ export default function UserStorePage({
                         width: '100%',
                         padding: '0.65rem 0.85rem',
                         borderRadius: '6px',
-                        border: '1px solid #DCD5D8',
+                        border: '1px solid #E8DEC8',
                         fontSize: '0.9rem',
                         outline: 'none',
                       }}
@@ -3408,7 +3645,7 @@ export default function UserStorePage({
                 <div
                   style={{
                     flexShrink: 0,
-                    borderTop: '1px solid #EFEAEB',
+                    borderTop: '1px solid #EFE7DC',
                     padding: '1rem 1.5rem',
                     backgroundColor: '#ffffff',
                     boxShadow: '0 -4px 16px rgba(0,0,0,0.05)',
@@ -3423,7 +3660,7 @@ export default function UserStorePage({
                     }}
                   >
                     <div>
-                      <span style={{ fontSize: '0.82rem', color: '#6A6367', display: 'block' }}>
+                      <span style={{ fontSize: '0.82rem', color: '#6B5D55', display: 'block' }}>
                         {paymentMethod === 'Cash on Delivery' ? 'Total Cash to Pay' : 'Total Amount to Transfer'}
                       </span>
                       <span style={{ fontSize: '1.25rem', fontWeight: 800, color: theme.primary }}>
@@ -3451,10 +3688,10 @@ export default function UserStorePage({
                       style={{
                         padding: '0.85rem 1.15rem',
                         borderRadius: '10px',
-                        border: '1.5px solid #DCD5D8',
+                        border: '1.5px solid #E8DEC8',
                         backgroundColor: '#ffffff',
                         fontWeight: 600,
-                        color: '#4A4248',
+                        color: '#6B5D55',
                         cursor: 'pointer',
                       }}
                     >
@@ -3487,7 +3724,7 @@ export default function UserStorePage({
                         justifyContent: 'center',
                         gap: '0.5rem',
                         border: 'none',
-                        boxShadow: '0 4px 14px rgba(109, 14, 59, 0.28)',
+                        boxShadow: '0 4px 14px rgba(92, 58, 33, 0.28)',
                         transition: 'all 0.2s ease',
                       }}
                     >
@@ -3526,16 +3763,16 @@ export default function UserStorePage({
                   <Check size={32} strokeWidth={2.5} />
                 </div>
 
-                <h3 className="font-serif" style={{ fontSize: '1.6rem', color: '#260618', marginBottom: '0.4rem' }}>
+                <h3 className="font-serif" style={{ fontSize: '1.6rem', color: '#2C1810', marginBottom: '0.4rem' }}>
                   Order Confirmed!
                 </h3>
 
-                <p style={{ fontSize: '0.9rem', color: '#6A6367', marginBottom: '1.5rem' }}>
+                <p style={{ fontSize: '0.9rem', color: '#6B5D55', marginBottom: '1.5rem' }}>
                   We received your order. Our team will verify via WhatsApp/Call and dispatch your parcel.
                 </p>
 
-                <div style={{ backgroundColor: '#F9F5F7', padding: '1rem 1.5rem', borderRadius: '12px', marginBottom: '2rem', width: '100%' }}>
-                  <span style={{ fontSize: '0.78rem', color: '#8A8287', textTransform: 'uppercase' }}>Your Order ID</span>
+                <div style={{ backgroundColor: '#F5EBE0', padding: '1rem 1.5rem', borderRadius: '12px', marginBottom: '2rem', width: '100%' }}>
+                  <span style={{ fontSize: '0.78rem', color: '#8C7D73', textTransform: 'uppercase' }}>Your Order ID</span>
                   <div style={{ fontSize: '1.3rem', fontWeight: 800, color: theme.primary }}>
                     {placedOrderData.orderNumber || placedOrderData._id}
                   </div>
@@ -3567,10 +3804,10 @@ export default function UserStorePage({
                     }}
                     style={{
                       backgroundColor: '#ffffff',
-                      color: '#4A4248',
+                      color: '#6B5D55',
                       padding: '0.75rem',
                       borderRadius: '8px',
-                      border: '1px solid #DCD5D8',
+                      border: '1px solid #E8DEC8',
                       fontWeight: 600,
                       cursor: 'pointer',
                     }}
@@ -3592,13 +3829,13 @@ export default function UserStorePage({
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: '2rem', position: 'relative' }}>
             <button
               onClick={() => setQuickViewProduct(null)}
-              style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: '#6A6367', cursor: 'pointer' }}
+              style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: '#6B5D55', cursor: 'pointer' }}
             >
               <X size={24} />
             </button>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }} className="hero-split">
-              <div className="quickview-img-box" style={{ borderRadius: '16px', overflow: 'hidden', height: '340px', backgroundColor: '#F8F3F5' }}>
+              <div className="quickview-img-box" style={{ borderRadius: '16px', overflow: 'hidden', height: '340px', backgroundColor: '#F5EBE0' }}>
                 <img
                   src={quickViewProduct.image}
                   alt={quickViewProduct.title}
@@ -3607,11 +3844,11 @@ export default function UserStorePage({
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '0.78rem', color: '#8A8287', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                <span style={{ fontSize: '0.78rem', color: '#8C7D73', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
                   {quickViewProduct.category}
                 </span>
 
-                <h3 className="font-serif" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#260618', marginBottom: '0.65rem' }}>
+                <h3 className="font-serif" style={{ fontSize: '1.5rem', fontWeight: 700, color: '#2C1810', marginBottom: '0.65rem' }}>
                   {quickViewProduct.title}
                 </h3>
 
@@ -3620,13 +3857,13 @@ export default function UserStorePage({
                     {formatPrice(quickViewProduct.price)}
                   </span>
                   {quickViewProduct.originalPrice && (
-                    <span style={{ fontSize: '1.05rem', color: '#A89FA4', textDecoration: 'line-through' }}>
+                    <span style={{ fontSize: '1.05rem', color: '#A39489', textDecoration: 'line-through' }}>
                       {formatPrice(quickViewProduct.originalPrice)}
                     </span>
                   )}
                 </div>
 
-                <p style={{ fontSize: '0.92rem', color: '#6A6367', lineHeight: 1.6, marginBottom: '1.75rem' }}>
+                <p style={{ fontSize: '0.92rem', color: '#6B5D55', lineHeight: 1.6, marginBottom: '1.75rem' }}>
                   {quickViewProduct.description || 'Premium quality verified item. 100% Cash on Delivery available.'}
                 </p>
 
@@ -3682,8 +3919,8 @@ export default function UserStorePage({
                       onClick={(e) => handleCopyProductLink(quickViewProduct, e)}
                       style={{
                         backgroundColor: '#ffffff',
-                        color: '#260618',
-                        border: '1px solid #DCD5D8',
+                        color: '#2C1810',
+                        border: '1px solid #E8DEC8',
                         padding: '0.55rem',
                         borderRadius: '6px',
                         fontSize: '0.85rem',
@@ -3714,7 +3951,7 @@ export default function UserStorePage({
       {wishlistDrawerOpen && (
         <div className="drawer-backdrop" onClick={() => setWishlistDrawerOpen(false)}>
           <div className="drawer-panel" onClick={(e) => e.stopPropagation()} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #EFEAEB', paddingBottom: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #EFE7DC', paddingBottom: '0.75rem' }}>
               <h3 className="font-serif" style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>
                 Saved Favorites ({wishlist.length})
               </h3>
@@ -3730,7 +3967,7 @@ export default function UserStorePage({
             ) : (
               <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 {wishlist.map((item) => (
-                  <div key={item._id} style={{ display: 'flex', gap: '0.75rem', padding: '0.65rem', backgroundColor: '#FCF9FA', borderRadius: '10px' }}>
+                  <div key={item._id} style={{ display: 'flex', gap: '0.75rem', padding: '0.65rem', backgroundColor: '#FDFBF7', borderRadius: '10px' }}>
                     <img src={item.image} alt={item.title} style={{ width: '56px', height: '56px', borderRadius: '6px', objectFit: 'cover' }} />
                     <div style={{ flex: 1 }}>
                       <h4 style={{ fontSize: '0.85rem', fontWeight: 600, margin: 0 }}>{item.title}</h4>
@@ -3825,7 +4062,7 @@ export default function UserStorePage({
                 placeholder="Enter Order ID (e.g. ORD-98241)"
                 value={trackSearchId}
                 onChange={(e) => setTrackSearchId(e.target.value)}
-                style={{ flex: 1, padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid #DCD5D8', fontSize: '0.95rem', outline: 'none' }}
+                style={{ flex: 1, padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid #E8DEC8', fontSize: '0.95rem', outline: 'none' }}
               />
               <button
                 onClick={() => handleTrackOrder()}
@@ -3909,11 +4146,11 @@ export default function UserStorePage({
               ];
 
               return (
-                <div style={{ backgroundColor: '#FAF6F8', borderRadius: '16px', padding: '1.5rem', border: '1px solid #EFEAEB' }}>
+                <div style={{ backgroundColor: '#F5EBE0', borderRadius: '16px', padding: '1.5rem', border: '1px solid #EFE7DC' }}>
                   {/* Tracking Header */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px dashed #E0D6DA', paddingBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px dashed #E8DEC8', paddingBottom: '0.75rem' }}>
                     <div>
-                      <span style={{ fontSize: '0.72rem', color: '#8A8287', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#8C7D73', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                         Live Tracking ID
                       </span>
                       <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: theme.primary, margin: '2px 0 0' }}>
@@ -3949,7 +4186,7 @@ export default function UserStorePage({
                   </div>
 
                   {/* Horizontal Milestone Connector Bar */}
-                  <div style={{ marginBottom: '1.75rem', padding: '0.85rem 0.5rem', backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #EFEAEB' }}>
+                  <div style={{ marginBottom: '1.75rem', padding: '0.85rem 0.5rem', backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #EFE7DC' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
                       {steps.map((st, sIdx) => {
                         const isDone = st.done;
@@ -4124,7 +4361,7 @@ export default function UserStorePage({
                       padding: '1rem',
                       backgroundColor: '#FFFFFF',
                       borderRadius: '12px',
-                      border: '1px solid #EFEAEB',
+                      border: '1px solid #EFE7DC',
                       fontSize: '0.85rem',
                     }}
                   >
@@ -4166,7 +4403,7 @@ export default function UserStorePage({
                       }}
                     >
                       <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', borderBottom: '1px solid #EFEAEB', paddingBottom: '0.85rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', borderBottom: '1px solid #EFE7DC', paddingBottom: '0.85rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                             {storeSettings.storeLogo && (
                               <img
@@ -4195,8 +4432,8 @@ export default function UserStorePage({
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             width: '100%',
-                            backgroundColor: '#FFF1F5',
-                            border: '1.5px solid #FDE2EA',
+                            backgroundColor: '#FDFBF7',
+                            border: '1.5px solid #EFE7DC',
                             borderRadius: '12px',
                             padding: '0.75rem 0.95rem',
                             cursor: 'pointer',
@@ -4221,10 +4458,10 @@ export default function UserStorePage({
                               <Heart size={18} fill="#DC2626" />
                             </div>
                             <div>
-                              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#260618' }}>
+                              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#2C1810' }}>
                                 My Wishlist
                               </div>
-                              <div style={{ fontSize: '0.72rem', color: '#8A8287' }}>
+                              <div style={{ fontSize: '0.72rem', color: '#8C7D73' }}>
                                 {wishlist.length === 0 ? 'No items saved yet' : `${wishlist.length} ${wishlist.length === 1 ? 'item' : 'items'} saved`}
                               </div>
                             </div>
@@ -4244,7 +4481,7 @@ export default function UserStorePage({
                                 {wishlist.length}
                               </span>
                             )}
-                            <span style={{ fontSize: '0.95rem', color: '#8A8287', fontWeight: 700 }}>→</span>
+                            <span style={{ fontSize: '0.95rem', color: '#8C7D73', fontWeight: 700 }}>→</span>
                           </div>
                         </button>
 
@@ -4285,7 +4522,7 @@ export default function UserStorePage({
                       </div>
 
                         {/* Mobile Menu Bottom Branding & Quick WhatsApp */}
-                        <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid #EFEAEB', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid #EFE7DC', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                           <a
                             href={`https://wa.me/${(storeSettings.whatsapp || '+923065779097').replace(/[^0-9]/g, '')}`}
                             target="_blank"
@@ -4309,7 +4546,7 @@ export default function UserStorePage({
                             <span>WhatsApp Helpline</span>
                           </a>
 
-                    <div style={{ fontSize: '0.72rem', color: '#8A8588', textAlign: 'center', lineHeight: 1.4 }}>
+                    <div style={{ fontSize: '0.72rem', color: '#8C7D73', textAlign: 'center', lineHeight: 1.4 }}>
                       🚚 100% Cash on Delivery<br />📦 Open Parcel Delivery Across Pakistan
                     </div>
                   </div>
@@ -4333,7 +4570,7 @@ export default function UserStorePage({
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    boxShadow: '0 8px 24px rgba(109, 14, 59, 0.35)',
+                    boxShadow: '0 8px 24px rgba(92, 58, 33, 0.35)',
                   }}
                 >
                   <Sparkles size={18} />

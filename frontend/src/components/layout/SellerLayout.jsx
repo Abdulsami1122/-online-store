@@ -83,14 +83,14 @@ export default function SellerLayout() {
               style={{
                 gap: '0.45rem',
                 fontWeight: 700,
-                backgroundColor: '#6D0E3B',
+                backgroundColor: '#5C3A21',
                 color: '#ffffff',
                 border: 'none',
                 display: 'inline-flex',
                 alignItems: 'center',
                 padding: '0.5rem 1rem',
                 borderRadius: '8px',
-                boxShadow: '0 2px 8px rgba(109, 14, 59, 0.2)',
+                boxShadow: '0 2px 8px rgba(92, 58, 33, 0.2)',
                 textDecoration: 'none',
               }}
             >

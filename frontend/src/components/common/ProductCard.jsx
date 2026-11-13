@@ -64,7 +64,7 @@ export default function ProductCard({ product }) {
           position: 'relative',
           paddingTop: '75%',
           overflow: 'hidden',
-          backgroundColor: '#121829',
+          backgroundColor: '#F5EBE0',
         }}
       >
         <img
@@ -166,11 +166,12 @@ export default function ProductCard({ product }) {
               aria-label="Add to cart"
               className="btn btn-sm"
               style={{
-                background: added ? 'var(--color-success)' : 'rgba(99, 102, 241, 0.15)',
-                color: added ? '#fff' : '#818cf8',
-                border: added ? '1px solid var(--color-success)' : '1px solid rgba(99, 102, 241, 0.3)',
+                background: added ? 'var(--color-success, #16A34A)' : 'var(--primary-light, #F5EBE0)',
+                color: added ? '#fff' : 'var(--primary, #5C3A21)',
+                border: added ? '1px solid var(--color-success, #16A34A)' : '1px solid var(--border-color, #E8DEC8)',
                 padding: '0.5rem 0.75rem',
                 borderRadius: 'var(--radius-md)',
+                fontWeight: 600,
               }}
             >
               {added ? (
@@ -190,8 +191,8 @@ export default function ProductCard({ product }) {
       <style>{`
         .product-card:hover {
           transform: translateY(-5px);
-          border-color: rgba(99, 102, 241, 0.35);
-          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+          border-color: rgba(92, 58, 33, 0.35);
+          box-shadow: 0 12px 30px rgba(44, 24, 16, 0.08);
         }
         .product-card:hover .product-image {
           transform: scale(1.06);

@@ -187,6 +187,8 @@ export default function AdminSettingsPage() {
     try {
       // Save locally for instant frontend sync
       localStorage.setItem('user_store_custom_info', JSON.stringify(settings));
+      window.dispatchEvent(new CustomEvent('store-settings-updated', { detail: settings }));
+      window.dispatchEvent(new Event('storage'));
 
       const profilePayload = {
         name: user?.name || 'Store Administrator',
