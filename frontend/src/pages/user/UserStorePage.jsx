@@ -440,6 +440,8 @@ export default function UserStorePage({
   // Mixed Hero Video & Transparent Navbar Controls
   const [activeSceneIdx, setActiveSceneIdx] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isNavHidden, setIsNavHidden] = useState(false);
+  const lastScrollYRef = useRef(0);
   const [isVideoPlaying, setIsVideoPlaying] = useState(true);
   const [isVideoMuted, setIsVideoMuted] = useState(true);
   const videoRef = useRef(null);
@@ -466,11 +468,39 @@ export default function UserStorePage({
     }
   }, [activeSceneIdx]);
 
-  // Window scroll listener for transparent navbar transitioning to solid sticky
+  // Smart Navbar Scroll Listener:
+  // 1. In Hero Section (scrollY <= 60): 100% transparent text over video (no bg, no line, no border)
+  // 2. Past Hero Section (scrollY > 60): Complete styled navbar
+  // 3. Scroll Down: Auto-hide (translateY(-100%))
+  // 4. Scroll Up: Reveal complete navbar (translateY(0))
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
+      const currentScrollY = window.scrollY;
+      const lastScrollY = lastScrollYRef.current;
+      const deltaY = currentScrollY - lastScrollY;
+
+      // 1. When at or near the hero section (top 60px)
+      if (currentScrollY <= 60) {
+        setIsScrolled(false);
+        setIsNavHidden(false);
+      } else {
+        // 2. Past hero -> Complete nav mode
+        setIsScrolled(true);
+
+        // 3. Scroll Down -> Hide navbar
+        if (deltaY > 6 && currentScrollY > 100) {
+          setIsNavHidden(true);
+        } else if (deltaY < -6) {
+          // 4. Scroll Up -> Reveal complete navbar
+          setIsNavHidden(false);
+        }
+      }
+
+      lastScrollYRef.current = currentScrollY;
     };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
@@ -545,6 +575,218 @@ export default function UserStorePage({
   const [trackingOrder, setTrackingOrder] = useState(null);
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [trackingError, setTrackingError] = useState(null);
+
+  // Mobile Floating Notch Bottom Navigation State & Hopping Paper Disc
+  const [activeBottomTab, setActiveBottomTab] = useState(0);
+  const [isDiscHopping, setIsDiscHopping] = useState(false);
+  const hopTimeoutRef = useRef(null);
+
+  const handleBottomTabClick = (index, action) => {
+    if (activeBottomTab !== index) {
+      setIsDiscHopping(true);
+      setActiveBottomTab(index);
+      if (hopTimeoutRef.current) clearTimeout(hopTimeoutRef.current);
+      hopTimeoutRef.current = setTimeout(() => {
+        setIsDiscHopping(false);
+      }, 430);
+    }
+    if (action) action();
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hopTimeoutRef.current) clearTimeout(hopTimeoutRef.current);
+    };
+  }, []);
+
+  // Sync scroll position to Home, Categories, Shop bottom tab when not hopping
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleScroll = () => {
+      if (trackingModalOpen || cartDrawerOpen || isDiscHopping) return;
+      const scrollPos = window.scrollY + 250;
+      const categoriesTop = categoriesRef.current ? categoriesRef.current.offsetTop : 600;
+      const productsTop = productsRef.current ? productsRef.current.offsetTop : 1200;
+
+      if (scrollPos < categoriesTop) {
+        if (activeBottomTab !== 0) setActiveBottomTab(0);
+      } else if (scrollPos >= categoriesTop && scrollPos < productsTop) {
+        if (activeBottomTab !== 1) setActiveBottomTab(1);
+      } else if (scrollPos >= productsTop) {
+        if (activeBottomTab !== 2) setActiveBottomTab(2);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [activeBottomTab, isDiscHopping, trackingModalOpen, cartDrawerOpen]);
+
+  // Keep Track & Bag synchronized with their active overlays
+  useEffect(() => {
+    if (cartDrawerOpen) {
+      setActiveBottomTab(4);
+    } else if (trackingModalOpen) {
+      setActiveBottomTab(3);
+    }
+  }, [cartDrawerOpen, trackingModalOpen]);
+
+  // Mobile Bottom Navigation Tabs Configuration
+  const MOBILE_NAV_TABS = [
+    {
+      id: 'home',
+      label: 'Home',
+      icon: <Home size={20} strokeWidth={2.1} />,
+      activeIcon: <Home size={22} strokeWidth={2.4} />,
+      action: () => scrollTo(heroRef),
+    },
+    {
+      id: 'categories',
+      label: 'Categories',
+      icon: <LayoutGrid size={20} strokeWidth={2.1} />,
+      activeIcon: <LayoutGrid size={22} strokeWidth={2.4} />,
+      action: () => scrollTo(categoriesRef),
+    },
+    {
+      id: 'shop',
+      label: 'Shop',
+      icon: <Package size={20} strokeWidth={2.1} />,
+      activeIcon: <Package size={22} strokeWidth={2.4} />,
+      action: () => scrollTo(productsRef),
+    },
+    {
+      id: 'track',
+      label: 'Track',
+      icon: <Truck size={20} strokeWidth={2.1} />,
+      activeIcon: <Truck size={22} strokeWidth={2.4} />,
+      action: () => setTrackingModalOpen(true),
+    },
+    {
+      id: 'bag',
+      label: 'Bag',
+      icon: <ShoppingBag size={20} strokeWidth={2.1} />,
+      activeIcon: <ShoppingBag size={22} strokeWidth={2.4} />,
+      badge: cartItems.length > 0 ? cartItems.length : null,
+      action: () => {
+        setCartDrawerOpen(true);
+        setCheckoutStep('cart');
+      },
+    },
+  ];
+
+  // Testimonial Carousel State & Controls
+  const [currentReviewIdx, setCurrentReviewIdx] = useState(0);
+  const [isReviewAutoPlaying, setIsReviewAutoPlaying] = useState(true);
+  const [slidesToShow, setSlidesToShow] = useState(3);
+  const [reviewTouchStart, setReviewTouchStart] = useState(null);
+
+  const TESTIMONIALS = [
+    {
+      name: 'Hamza Tariq',
+      role: 'Verified Buyer (Lahore)',
+      text: 'Saw the post on Facebook Marketplace and ordered through this website. Arrived in 2 days, courier let me open the box first, exactly as described!',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+      item: 'Air Cushion Running Shoes',
+      rating: 5,
+    },
+    {
+      name: 'Ayesha Siddiqui',
+      role: 'Verified Buyer (Karachi)',
+      text: 'Outstanding quality and very responsive on WhatsApp. The raw Sidr honey is 100% genuine and the ambient LED kit looks phenomenal in my car.',
+      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
+      item: 'Pure Natural Sidr Honey (1kg)',
+      rating: 5,
+    },
+    {
+      name: 'Usman Ali',
+      role: 'Verified Buyer (Islamabad)',
+      text: 'Smooth 1-click Cash on Delivery order. No complicated sign-up. The sneakers fit comfortably and stitching is top quality.',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
+      item: 'Urban Streetwear Denim',
+      rating: 5,
+    },
+    {
+      name: 'Bilal Khan',
+      role: 'Verified Buyer (Peshawar)',
+      text: 'I was hesitant about ordering online, but the open parcel guarantee made me confident. Checked the item before paying the rider. 10/10 service!',
+      avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150&q=80',
+      item: 'Luxury Car Detailing Kit',
+      rating: 5,
+    },
+    {
+      name: 'Fatima Noor',
+      role: 'Verified Buyer (Faisalabad)',
+      text: 'The fabric quality is unreal for this price. Ordered for my brother and he absolutely loved it. Super fast delivery via TCS.',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+      item: 'Oversized Streetwear Hoodie',
+      rating: 5,
+    },
+    {
+      name: 'Zainab Raza',
+      role: 'Verified Buyer (Multan)',
+      text: 'Best online shopping experience in Pakistan so far. WhatsApp support answered my size question in minutes. Highly recommended!',
+      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80',
+      item: 'Organic Flower Sidr Honey',
+      rating: 5,
+    },
+  ];
+
+  useEffect(() => {
+    const updateSlidesToShow = () => {
+      if (typeof window === 'undefined') return;
+      if (window.innerWidth < 768) {
+        setSlidesToShow(1);
+      } else if (window.innerWidth < 1024) {
+        setSlidesToShow(2);
+      } else {
+        setSlidesToShow(3);
+      }
+    };
+    updateSlidesToShow();
+    window.addEventListener('resize', updateSlidesToShow);
+    return () => window.removeEventListener('resize', updateSlidesToShow);
+  }, []);
+
+  const maxReviewIdx = Math.max(0, TESTIMONIALS.length - slidesToShow);
+
+  useEffect(() => {
+    if (currentReviewIdx > maxReviewIdx) {
+      setCurrentReviewIdx(maxReviewIdx);
+    }
+  }, [maxReviewIdx, currentReviewIdx]);
+
+  const nextReview = () => {
+    setCurrentReviewIdx((prev) => (prev >= maxReviewIdx ? 0 : prev + 1));
+  };
+
+  const prevReview = () => {
+    setCurrentReviewIdx((prev) => (prev <= 0 ? maxReviewIdx : prev - 1));
+  };
+
+  useEffect(() => {
+    if (!isReviewAutoPlaying) return;
+    const interval = setInterval(() => {
+      setCurrentReviewIdx((prev) => (prev >= maxReviewIdx ? 0 : prev + 1));
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [isReviewAutoPlaying, maxReviewIdx]);
+
+  const handleReviewTouchStart = (e) => {
+    setReviewTouchStart(e.touches[0].clientX);
+    setIsReviewAutoPlaying(false);
+  };
+
+  const handleReviewTouchEnd = (e) => {
+    if (reviewTouchStart === null) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = reviewTouchStart - touchEnd;
+    if (diff > 40) {
+      nextReview();
+    } else if (diff < -40) {
+      prevReview();
+    }
+    setReviewTouchStart(null);
+    setIsReviewAutoPlaying(true);
+  };
 
   // Newsletter
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -899,58 +1141,59 @@ export default function UserStorePage({
       className="font-sans storefront-bottom-padding"
     >
       {/* ================================================================= */}
-      {/* 1. TOP ADVERTISEMENT MARQUEE CAROUSEL (Text flows from right)     */}
+      {/* 2. SMART NAVIGATION WRAPPER                                        */}
+      {/* (Transparent on Hero Video, Complete on Scroll, Auto-Hides on Scroll Down, Reveals on Scroll Up) */}
       {/* ================================================================= */}
-      {storeSettings.showTicker !== false && (
-        <div className="advertisement-ticker-wrap">
-          <div className="advertisement-ticker-track">
-            {[0, 1].map((loopIdx) => {
-              const tickerItems = storeSettings.tickerText
-                ? storeSettings.tickerText.split('•').map((t) => t.trim()).filter(Boolean)
-                : [
-                  '✨ 100% CASH ON DELIVERY AVAILABLE',
-                  '🚀 2-4 DAYS FAST SHIPPING ACROSS PAKISTAN',
-                  '📦 OPEN PARCEL BEFORE PAYMENT',
-                  '🔄 7-DAY EASY REPLACEMENT & MONEY BACK',
-                  `💬 DIRECT WHATSAPP SELLER HELPLINE: ${storeSettings.whatsapp}`,
-                  '⭐ 100% VERIFIED QUALITY GUARANTEED',
-                ];
-              return (
-                <div key={loopIdx} style={{ display: 'inline-flex', alignItems: 'center' }}>
-                  {tickerItems.map((item, idx) => (
-                    <span key={idx} className="advertisement-item">
-                      <span>{item}</span>
-                      <span className="dot-divider" />
-                    </span>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ================================================================= */}
-      {/* 2. MAIN HEADER (Transparent on Hero Video, Solid when Scrolled)   */}
-      {/* ================================================================= */}
-      <header
-        className="store-sticky-header"
-        style={{
-          position: 'sticky',
-          top: 0,
-          backgroundColor: isScrolled
-            ? 'rgba(255, 255, 255, 0.98)'
-            : 'rgba(21, 12, 7, 0.22)',
-          backdropFilter: isScrolled ? 'blur(14px)' : 'blur(4px)',
-          WebkitBackdropFilter: isScrolled ? 'blur(14px)' : 'blur(4px)',
-          zIndex: 900,
-          boxShadow: isScrolled ? '0 2px 14px rgba(0, 0, 0, 0.08)' : 'none',
-          borderBottom: isScrolled
-            ? '1px solid rgba(0, 0, 0, 0.06)'
-            : '1px solid rgba(255, 255, 255, 0.15)',
-          transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-        }}
+      <div
+        className={`store-nav-wrapper ${isScrolled ? 'nav-scrolled' : 'nav-at-hero'} ${isNavHidden ? 'nav-hidden' : 'nav-visible'}`}
       >
+        {/* Top Ticker: Part of complete nav, displays when scrolled past hero */}
+        {isScrolled && storeSettings.showTicker !== false && (
+          <div className="advertisement-ticker-wrap">
+            <div className="advertisement-ticker-track">
+              {[0, 1].map((loopIdx) => {
+                const tickerItems = storeSettings.tickerText
+                  ? storeSettings.tickerText.split('•').map((t) => t.trim()).filter(Boolean)
+                  : [
+                    '✨ 100% CASH ON DELIVERY AVAILABLE',
+                    '🚀 2-4 DAYS FAST SHIPPING ACROSS PAKISTAN',
+                    '📦 OPEN PARCEL BEFORE PAYMENT',
+                    '🔄 7-DAY EASY REPLACEMENT & MONEY BACK',
+                    `💬 DIRECT WHATSAPP SELLER HELPLINE: ${storeSettings.whatsapp}`,
+                    '⭐ 100% VERIFIED QUALITY GUARANTEED',
+                  ];
+                return (
+                  <div key={loopIdx} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    {tickerItems.map((item, idx) => (
+                      <span key={idx} className="advertisement-item">
+                        <span>{item}</span>
+                        <span className="dot-divider" />
+                      </span>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <header
+          className="store-sticky-header"
+          style={{
+            backgroundColor: isScrolled
+              ? 'rgba(255, 255, 255, 0.98)'
+              : 'transparent',
+            backdropFilter: isScrolled ? 'blur(16px)' : 'none',
+            WebkitBackdropFilter: isScrolled ? 'blur(16px)' : 'none',
+            borderBottom: isScrolled
+              ? '1px solid rgba(0, 0, 0, 0.08)'
+              : 'none',
+            boxShadow: isScrolled
+              ? '0 4px 20px rgba(44, 24, 16, 0.08)'
+              : 'none',
+            transition: 'background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
+          }}
+        >
         <div
           className="container"
           style={{
@@ -1004,6 +1247,7 @@ export default function UserStorePage({
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                 <span
+                  className="brand-title-text"
                   style={{
                     fontFamily: theme.headingFont,
                     fontSize: '1.4rem',
@@ -1020,6 +1264,7 @@ export default function UserStorePage({
                 </span>
               </div>
               <span
+                className="brand-sub-text"
                 style={{
                   fontSize: '0.68rem',
                   color: isScrolled ? '#8C7D73' : 'rgba(255, 255, 255, 0.85)',
@@ -1086,6 +1331,7 @@ export default function UserStorePage({
             {/* Search */}
             <button
               onClick={() => setSearchModalOpen(true)}
+              className="header-icon-btn"
               style={{
                 background: 'none',
                 border: 'none',
@@ -1201,7 +1447,7 @@ export default function UserStorePage({
                 color: isScrolled ? '#2C1810' : '#FFFFFF',
                 transition: 'color 0.3s ease',
               }}
-              className="mobile-nav-toggle"
+              className="mobile-nav-toggle header-icon-btn"
               aria-label="Open menu"
             >
               <Menu size={24} />
@@ -1220,6 +1466,7 @@ export default function UserStorePage({
           }
         `}</style>
       </header>
+      </div>
 
       {/* ================================================================= */}
       {/* 3. HERO SECTION (Mixed Video: Girls Shopping, Honey, Cars, Spree) */}
@@ -1227,7 +1474,7 @@ export default function UserStorePage({
       <section
         ref={heroRef}
         style={{
-          marginTop: '-72px',
+          marginTop: 0,
           paddingTop: 'calc(72px + 3.5rem)',
           paddingBottom: '4.5rem',
           position: 'relative',
@@ -1293,28 +1540,11 @@ export default function UserStorePage({
             padding: '2.5rem 1.25rem 1.5rem',
           }}
         >
-          {/* Cursive / Script Accent Badge */}
-          <div
-            className={theme.hasScriptFont ? 'font-script' : ''}
-            style={{
-              fontSize: theme.hasScriptFont ? '2.4rem' : '1rem',
-              fontWeight: theme.hasScriptFont ? 400 : 700,
-              color: '#F4C472',
-              lineHeight: 1.2,
-              marginBottom: '0.85rem',
-              letterSpacing: theme.hasScriptFont ? 'normal' : '0.08em',
-              textTransform: theme.hasScriptFont ? 'none' : 'uppercase',
-              textShadow: '0 2px 14px rgba(0, 0, 0, 0.75)',
-            }}
-          >
-            {storeSettings.heroBadgeText || '✨ Direct From Verified Sellers'}
-          </div>
-
           {/* Main Headline */}
           <h1
             style={{
               fontFamily: theme.headingFont,
-              fontSize: 'clamp(2.5rem, 5.2vw, 4.2rem)',
+              fontSize: 'clamp(2rem, 5.8vw, 4rem)',
               fontWeight: 800,
               color: '#FFFFFF',
               lineHeight: 1.15,
@@ -1462,6 +1692,7 @@ export default function UserStorePage({
 
           {/* Horizontal 3 Feature Badges Row - Centered Professional Luxury Cards */}
           <div
+            className="hero-trust-badges-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
@@ -1628,43 +1859,23 @@ export default function UserStorePage({
       {/* 5. PROMO BANNER (Direct From Facebook / Daraz Seller Guarantee)   */}
       {/* ================================================================= */}
       <ScrollRevealSection direction="right">
-        <section style={{ padding: '2rem 1.25rem' }}>
-          <div className="container">
+        <section className="section-social-commerce">
             <div
               style={{
-                background: theme.promoBg,
-                borderRadius: '24px',
-                padding: '2.5rem 3rem',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '2.5rem',
-                boxShadow: '0 20px 45px -10px rgba(83, 11, 45, 0.45)',
-                position: 'relative',
-                overflow: 'hidden',
+                background: theme.promoBg || '#2C1810',
               }}
-              className="hero-split"
+              className="social-commerce-card"
             >
-              <div style={{ position: 'relative', flexShrink: 0, display: 'flex', justifyContent: 'center' }}>
+              <div className="social-commerce-avatar-wrap">
                 <div
+                  className="social-commerce-avatar"
                   style={{
-                    width: '190px',
-                    height: '190px',
-                    borderRadius: '50%',
-                    overflow: 'hidden',
-                    border: '4px solid rgba(255, 255, 255, 0.35)',
-                    boxShadow: '0 15px 35px rgba(0,0,0,0.3)',
-                    backgroundColor: '#4A0826',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    backgroundColor: theme.primary || '#4A0826',
                   }}
                 >
                   <img
                     src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80"
                     alt="Verified Direct Store"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     onError={(e) => {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&q=80';
@@ -1672,99 +1883,43 @@ export default function UserStorePage({
                   />
                 </div>
                 <div
+                  className="social-commerce-avatar-badge"
                   style={{
-                    position: 'absolute',
-                    bottom: '-6px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    backgroundColor: '#ffffff',
-                    color: theme.primary,
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '999px',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    whiteSpace: 'nowrap',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
+                    color: theme.primary || '#5C3A21',
                   }}
                 >
                   <span>📦 Open Parcel Verified</span>
                 </div>
               </div>
 
-              <div style={{ flex: 1 }}>
-                <span
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-                    color: '#ffffff',
-                    fontSize: '0.72rem',
-                    fontWeight: 700,
-                    letterSpacing: '0.08em',
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '999px',
-                    display: 'inline-block',
-                    marginBottom: '0.75rem',
-                  }}
-                >
+              <div className="social-commerce-content">
+                <span className="social-commerce-pill">
                   SOCIAL COMMERCE DIRECT STORE
                 </span>
 
-                <h2
-                  className="font-serif"
-                  style={{
-                    fontSize: 'clamp(1.8rem, 3.2vw, 2.6rem)',
-                    fontWeight: 700,
-                    color: '#ffffff',
-                    lineHeight: 1.2,
-                    marginBottom: '0.65rem',
-                  }}
-                >
+                <h2 className="font-serif social-commerce-title">
                   Buy Direct With Guaranteed Open Parcel Delivery
                 </h2>
 
-                <p
-                  style={{
-                    fontSize: '0.98rem',
-                    color: 'rgba(255, 255, 255, 0.85)',
-                    lineHeight: 1.6,
-                    maxWidth: '540px',
-                    marginBottom: '1.5rem',
-                  }}
-                >
+                <p className="social-commerce-desc">
                   Linked here from Facebook Marketplace, Daraz, or Instagram? Enjoy zero marketplace hidden fees,
                   100% verified genuine products, and instant cash on delivery at your doorstep.
                 </p>
 
                 <button
                   onClick={() => scrollTo(productsRef)}
+                  className="social-commerce-btn"
                   style={{
-                    backgroundColor: '#ffffff',
-                    color: theme.primary,
-                    padding: '0.75rem 1.8rem',
-                    borderRadius: '8px',
-                    fontSize: '0.92rem',
-                    fontWeight: 700,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
-                    border: 'none',
-                    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.15)',
-                    transition: 'transform 0.2s ease',
+                    color: theme.primary || '#5C3A21',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
                 >
                   <span>Browse Full Catalog</span>
                   <ArrowRight size={16} />
                 </button>
               </div>
             </div>
-          </div>
-        </section>
-      </ScrollRevealSection>
+          </section>
+        </ScrollRevealSection>
 
       {/* ================================================================= */}
       {/* 6. FEATURED COLLECTION (Shows Admin Products & Filter Tabs)        */}
@@ -1837,7 +1992,7 @@ export default function UserStorePage({
                 gridTemplateColumns: 'repeat(4, 1fr)',
                 gap: '1.5rem',
               }}
-              className="grid-responsive-4"
+              className="grid-responsive-4 grid-responsive-products"
             >
               {filteredProducts.map((product) => {
                 const inWishlist = isWishlisted(product._id);
@@ -2247,7 +2402,7 @@ export default function UserStorePage({
                   gridTemplateColumns: 'repeat(4, 1fr)',
                   gap: '1.5rem',
                 }}
-                className="grid-responsive-4"
+                className="grid-responsive-4 grid-responsive-products"
               >
                 {bestSellers.map((item) => {
                   const inWishlist = isWishlisted(item._id);
@@ -2342,7 +2497,7 @@ export default function UserStorePage({
                 overflow: 'hidden',
                 boxShadow: '0 20px 45px rgba(0,0,0,0.1)',
               }}
-              className="hero-split"
+              className="flash-sale-split"
             >
               <div
                 className="flash-sale-box"
@@ -2429,114 +2584,270 @@ export default function UserStorePage({
       </ScrollRevealSection>
 
       {/* ================================================================= */}
-      {/* 10. WHAT OUR CUSTOMERS SAY (Testimonials)                          */}
+      {/* 10. WHAT OUR CUSTOMERS SAY (Claymorphic Testimonials Carousel)     */}
       {/* ================================================================= */}
       <ScrollRevealSection direction="left">
         <section
           ref={reviewsRef}
           style={{
-            padding: '3rem 1.25rem 4rem',
+            padding: '3.5rem 1.25rem 4.5rem',
             backgroundColor: '#FFFFFF',
+            position: 'relative',
           }}
         >
-          <div className="container">
+          <div className="container" style={{ maxWidth: '1240px', margin: '0 auto' }}>
             <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+              <div
+                className="clay-pill"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  backgroundColor: '#F5EBE0',
+                  color: theme.primary,
+                  padding: '0.35rem 0.95rem',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.04em',
+                  marginBottom: '0.75rem',
+                }}
+              >
+                <Sparkles size={13} />
+                <span>100% VERIFIED CUSTOMER EXPERIENCES</span>
+              </div>
               <h2
                 className="font-serif"
                 style={{
-                  fontSize: '2.2rem',
+                  fontSize: 'clamp(2rem, 3.8vw, 2.6rem)',
                   fontWeight: 700,
                   color: '#2C1810',
-                  marginBottom: '0.4rem',
+                  marginBottom: '0.5rem',
                 }}
               >
                 What Our Customers Say
               </h2>
-              <p style={{ fontSize: '0.95rem', color: '#8C7D73' }}>
-                Verified reviews from Facebook Marketplace, Daraz & direct store buyers
+              <p style={{ fontSize: '0.98rem', color: '#8C7D73', maxWidth: '620px', margin: '0 auto' }}>
+                Verified reviews from Facebook Marketplace, Daraz & direct store buyers across Pakistan
               </p>
             </div>
 
+            {/* Testimonials Carousel Container */}
             <div
-              className="reviews-grid-responsive"
+              className="testimonial-carousel-wrap"
+              style={{
+                position: 'relative',
+                padding: '0 0.25rem',
+              }}
+              onMouseEnter={() => setIsReviewAutoPlaying(false)}
+              onMouseLeave={() => setIsReviewAutoPlaying(true)}
             >
-              {[
-                {
-                  name: 'Hamza Tariq',
-                  role: 'Verified Buyer (Lahore)',
-                  text: 'Saw the post on Facebook Marketplace and ordered through this website. Arrived in 2 days, courier let me open the box first, exactly as described!',
-                  avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-                },
-                {
-                  name: 'Ayesha Siddiqui',
-                  role: 'Verified Buyer (Karachi)',
-                  text: 'Outstanding quality and very responsive on WhatsApp. The raw Sidr honey is 100% genuine and the ambient LED kit looks phenomenal in my car.',
-                  avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
-                },
-                {
-                  name: 'Usman Ali',
-                  role: 'Verified Buyer (Islamabad)',
-                  text: 'Smooth 1-click Cash on Delivery order. No complicated sign-up. The sneakers fit comfortably and stitching is top quality.',
-                  avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
-                },
-              ].map((test, idx) => (
-                <TiltCard
-                  key={idx}
-                  className="review-card"
-                >
-                  <div className="depth-content" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <div style={{ display: 'flex', color: '#F59E0B', marginBottom: '1.25rem' }}>
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={16} fill="#F59E0B" strokeWidth={0} />
-                      ))}
-                    </div>
+              {/* Previous Button */}
+              <button
+                onClick={prevReview}
+                className="clay-carousel-arrow testimonial-prev-arrow"
+                aria-label="Previous review"
+                style={{
+                  position: 'absolute',
+                  left: '-16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  zIndex: 20,
+                }}
+              >
+                <ChevronLeft size={22} strokeWidth={2.5} />
+              </button>
 
-                    <p
+              {/* Next Button */}
+              <button
+                onClick={nextReview}
+                className="clay-carousel-arrow testimonial-next-arrow"
+                aria-label="Next review"
+                style={{
+                  position: 'absolute',
+                  right: '-16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  zIndex: 20,
+                }}
+              >
+                <ChevronRight size={22} strokeWidth={2.5} />
+              </button>
+
+              {/* Carousel Viewport / Track */}
+              <div
+                style={{
+                  overflow: 'hidden',
+                  padding: '0.75rem 0.35rem',
+                }}
+                onTouchStart={handleReviewTouchStart}
+                onTouchEnd={handleReviewTouchEnd}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    transition: 'transform 0.45s cubic-bezier(0.25, 1, 0.5, 1)',
+                    transform: `translateX(-${currentReviewIdx * (100 / slidesToShow)}%)`,
+                  }}
+                >
+                  {TESTIMONIALS.map((test, idx) => (
+                    <div
+                      key={idx}
                       style={{
-                        fontSize: '0.95rem',
-                        color: '#6B5D55',
-                        lineHeight: 1.65,
-                        fontStyle: 'italic',
-                        marginBottom: '1.75rem',
-                        flex: 1,
+                        flex: `0 0 ${100 / slidesToShow}%`,
+                        padding: '0 0.65rem',
+                        boxSizing: 'border-box',
                       }}
                     >
-                      "{test.text}"
-                    </p>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                      <img
-                        src={test.avatar}
-                        alt={test.name}
+                      <div
+                        className="clay-testimonial-card"
                         style={{
-                          width: '46px',
-                          height: '46px',
-                          borderRadius: '50%',
-                          objectFit: 'cover',
+                          padding: '1.85rem 1.65rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          height: '100%',
+                          minHeight: '275px',
                         }}
-                      />
-                      <div>
-                        <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#2C1810', margin: 0 }}>
-                          {test.name}
-                        </h4>
-                        <span
+                      >
+                        {/* Rating Stars & Verified Badge */}
+                        <div
                           style={{
-                            fontSize: '0.75rem',
-                            color: '#10B981',
-                            fontWeight: 600,
-                            display: 'inline-flex',
+                            display: 'flex',
                             alignItems: 'center',
-                            gap: '0.2rem',
+                            justifyContent: 'space-between',
+                            marginBottom: '1rem',
                           }}
                         >
-                          <CheckCircle2 size={12} />
-                          {test.role}
-                        </span>
+                          <div style={{ display: 'flex', color: '#F59E0B' }}>
+                            {[...Array(test.rating || 5)].map((_, starI) => (
+                              <Star key={starI} size={15} fill="#F59E0B" strokeWidth={0} />
+                            ))}
+                          </div>
+                          <span
+                            className="clay-pill"
+                            style={{
+                              backgroundColor: '#ECFDF5',
+                              color: '#059669',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              padding: '0.22rem 0.65rem',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.25rem',
+                            }}
+                          >
+                            <Check size={11} strokeWidth={3} />
+                            <span>Verified Order</span>
+                          </span>
+                        </div>
+
+                        {/* Review Text */}
+                        <p
+                          style={{
+                            fontSize: '0.95rem',
+                            color: '#4A3B32',
+                            lineHeight: 1.65,
+                            fontStyle: 'italic',
+                            marginBottom: '1.25rem',
+                            flex: 1,
+                          }}
+                        >
+                          "{test.text}"
+                        </p>
+
+                        {/* Ordered Product Pill */}
+                        {test.item && (
+                          <div
+                            style={{
+                              backgroundColor: '#FFFFFF',
+                              border: '1px solid #EAE0D5',
+                              color: '#8C7D73',
+                              fontSize: '0.72rem',
+                              fontWeight: 600,
+                              padding: '0.25rem 0.65rem',
+                              borderRadius: '8px',
+                              marginBottom: '1.15rem',
+                              width: 'fit-content',
+                              boxShadow: 'inset 1px 1px 2px rgba(0,0,0,0.03)',
+                            }}
+                          >
+                            Product: <span style={{ color: '#2C1810', fontWeight: 700 }}>{test.item}</span>
+                          </div>
+                        )}
+
+                        {/* Reviewer Profile */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                          <img
+                            src={test.avatar}
+                            alt={test.name}
+                            style={{
+                              width: '46px',
+                              height: '46px',
+                              borderRadius: '50%',
+                              objectFit: 'cover',
+                              border: '2px solid #FFFFFF',
+                              boxShadow: '0 2px 8px rgba(44, 24, 16, 0.12)',
+                            }}
+                          />
+                          <div>
+                            <h4
+                              style={{
+                                fontSize: '0.96rem',
+                                fontWeight: 700,
+                                color: '#2C1810',
+                                margin: 0,
+                              }}
+                            >
+                              {test.name}
+                            </h4>
+                            <span
+                              style={{
+                                fontSize: '0.75rem',
+                                color: '#8C7D73',
+                                fontWeight: 500,
+                              }}
+                            >
+                              {test.role}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </TiltCard>
-              ))}
+                  ))}
+                </div>
+              </div>
+
+              {/* Pagination Dots */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  marginTop: '1.75rem',
+                }}
+              >
+                {Array.from({ length: maxReviewIdx + 1 }).map((_, dotIdx) => (
+                  <button
+                    key={dotIdx}
+                    onClick={() => setCurrentReviewIdx(dotIdx)}
+                    style={{
+                      width: currentReviewIdx === dotIdx ? '28px' : '9px',
+                      height: '9px',
+                      borderRadius: '999px',
+                      backgroundColor: currentReviewIdx === dotIdx ? theme.primary : '#E0D6CC',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: 0,
+                      transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                      boxShadow:
+                        currentReviewIdx === dotIdx
+                          ? '0 2px 6px rgba(92, 58, 33, 0.35)'
+                          : 'inset 1px 1px 2px rgba(0,0,0,0.1)',
+                    }}
+                    aria-label={`Go to slide ${dotIdx + 1}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -3834,7 +4145,7 @@ export default function UserStorePage({
               <X size={24} />
             </button>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }} className="hero-split">
+            <div className="quickview-modal-grid">
               <div className="quickview-img-box" style={{ borderRadius: '16px', overflow: 'hidden', height: '340px', backgroundColor: '#F5EBE0' }}>
                 <img
                   src={quickViewProduct.image}
@@ -4558,10 +4869,10 @@ export default function UserStorePage({
               <div className="floating-ai-btn-wrap" style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 99 }}>
                 <button
                   onClick={() => setAiModalOpen(true)}
+                  className="clay-floating-ai"
                   style={{
                     backgroundColor: theme.primary,
                     color: '#ffffff',
-                    border: 'none',
                     padding: '0.85rem 1.4rem',
                     borderRadius: '999px',
                     fontSize: '0.88rem',
@@ -4570,7 +4881,6 @@ export default function UserStorePage({
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    boxShadow: '0 8px 24px rgba(92, 58, 33, 0.35)',
                   }}
                 >
                   <Sparkles size={18} />
@@ -4578,58 +4888,81 @@ export default function UserStorePage({
                 </button>
               </div>
 
-              {/* Customer Mobile Bottom Navigation Bar (Fixed for Mobile Screens) */}
+              {/* Customer Mobile Bottom Navigation Bar with Floating Notch & Hopping Paper Disc */}
               <nav className="mobile-bottom-nav" aria-label="Mobile Bottom Navigation">
-                <button
-                  type="button"
-                  className="mobile-bottom-tab"
-                  onClick={() => scrollTo(heroRef)}
-                >
-                  <Home size={20} />
-                  <span>Home</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="mobile-bottom-tab"
-                  onClick={() => scrollTo(categoriesRef)}
-                >
-                  <LayoutGrid size={20} />
-                  <span>Categories</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="mobile-bottom-tab"
-                  onClick={() => scrollTo(productsRef)}
-                >
-                  <Package size={20} />
-                  <span>Shop</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="mobile-bottom-tab"
-                  onClick={() => setTrackingModalOpen(true)}
-                >
-                  <Truck size={20} />
-                  <span>Track</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="mobile-bottom-tab"
-                  onClick={() => {
-                    setCartDrawerOpen(true);
-                    setCheckoutStep('cart');
+                {/* Moving Floating Notch and Hopping Paper Disc */}
+                <div
+                  className="mobile-notch-slider"
+                  style={{
+                    left: `calc(${activeBottomTab * 20}% + 10%)`,
                   }}
                 >
-                  <ShoppingBag size={20} />
-                  <span>Bag</span>
-                  {cartItems.length > 0 && (
-                    <span className="mobile-bottom-badge">{cartItems.length}</span>
-                  )}
-                </button>
+                  {/* Curved Cutout Notch SVG */}
+                  <svg
+                    className="mobile-notch-svg"
+                    viewBox="0 0 94 30"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M0 0 C 18 0, 22 24, 47 24 C 72 24, 76 0, 94 0 L 0 0 Z"
+                      fill="var(--bg-app, #FAF7F2)"
+                    />
+                    <path
+                      d="M0 0.75 C 18 0.75, 22 24.5, 47 24.5 C 72 24.5, 76 0.75, 94 0.75"
+                      stroke="var(--border-color, #EFE7DC)"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                  </svg>
+
+                  {/* Tactile Floating Paper Disc (Hops on Notch) */}
+                  <div
+                    className={`mobile-paper-disc ${isDiscHopping ? 'hopping' : ''}`}
+                    onClick={() => MOBILE_NAV_TABS[activeBottomTab].action()}
+                    title={MOBILE_NAV_TABS[activeBottomTab].label}
+                    style={{
+                      color: theme.primary || '#5C3A21',
+                    }}
+                  >
+                    <span className="paper-disc-icon">
+                      {MOBILE_NAV_TABS[activeBottomTab].activeIcon}
+                    </span>
+                    {MOBILE_NAV_TABS[activeBottomTab].badge && (
+                      <span className="mobile-disc-badge">
+                        {MOBILE_NAV_TABS[activeBottomTab].badge}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* 5 Bottom Navigation Tab Buttons */}
+                <div className="mobile-bottom-tabs-row">
+                  {MOBILE_NAV_TABS.map((tab, idx) => {
+                    const isActive = activeBottomTab === idx;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        className={`mobile-bottom-tab ${isActive ? 'active' : ''}`}
+                        onClick={() => handleBottomTabClick(idx, tab.action)}
+                        aria-label={tab.label}
+                      >
+                        <div className={`tab-icon-wrap ${isActive ? 'hidden' : ''}`}>
+                          {tab.icon}
+                          {tab.badge && !isActive && (
+                            <span className="mobile-bottom-badge">{tab.badge}</span>
+                          )}
+                        </div>
+
+                        <span className={`tab-label ${isActive ? 'active-label' : ''}`}>
+                          {tab.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </nav>
 
               {aiModalOpen && <AiAssistantModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)} />}

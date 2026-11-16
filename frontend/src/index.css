@@ -60,7 +60,9 @@
 
 html,
 body {
-  overflow-x: clip;
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
 }
 
 body {
@@ -71,13 +73,40 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Storefront Sticky Header - Always visible on scroll down and scroll up */
-.store-sticky-header {
-  position: -webkit-sticky !important;
-  position: sticky !important;
+/* Storefront Smart Header Wrapper - Auto-hide on scroll down, reveal on scroll up, transparent at hero */
+.store-nav-wrapper {
+  position: fixed !important;
   top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
   z-index: 900 !important;
-  transition: background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  will-change: transform;
+}
+
+.store-nav-wrapper.nav-hidden {
+  transform: translateY(-100%) !important;
+}
+
+.store-nav-wrapper.nav-visible {
+  transform: translateY(0) !important;
+}
+
+/* In Hero Mode: 100% Transparent, No Background, No Border, No Line, No Box Shadow */
+.store-nav-wrapper.nav-at-hero .store-sticky-header {
+  background-color: transparent !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.store-sticky-header {
+  width: 100%;
+  position: relative;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
 }
 
 @keyframes pulse {
@@ -690,6 +719,183 @@ textarea {
   flex-direction: column;
 }
 
+/* ==========================================================================
+   Section 5: Social Commerce Direct Store Card (Desktop & Claymorphism Base)
+   ========================================================================== */
+.section-social-commerce {
+  padding: 2rem 1.25rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.social-commerce-card {
+  border-radius: 28px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2.75rem;
+  padding: 3rem 3.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 24px 50px -12px rgba(44, 24, 16, 0.45),
+    inset 0 2px 4px rgba(255, 255, 255, 0.14),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.social-commerce-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 30px 60px -12px rgba(44, 24, 16, 0.55),
+    inset 0 2px 4px rgba(255, 255, 255, 0.18),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.35);
+}
+
+.social-commerce-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.social-commerce-avatar {
+  width: 185px;
+  height: 185px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 16px 36px rgba(0, 0, 0, 0.35),
+    inset 0 2px 6px rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #4A0826;
+}
+
+.social-commerce-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.social-commerce-avatar-badge {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ffffff;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.22),
+    inset 0 1px 2px rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  z-index: 2;
+}
+
+.social-commerce-content {
+  flex: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.social-commerce-pill {
+  background-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  display: inline-block;
+  margin-bottom: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.25);
+}
+
+.social-commerce-title {
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+  margin-bottom: 0.75rem;
+  text-align: left;
+  word-wrap: break-word;
+}
+
+.social-commerce-desc {
+  font-size: 0.98rem;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.6;
+  max-width: 540px;
+  margin-bottom: 1.6rem;
+  text-align: left;
+}
+
+.social-commerce-btn {
+  background-color: #ffffff;
+  padding: 0.85rem 2rem;
+  border-radius: 12px;
+  font-size: 0.94rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  border: none;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.2),
+    inset 0 2px 3px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.social-commerce-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 24px rgba(0, 0, 0, 0.25),
+    inset 0 2px 4px rgba(255, 255, 255, 1);
+}
+
+.social-commerce-btn:active {
+  transform: translateY(1px);
+}
+
+/* Flash Sale Split & Quickview Base Grid */
+.flash-sale-split {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.1);
+}
+
+.quickview-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
 /* Flash Sale Box */
 .flash-sale-box {
   padding: 4rem 3.5rem;
@@ -813,9 +1019,109 @@ textarea {
     display: none !important;
   }
 
-  .hero-split {
+  /* Hero Video Section Mobile Responsiveness (Same Like Desktop, Perfectly Scaled) */
+  .hero-video-section {
+    min-height: 82vh !important;
+    padding-top: calc(72px + 2rem) !important;
+    padding-bottom: 3.5rem !important;
+  }
+
+  .flash-sale-split {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    text-align: left;
+  }
+
+  /* Section 5: Mobile Stacking, Centering & No Overflow */
+  .section-social-commerce {
+    padding: 1.25rem 0.85rem !important;
+  }
+
+  .social-commerce-card {
     flex-direction: column !important;
-    text-align: center;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 2.25rem 1.25rem 2.1rem !important;
+    gap: 1.5rem !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+    border-radius: 22px !important;
+    box-sizing: border-box !important;
+  }
+
+  .social-commerce-avatar-wrap {
+    margin: 0 auto 0.25rem !important;
+  }
+
+  .social-commerce-avatar {
+    width: 140px !important;
+    height: 140px !important;
+    border-width: 3.5px !important;
+  }
+
+  .social-commerce-avatar-badge {
+    bottom: -9px !important;
+    padding: 0.24rem 0.72rem !important;
+    font-size: 0.68rem !important;
+  }
+
+  .social-commerce-content {
+    align-items: center !important;
+    text-align: center !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .social-commerce-pill {
+    margin: 0 auto 0.75rem !important;
+    font-size: 0.68rem !important;
+    padding: 0.25rem 0.75rem !important;
+  }
+
+  .social-commerce-title {
+    text-align: center !important;
+    font-size: clamp(1.4rem, 5.2vw, 1.85rem) !important;
+    line-height: 1.25 !important;
+    margin: 0 auto 0.75rem !important;
+    max-width: 350px !important;
+  }
+
+  .social-commerce-desc {
+    text-align: center !important;
+    font-size: 0.86rem !important;
+    line-height: 1.55 !important;
+    margin: 0 auto 1.35rem !important;
+    max-width: 360px !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .social-commerce-btn {
+    margin: 0 auto !important;
+    padding: 0.75rem 1.8rem !important;
+    font-size: 0.9rem !important;
+    width: auto !important;
+    min-width: 200px !important;
+    box-shadow: 
+      0 6px 16px rgba(0, 0, 0, 0.2),
+      inset 0 2px 3px rgba(255, 255, 255, 0.9),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* Quickview Modal & Hero Badges Responsive */
+  .quickview-modal-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  .quickview-modal-grid .quickview-img-box {
+    height: 240px !important;
+  }
+
+  .hero-trust-badges-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
   }
 
   .arch-frame {
@@ -824,12 +1130,190 @@ textarea {
     border-radius: 120px 120px 24px 24px;
   }
 
-  /* Responsive 2-Column Grid on Mobile */
+  /* Responsive Grids on Mobile: Product cards 1-by-1, Categories 2-col */
+  .grid-responsive-products {
+    grid-template-columns: 1fr !important;
+    gap: 1.35rem !important;
+  }
+
   .grid-responsive-4,
-  .grid-responsive-5,
+  .grid-responsive-5 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+
   .category-grid-responsive {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 0.65rem !important;
+  }
+
+  /* 1. Android App Product Card (1-Column Showcase on Mobile) */
+  .grid-responsive-products .luxury-product-card {
+    border-radius: 20px !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #EFE7DC !important;
+    box-shadow: 0 4px 18px rgba(44, 24, 16, 0.07) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    position: relative !important;
+    width: 100% !important;
+    max-width: 440px !important;
+    margin: 0 auto !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .grid-responsive-products .luxury-product-card:active {
+    transform: scale(0.99) !important;
+    box-shadow: 0 2px 8px rgba(44, 24, 16, 0.09) !important;
+  }
+
+  .grid-responsive-products .product-card-image-wrap {
+    height: 285px !important;
+    background-color: #F5EBE0 !important;
+    position: relative !important;
+  }
+
+  .grid-responsive-products .product-card-image-wrap img {
+    object-fit: cover !important;
+  }
+
+  .grid-responsive-products .product-card-badge {
+    top: 10px !important;
+    left: 10px !important;
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+    padding: 0.25rem 0.65rem !important;
+    border-radius: 999px !important;
+    letter-spacing: 0.04em !important;
+    box-shadow: 0 2px 8px rgba(44, 24, 16, 0.22) !important;
+  }
+
+  .grid-responsive-products .product-card-action-icons {
+    top: 10px !important;
+    right: 10px !important;
+    gap: 8px !important;
+  }
+
+  .grid-responsive-products .product-card-action-icons button {
+    width: 34px !important;
+    height: 34px !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(4px) !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 8px rgba(44, 24, 16, 0.14) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .grid-responsive-products .product-card-quickview {
+    bottom: 10px !important;
+    padding: 0.32rem 0.85rem !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    border-radius: 999px !important;
+    box-shadow: 0 2px 10px rgba(44, 24, 16, 0.16) !important;
+  }
+
+  .grid-responsive-products .product-card-body {
+    padding: 1.15rem 1.1rem 1.25rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+  }
+
+  .grid-responsive-products .product-card-category {
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    color: #8C7D73 !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 0.25rem !important;
+    text-transform: uppercase !important;
+  }
+
+  .grid-responsive-products .product-card-title {
+    font-size: 1.08rem !important;
+    line-height: 1.35 !important;
+    font-weight: 700 !important;
+    color: #2C1810 !important;
+    margin-bottom: 0.45rem !important;
+    display: block !important;
+    min-height: auto !important;
+  }
+
+  .grid-responsive-products .product-card-rating-stock {
+    margin-bottom: 0.65rem !important;
+    gap: 0.45rem !important;
+    flex-wrap: wrap !important;
+  }
+
+  .grid-responsive-products .product-card-stars svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  .grid-responsive-products .product-card-rating-val {
+    font-size: 0.82rem !important;
+    font-weight: 700 !important;
+    color: #2C1810 !important;
+  }
+
+  .grid-responsive-products .product-card-stock-tag {
+    font-size: 0.74rem !important;
+    font-weight: 700 !important;
+  }
+
+  .grid-responsive-products .product-card-price-row {
+    margin-bottom: 0.85rem !important;
+    display: flex !important;
+    align-items: baseline !important;
+    flex-wrap: wrap !important;
+  }
+
+  .grid-responsive-products .product-card-price {
+    font-size: 1.28rem !important;
+    font-weight: 800 !important;
+    color: var(--primary, #5C3A21) !important;
+  }
+
+  .grid-responsive-products .product-card-original-price {
+    font-size: 0.86rem !important;
+    color: #A39489 !important;
+    margin-left: 0.45rem !important;
+  }
+
+  .grid-responsive-products .product-card-cod-btn {
+    padding: 0.8rem 1rem !important;
+    font-size: 0.92rem !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+  }
+
+  .grid-responsive-products .product-card-sub-buttons {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+
+  .grid-responsive-products .product-card-sub-buttons button {
+    padding: 0.7rem 0.85rem !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+  }
+
+  /* Testimonial Carousel Mobile Arrows */
+  .testimonial-prev-arrow {
+    left: 2px !important;
+    width: 38px !important;
+    height: 38px !important;
+  }
+  .testimonial-next-arrow {
+    right: 2px !important;
+    width: 38px !important;
+    height: 38px !important;
   }
 
   /* 1. Android App Product Card */
@@ -1123,13 +1607,107 @@ textarea {
 
   /* 5. Flash Sale Box on Mobile */
   .flash-sale-box {
-    padding: 2rem 1.25rem !important;
-    text-align: center !important;
-    align-items: center !important;
+    padding: 1.75rem 1.15rem !important;
+    text-align: left !important;
+    align-items: flex-start !important;
   }
 }
 
 @media (max-width: 480px) {
+  .grid-responsive-products {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  .grid-responsive-products .luxury-product-card {
+    max-width: 100% !important;
+  }
+
+  .grid-responsive-products .product-card-image-wrap {
+    height: 275px !important;
+  }
+
+  .grid-responsive-products .product-card-body {
+    padding: 1.1rem 1rem 1.2rem !important;
+  }
+
+  .grid-responsive-products .product-card-title {
+    font-size: 1.05rem !important;
+    min-height: auto !important;
+  }
+
+  .grid-responsive-products .product-card-price {
+    font-size: 1.22rem !important;
+  }
+
+  .grid-responsive-products .product-card-cod-btn {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .grid-responsive-products .product-card-sub-buttons button {
+    padding: 0.65rem 0.8rem !important;
+    font-size: 0.82rem !important;
+  }
+
+  .flash-sale-split {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .flash-sale-box {
+    padding: 1.25rem 0.85rem !important;
+    text-align: left !important;
+    align-items: flex-start !important;
+  }
+
+  .flash-sale-box h2 {
+    font-size: 1.45rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .flash-sale-box p {
+    font-size: 0.78rem !important;
+    line-height: 1.35 !important;
+    margin-bottom: 0.95rem !important;
+  }
+
+  .flash-sale-box button {
+    padding: 0.55rem 0.95rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  .section-social-commerce {
+    padding: 1rem 0.65rem !important;
+  }
+
+  .social-commerce-card {
+    padding: 1.85rem 0.95rem 1.75rem !important;
+    border-radius: 18px !important;
+  }
+
+  .social-commerce-avatar {
+    width: 125px !important;
+    height: 125px !important;
+  }
+
+  .social-commerce-title {
+    font-size: 1.35rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .social-commerce-desc {
+    font-size: 0.82rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .social-commerce-btn {
+    width: 100% !important;
+    max-width: 260px !important;
+    font-size: 0.88rem !important;
+    padding: 0.72rem 1.2rem !important;
+  }
+
   .grid-responsive-4,
   .grid-responsive-5,
   .category-grid-responsive {
@@ -1523,38 +2101,38 @@ textarea {
   }
 }
 
-/* 2. Customer Mobile Bottom Navigation Bar */
+/* ==========================================================================
+   2. Customer Mobile Bottom Navigation Bar with Floating Notch & Hopping Paper Disc
+   ========================================================================== */
 .mobile-bottom-nav {
   display: none;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 62px;
-  background: rgba(253, 251, 247, 0.97);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid #EFE7DC;
-  box-shadow: 0 -4px 20px rgba(44, 24, 16, 0.08);
+  height: 64px;
+  background: var(--bg-card, #FFFFFF);
+  border-top: 1px solid var(--border-color, #EFE7DC);
+  box-shadow: 0 -8px 28px rgba(44, 24, 16, 0.08);
   z-index: 950;
-  justify-content: space-around;
-  align-items: center;
-  padding: 0 0.5rem;
-  padding-bottom: max(0.2rem, env(safe-area-inset-bottom));
+  padding-bottom: max(0.2rem, env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+  user-select: none;
+  transition: background-color 0.3s ease;
 }
 
 @media (max-width: 768px) {
   .mobile-bottom-nav {
-    display: flex !important;
+    display: block !important;
   }
 
   .storefront-bottom-padding {
-    padding-bottom: 74px !important;
+    padding-bottom: 84px !important;
   }
 
   .floating-ai-btn-wrap {
-    bottom: 74px !important;
-    right: 12px !important;
+    bottom: 80px !important;
+    right: 14px !important;
   }
 
   .floating-ai-btn-wrap button {
@@ -1563,50 +2141,208 @@ textarea {
   }
 }
 
+/* Sliding Floating Notch Cradle */
+.mobile-notch-slider {
+  position: absolute;
+  top: -1px;
+  width: 94px;
+  height: 30px;
+  transform: translateX(-50%);
+  transition: left 0.42s cubic-bezier(0.34, 1.25, 0.64, 1);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.mobile-notch-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 94px;
+  height: 30px;
+  display: block;
+  pointer-events: none;
+}
+
+/* Tactile Floating Paper Disc (Hops on Notch) */
+.mobile-paper-disc {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translate(-50%, 0) scale(1);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 3.5px solid #FFFFFF;
+  box-shadow: 
+    0 12px 26px -2px rgba(44, 24, 16, 0.32),
+    0 4px 10px rgba(44, 24, 16, 0.12),
+    inset 0 2px 4px rgba(255, 255, 255, 0.95),
+    inset 0 -2px 4px rgba(44, 24, 16, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 15;
+  outline: 1px solid rgba(92, 58, 33, 0.08);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-paper-disc:active {
+  transform: translate(-50%, 2px) scale(0.94);
+}
+
+.mobile-paper-disc.hopping {
+  animation: paperDiscHop 0.42s cubic-bezier(0.34, 1.35, 0.64, 1) forwards;
+}
+
+.paper-disc-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-paper-disc.hopping .paper-disc-icon {
+  animation: paperDiscIconPop 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes paperDiscHop {
+  0% {
+    transform: translate(-50%, 0) scale(1);
+  }
+  25% {
+    transform: translate(-50%, -20px) scale(1.14, 0.9);
+  }
+  60% {
+    transform: translate(-50%, -23px) scale(0.96, 1.08);
+  }
+  85% {
+    transform: translate(-50%, 2px) scale(1.08, 0.94);
+  }
+  100% {
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+@keyframes paperDiscIconPop {
+  0% {
+    transform: scale(0.65) rotate(-12deg);
+    opacity: 0.3;
+  }
+  70% {
+    transform: scale(1.14) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Badge on Paper Disc */
+.mobile-disc-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background-color: var(--primary, #5C3A21);
+  color: #FFFFFF;
+  font-size: 0.62rem;
+  font-weight: 800;
+  min-width: 19px;
+  height: 19px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Tabs Container Row */
+.mobile-bottom-tabs-row {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 5;
+}
+
 .mobile-bottom-tab {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.2rem;
   background: none;
   border: none;
-  color: #8C7D73;
-  font-size: 0.68rem;
-  font-weight: 600;
-  padding: 0.35rem 0.5rem;
-  border-radius: 8px;
+  padding: 0.4rem 0.2rem 0.3rem;
   cursor: pointer;
   position: relative;
   transition: all 0.2s ease;
-  flex: 1;
-  max-width: 75px;
+  -webkit-tap-highlight-color: transparent;
+  height: 100%;
 }
 
 .mobile-bottom-tab:active {
   transform: scale(0.92);
 }
 
-.mobile-bottom-tab.active {
+.tab-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8C7D73;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  margin-bottom: 2px;
+  height: 22px;
+}
+
+.tab-icon-wrap.hidden {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.3);
+  pointer-events: none;
+}
+
+.tab-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #8C7D73;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  line-height: 1.2;
+}
+
+.tab-label.active-label {
   color: var(--primary, #5C3A21);
-  font-weight: 700;
+  font-weight: 800;
+  transform: translateY(11px);
+}
+
+.mobile-bottom-tab.active .tab-label {
+  color: var(--primary, #5C3A21);
+  font-weight: 800;
 }
 
 .mobile-bottom-badge {
   position: absolute;
-  top: 2px;
-  right: 14px;
+  top: -4px;
+  right: -8px;
   background-color: var(--primary, #5C3A21);
-  color: #ffffff;
-  font-size: 0.62rem;
+  color: #FFFFFF;
+  font-size: 0.6rem;
   font-weight: 800;
-  width: 17px;
-  height: 17px;
-  border-radius: 50%;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  padding: 0 3px;
+  border: 1.5px solid #FFFFFF;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 /* 3. Mobile Drawers and Modals Overrides */
@@ -2136,4 +2872,209 @@ textarea {
   .footer-legal-links {
     gap: 1.15rem !important;
   }
+}
+
+/* ==========================================================================
+   CLAYMORPHISM LUXURY DESIGN SYSTEM (Warm Mocha & Cream 3D Tactile Aesthetic)
+   ========================================================================== */
+
+/* 1. Base Clay Card */
+.clay-card,
+.luxury-product-card {
+  background: #FFFFFF !important;
+  border-radius: 22px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 
+    10px 14px 28px rgba(44, 24, 16, 0.07),
+    -8px -8px 24px rgba(255, 255, 255, 0.95),
+    inset 2px 2px 5px rgba(255, 255, 255, 0.9),
+    inset -2px -2px 6px rgba(44, 24, 16, 0.04) !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.clay-card:hover,
+.luxury-product-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 
+    14px 20px 36px rgba(44, 24, 16, 0.12),
+    -10px -10px 28px rgba(255, 255, 255, 0.98),
+    inset 2px 2px 6px rgba(255, 255, 255, 0.95),
+    inset -2px -2px 6px rgba(44, 24, 16, 0.05) !important;
+}
+
+/* 2. Clay Surface / Cream Background Container */
+.clay-surface {
+  background: #FAF7F2;
+  border-radius: 24px;
+  border: 1.5px solid #F0E6DA;
+  box-shadow: 
+    12px 16px 32px rgba(44, 24, 16, 0.06),
+    -8px -8px 22px rgba(255, 255, 255, 0.9),
+    inset 2px 2px 6px rgba(255, 255, 255, 0.8),
+    inset -2px -2px 6px rgba(44, 24, 16, 0.03);
+}
+
+/* 3. Clay Primary Button (Plump, Tactile 3D Action) */
+.clay-btn-primary,
+.product-card-cod-btn {
+  border-radius: 12px !important;
+  box-shadow: 
+    0 8px 18px rgba(92, 58, 33, 0.28),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.45),
+    inset -2px -2px 5px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.clay-btn-primary:active,
+.product-card-cod-btn:active {
+  transform: translateY(2px) scale(0.98) !important;
+  box-shadow: 
+    0 3px 8px rgba(92, 58, 33, 0.22),
+    inset 3px 3px 6px rgba(0, 0, 0, 0.3),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* 4. Clay Secondary / WhatsApp Button */
+.clay-btn-whatsapp,
+.product-card-sub-buttons button {
+  border-radius: 10px !important;
+  box-shadow: 
+    0 4px 12px rgba(44, 24, 16, 0.08),
+    inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.6),
+    inset -1.5px -1.5px 4px rgba(0, 0, 0, 0.12) !important;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.clay-btn-whatsapp:active,
+.product-card-sub-buttons button:active {
+  transform: translateY(1.5px) scale(0.97) !important;
+  box-shadow: 
+    0 2px 6px rgba(44, 24, 16, 0.06),
+    inset 2px 2px 5px rgba(0, 0, 0, 0.2),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* 5. Clay Pills and Badges */
+.clay-pill,
+.product-card-badge {
+  border-radius: 999px !important;
+  box-shadow: 
+    3px 4px 10px rgba(44, 24, 16, 0.16),
+    inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.6),
+    inset -1.5px -1.5px 3px rgba(0, 0, 0, 0.15) !important;
+}
+
+.clay-action-btn,
+.product-card-action-icons button {
+  box-shadow: 
+    4px 6px 14px rgba(44, 24, 16, 0.12),
+    -2px -2px 8px rgba(255, 255, 255, 0.9),
+    inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.9),
+    inset -1.5px -1.5px 3px rgba(44, 24, 16, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+}
+
+/* 6. Clay Category Icon Seals */
+.category-card {
+  border-radius: 20px !important;
+  background: #FFFFFF !important;
+  border: 1.5px solid #F0E6DA !important;
+  box-shadow: 
+    8px 12px 24px rgba(44, 24, 16, 0.06),
+    -6px -6px 18px rgba(255, 255, 255, 0.95),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.9),
+    inset -2px -2px 4px rgba(44, 24, 16, 0.04) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.category-card:hover {
+  transform: translateY(-4px) scale(1.02) !important;
+  box-shadow: 
+    12px 16px 30px rgba(44, 24, 16, 0.1),
+    -8px -8px 22px rgba(255, 255, 255, 0.98),
+    inset 2px 2px 5px rgba(255, 255, 255, 0.95),
+    inset -2px -2px 5px rgba(44, 24, 16, 0.05) !important;
+}
+
+.category-card-img-wrap {
+  border-radius: 50% !important;
+  box-shadow: 
+    inset 2px 3px 6px rgba(44, 24, 16, 0.12),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.8),
+    0 4px 10px rgba(44, 24, 16, 0.06) !important;
+  border: 2px solid rgba(255, 255, 255, 0.9) !important;
+}
+
+/* 7. Clay Testimonial Card & Carousel Navigation */
+.clay-testimonial-card {
+  background: #FAF7F2 !important;
+  border-radius: 24px !important;
+  border: 1.5px solid #EFE7DC !important;
+  box-shadow: 
+    10px 14px 30px rgba(44, 24, 16, 0.06),
+    -6px -6px 20px rgba(255, 255, 255, 0.95),
+    inset 2px 2px 5px rgba(255, 255, 255, 0.9),
+    inset -2px -2px 5px rgba(44, 24, 16, 0.03) !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.clay-testimonial-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 
+    14px 18px 36px rgba(44, 24, 16, 0.09),
+    -8px -8px 24px rgba(255, 255, 255, 0.98),
+    inset 2px 2px 5px rgba(255, 255, 255, 0.95),
+    inset -2px -2px 5px rgba(44, 24, 16, 0.04) !important;
+}
+
+.clay-carousel-arrow {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background: #FAF7F2 !important;
+  border: 1.5px solid #EFE7DC !important;
+  color: #2C1810 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 
+    6px 8px 20px rgba(44, 24, 16, 0.12),
+    -4px -4px 14px rgba(255, 255, 255, 0.95),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.95),
+    inset -2px -2px 4px rgba(44, 24, 16, 0.06) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.clay-carousel-arrow:hover {
+  transform: translateY(-50%) scale(1.08) !important;
+  background: #FFFFFF !important;
+  box-shadow: 
+    8px 12px 24px rgba(44, 24, 16, 0.16),
+    -6px -6px 18px rgba(255, 255, 255, 1),
+    inset 2px 2px 4px rgba(255, 255, 255, 1),
+    inset -2px -2px 4px rgba(44, 24, 16, 0.07) !important;
+}
+
+.clay-carousel-arrow:active {
+  transform: translateY(-50%) scale(0.94) !important;
+  box-shadow: 
+    2px 3px 8px rgba(44, 24, 16, 0.1),
+    inset 2px 2px 5px rgba(44, 24, 16, 0.12),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* 8. Clay Floating AI Assistant Pill */
+.clay-floating-ai {
+  border-radius: 999px !important;
+  border: 2px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 
+    8px 12px 30px rgba(44, 24, 16, 0.32),
+    inset 2px 2px 5px rgba(255, 255, 255, 0.5),
+    inset -2px -2px 6px rgba(0, 0, 0, 0.35) !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease !important;
+}
+
+.clay-floating-ai:active {
+  transform: scale(0.96) !important;
 }
