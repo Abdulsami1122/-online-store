@@ -1130,16 +1130,16 @@ textarea {
     border-radius: 120px 120px 24px 24px;
   }
 
-  /* Responsive Grids on Mobile: Product cards 1-by-1, Categories 2-col */
+  /* Responsive Grids on Mobile: Product cards 2-in-a-row (compact & touch-friendly) */
   .grid-responsive-products {
-    grid-template-columns: 1fr !important;
-    gap: 1.35rem !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.65rem !important;
   }
 
   .grid-responsive-4,
   .grid-responsive-5 {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.75rem !important;
+    gap: 0.65rem !important;
   }
 
   .category-grid-responsive {
@@ -1147,30 +1147,30 @@ textarea {
     gap: 0.65rem !important;
   }
 
-  /* 1. Android App Product Card (1-Column Showcase on Mobile) */
+  /* 1. Android App Product Card (2-in-a-row Showcase on Mobile) */
   .grid-responsive-products .luxury-product-card {
-    border-radius: 20px !important;
+    border-radius: 14px !important;
     background-color: #FFFFFF !important;
     border: 1px solid #EFE7DC !important;
-    box-shadow: 0 4px 18px rgba(44, 24, 16, 0.07) !important;
+    box-shadow: 0 3px 12px rgba(44, 24, 16, 0.06) !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
     position: relative !important;
     width: 100% !important;
-    max-width: 440px !important;
-    margin: 0 auto !important;
+    max-width: 100% !important;
+    margin: 0 !important;
     transition: transform 0.15s ease, box-shadow 0.15s ease !important;
     -webkit-tap-highlight-color: transparent !important;
   }
 
   .grid-responsive-products .luxury-product-card:active {
-    transform: scale(0.99) !important;
-    box-shadow: 0 2px 8px rgba(44, 24, 16, 0.09) !important;
+    transform: scale(0.98) !important;
+    box-shadow: 0 2px 6px rgba(44, 24, 16, 0.08) !important;
   }
 
   .grid-responsive-products .product-card-image-wrap {
-    height: 285px !important;
+    height: 165px !important;
     background-color: #F5EBE0 !important;
     position: relative !important;
   }
@@ -1180,128 +1180,137 @@ textarea {
   }
 
   .grid-responsive-products .product-card-badge {
-    top: 10px !important;
-    left: 10px !important;
-    font-size: 0.72rem !important;
+    top: 6px !important;
+    left: 6px !important;
+    font-size: 0.65rem !important;
     font-weight: 800 !important;
-    padding: 0.25rem 0.65rem !important;
+    padding: 0.2rem 0.5rem !important;
     border-radius: 999px !important;
-    letter-spacing: 0.04em !important;
-    box-shadow: 0 2px 8px rgba(44, 24, 16, 0.22) !important;
+    letter-spacing: 0.03em !important;
+    box-shadow: 0 2px 6px rgba(44, 24, 16, 0.2) !important;
   }
 
   .grid-responsive-products .product-card-action-icons {
-    top: 10px !important;
-    right: 10px !important;
-    gap: 8px !important;
+    top: 6px !important;
+    right: 6px !important;
+    gap: 5px !important;
   }
 
   .grid-responsive-products .product-card-action-icons button {
-    width: 34px !important;
-    height: 34px !important;
+    width: 28px !important;
+    height: 28px !important;
     background-color: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(4px) !important;
     border-radius: 50% !important;
-    box-shadow: 0 2px 8px rgba(44, 24, 16, 0.14) !important;
+    box-shadow: 0 2px 6px rgba(44, 24, 16, 0.12) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
   }
 
+  .grid-responsive-products .product-card-action-icons button svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
   .grid-responsive-products .product-card-quickview {
-    bottom: 10px !important;
-    padding: 0.32rem 0.85rem !important;
-    font-size: 0.75rem !important;
+    bottom: 6px !important;
+    padding: 0.25rem 0.65rem !important;
+    font-size: 0.68rem !important;
     font-weight: 700 !important;
     border-radius: 999px !important;
-    box-shadow: 0 2px 10px rgba(44, 24, 16, 0.16) !important;
+    box-shadow: 0 2px 8px rgba(44, 24, 16, 0.14) !important;
   }
 
   .grid-responsive-products .product-card-body {
-    padding: 1.15rem 1.1rem 1.25rem !important;
+    padding: 0.75rem 0.65rem 0.85rem !important;
     display: flex !important;
     flex-direction: column !important;
     flex: 1 !important;
   }
 
   .grid-responsive-products .product-card-category {
-    font-size: 0.72rem !important;
+    font-size: 0.65rem !important;
     font-weight: 700 !important;
     color: #8C7D73 !important;
-    letter-spacing: 0.05em !important;
-    margin-bottom: 0.25rem !important;
+    letter-spacing: 0.04em !important;
+    margin-bottom: 0.2rem !important;
     text-transform: uppercase !important;
   }
 
   .grid-responsive-products .product-card-title {
-    font-size: 1.08rem !important;
-    line-height: 1.35 !important;
+    font-size: 0.85rem !important;
+    line-height: 1.25 !important;
     font-weight: 700 !important;
     color: #2C1810 !important;
-    margin-bottom: 0.45rem !important;
-    display: block !important;
-    min-height: auto !important;
+    margin-bottom: 0.35rem !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    min-height: 2.15rem !important;
   }
 
   .grid-responsive-products .product-card-rating-stock {
-    margin-bottom: 0.65rem !important;
-    gap: 0.45rem !important;
+    margin-bottom: 0.45rem !important;
+    gap: 0.35rem !important;
     flex-wrap: wrap !important;
   }
 
   .grid-responsive-products .product-card-stars svg {
-    width: 13px !important;
-    height: 13px !important;
+    width: 11px !important;
+    height: 11px !important;
   }
 
   .grid-responsive-products .product-card-rating-val {
-    font-size: 0.82rem !important;
+    font-size: 0.72rem !important;
     font-weight: 700 !important;
     color: #2C1810 !important;
   }
 
   .grid-responsive-products .product-card-stock-tag {
-    font-size: 0.74rem !important;
+    font-size: 0.66rem !important;
     font-weight: 700 !important;
   }
 
   .grid-responsive-products .product-card-price-row {
-    margin-bottom: 0.85rem !important;
+    margin-bottom: 0.6rem !important;
     display: flex !important;
     align-items: baseline !important;
     flex-wrap: wrap !important;
+    gap: 0.3rem !important;
   }
 
   .grid-responsive-products .product-card-price {
-    font-size: 1.28rem !important;
+    font-size: 1.05rem !important;
     font-weight: 800 !important;
     color: var(--primary, #5C3A21) !important;
   }
 
   .grid-responsive-products .product-card-original-price {
-    font-size: 0.86rem !important;
+    font-size: 0.75rem !important;
     color: #A39489 !important;
-    margin-left: 0.45rem !important;
+    margin-left: 0 !important;
   }
 
   .grid-responsive-products .product-card-cod-btn {
-    padding: 0.8rem 1rem !important;
-    font-size: 0.92rem !important;
+    padding: 0.55rem 0.6rem !important;
+    font-size: 0.75rem !important;
     font-weight: 700 !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
   }
 
   .grid-responsive-products .product-card-sub-buttons {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.5rem !important;
+    gap: 0.35rem !important;
   }
 
   .grid-responsive-products .product-card-sub-buttons button {
-    padding: 0.7rem 0.85rem !important;
-    font-size: 0.85rem !important;
+    padding: 0.45rem 0.4rem !important;
+    font-size: 0.72rem !important;
     font-weight: 700 !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
   }
 
   /* Testimonial Carousel Mobile Arrows */
@@ -1615,39 +1624,50 @@ textarea {
 
 @media (max-width: 480px) {
   .grid-responsive-products {
-    grid-template-columns: 1fr !important;
-    gap: 1.25rem !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.55rem !important;
   }
 
   .grid-responsive-products .luxury-product-card {
     max-width: 100% !important;
   }
 
-  .grid-responsive-products .product-card-image-wrap {
-    height: 275px !important;
+  .grid-responsive-products .product-card-image-wrap,
+  .product-card-image-wrap {
+    height: 152px !important;
   }
 
-  .grid-responsive-products .product-card-body {
-    padding: 1.1rem 1rem 1.2rem !important;
+  .grid-responsive-products .product-card-body,
+  .product-card-body {
+    padding: 0.65rem 0.5rem 0.75rem !important;
   }
 
-  .grid-responsive-products .product-card-title {
-    font-size: 1.05rem !important;
-    min-height: auto !important;
+  .grid-responsive-products .product-card-title,
+  .product-card-title {
+    font-size: 0.8rem !important;
+    min-height: 2rem !important;
+    line-height: 1.22 !important;
   }
 
-  .grid-responsive-products .product-card-price {
-    font-size: 1.22rem !important;
+  .grid-responsive-products .product-card-price,
+  .product-card-price {
+    font-size: 0.98rem !important;
   }
 
-  .grid-responsive-products .product-card-cod-btn {
-    padding: 0.75rem 1rem !important;
-    font-size: 0.9rem !important;
+  .grid-responsive-products .product-card-original-price {
+    font-size: 0.7rem !important;
   }
 
-  .grid-responsive-products .product-card-sub-buttons button {
-    padding: 0.65rem 0.8rem !important;
-    font-size: 0.82rem !important;
+  .grid-responsive-products .product-card-cod-btn,
+  .product-card-cod-btn {
+    padding: 0.46rem 0.45rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .grid-responsive-products .product-card-sub-buttons button,
+  .product-card-sub-buttons button {
+    padding: 0.38rem 0.3rem !important;
+    font-size: 0.66rem !important;
   }
 
   .flash-sale-split {
@@ -1715,36 +1735,66 @@ textarea {
     gap: 0.5rem !important;
   }
 
-  .product-card-image-wrap {
-    height: 155px !important;
-  }
-
-  .product-card-body {
-    padding: 0.6rem 0.5rem 0.75rem !important;
-  }
-
-  .product-card-title {
-    font-size: 0.82rem !important;
-    min-height: 2.1em !important;
-  }
-
-  .product-card-price {
-    font-size: 0.98rem !important;
-  }
-
-  .product-card-cod-btn {
-    padding: 0.46rem 0.35rem !important;
-    font-size: 0.72rem !important;
-  }
-
-  .product-card-sub-buttons button {
-    padding: 0.38rem 0.25rem !important;
-    font-size: 0.68rem !important;
-  }
-
   .category-card-img-wrap {
     width: 64px !important;
     height: 64px !important;
+  }
+}
+
+@media (max-width: 395px) {
+  .grid-responsive-products {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.45rem !important;
+  }
+
+  .grid-responsive-products .product-card-image-wrap,
+  .product-card-image-wrap {
+    height: 138px !important;
+  }
+
+  .grid-responsive-products .product-card-body,
+  .product-card-body {
+    padding: 0.55rem 0.4rem 0.65rem !important;
+  }
+
+  .grid-responsive-products .product-card-title,
+  .product-card-title {
+    font-size: 0.76rem !important;
+    min-height: 1.95rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .grid-responsive-products .product-card-price,
+  .product-card-price {
+    font-size: 0.92rem !important;
+  }
+
+  .grid-responsive-products .product-card-cod-btn,
+  .product-card-cod-btn {
+    padding: 0.42rem 0.35rem !important;
+    font-size: 0.68rem !important;
+  }
+
+  .grid-responsive-products .product-card-sub-buttons button,
+  .product-card-sub-buttons button {
+    padding: 0.34rem 0.25rem !important;
+    font-size: 0.64rem !important;
+  }
+
+  /* Robot icon button slightly smaller for 395px */
+  .floating-ai-btn-wrap {
+    bottom: 74px !important;
+    right: 12px !important;
+  }
+
+  .clay-floating-ai {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  .clay-floating-ai .ai-robot-icon {
+    width: 19px !important;
+    height: 19px !important;
   }
 }
 
@@ -2131,13 +2181,30 @@ textarea {
   }
 
   .floating-ai-btn-wrap {
-    bottom: 80px !important;
+    bottom: 76px !important;
     right: 14px !important;
   }
 
-  .floating-ai-btn-wrap button {
-    padding: 0.65rem 1.05rem !important;
-    font-size: 0.8rem !important;
+  .floating-ai-btn-wrap button,
+  .clay-floating-ai {
+    width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .clay-floating-ai .ai-robot-icon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .ai-robot-status-dot {
+    top: 2px !important;
+    right: 2px !important;
+    width: 8px !important;
+    height: 8px !important;
   }
 }
 
@@ -3016,6 +3083,14 @@ textarea {
     inset 2px 2px 5px rgba(255, 255, 255, 0.9),
     inset -2px -2px 5px rgba(44, 24, 16, 0.03) !important;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  padding: 1.85rem 1.65rem !important;
+}
+
+@media (max-width: 768px) {
+  .clay-testimonial-card {
+    padding: 1.25rem 1rem !important;
+    border-radius: 18px !important;
+  }
 }
 
 .clay-testimonial-card:hover {
@@ -3064,17 +3139,56 @@ textarea {
     inset -1px -1px 3px rgba(255, 255, 255, 0.8) !important;
 }
 
-/* 8. Clay Floating AI Assistant Pill */
+/* 8. Clay Floating AI Robot Assistant */
 .clay-floating-ai {
-  border-radius: 999px !important;
-  border: 2px solid rgba(255, 255, 255, 0.35) !important;
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  padding: 0 !important;
+  border: 2px solid rgba(255, 255, 255, 0.45) !important;
   box-shadow: 
-    8px 12px 30px rgba(44, 24, 16, 0.32),
-    inset 2px 2px 5px rgba(255, 255, 255, 0.5),
+    0 10px 24px rgba(44, 24, 16, 0.32),
+    inset 2px 2px 5px rgba(255, 255, 255, 0.6),
     inset -2px -2px 6px rgba(0, 0, 0, 0.35) !important;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease !important;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease !important;
+}
+
+.clay-floating-ai:hover {
+  transform: translateY(-3px) scale(1.06) !important;
+  box-shadow: 
+    0 14px 28px rgba(44, 24, 16, 0.4),
+    inset 2px 2px 5px rgba(255, 255, 255, 0.7),
+    inset -2px -2px 6px rgba(0, 0, 0, 0.4) !important;
 }
 
 .clay-floating-ai:active {
-  transform: scale(0.96) !important;
+  transform: scale(0.94) !important;
+}
+
+.ai-robot-status-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  background-color: #22c55e;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
+  animation: ai-pulse 2s infinite;
+}
+
+@keyframes ai-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 0.75;
+  }
 }

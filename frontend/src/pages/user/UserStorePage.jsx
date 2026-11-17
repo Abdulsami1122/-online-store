@@ -1194,180 +1194,225 @@ export default function UserStorePage({
             transition: 'background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
           }}
         >
-        <div
-          className="container"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0.85rem 1.25rem',
-          }}
-        >
-          {/* Left: Brand Logo & Customizable Store Name */}
           <div
-            onClick={() => scrollTo(heroRef)}
+            className="container"
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.75rem',
-              cursor: 'pointer',
-              userSelect: 'none',
+              justifyContent: 'space-between',
+              padding: '0.85rem 1.25rem',
             }}
           >
-            {storeSettings.storeLogo ? (
-              <img
-                src={storeSettings.storeLogo}
-                alt={storeSettings.storeName}
-                style={{
-                  maxHeight: '44px',
-                  maxWidth: '56px',
-                  objectFit: 'contain',
-                  display: 'block',
-                  borderRadius: '8px',
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '12px',
-                  backgroundColor: isScrolled ? theme.primaryLight : 'rgba(255, 255, 255, 0.22)',
-                  color: isScrolled ? theme.primary : '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <Store size={22} strokeWidth={2.2} />
-              </div>
-            )}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <span
-                  className="brand-title-text"
+            {/* Left: Brand Logo & Customizable Store Name */}
+            <div
+              onClick={() => scrollTo(heroRef)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              {storeSettings.storeLogo ? (
+                <img
+                  src={storeSettings.storeLogo}
+                  alt={storeSettings.storeName}
                   style={{
-                    fontFamily: theme.headingFont,
-                    fontSize: '1.4rem',
-                    fontWeight: 700,
-                    color: isScrolled ? theme.primary : '#FFFFFF',
-                    letterSpacing: '-0.02em',
+                    maxHeight: '44px',
+                    maxWidth: '56px',
+                    objectFit: 'contain',
                     display: 'block',
-                    lineHeight: 1.1,
-                    textShadow: isScrolled ? 'none' : '0 2px 10px rgba(0, 0, 0, 0.75)',
+                    borderRadius: '8px',
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '12px',
+                    backgroundColor: isScrolled ? theme.primaryLight : 'rgba(255, 255, 255, 0.22)',
+                    color: isScrolled ? theme.primary : '#FFFFFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  <Store size={22} strokeWidth={2.2} />
+                </div>
+              )}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <span
+                    className="brand-title-text"
+                    style={{
+                      fontFamily: theme.headingFont,
+                      fontSize: '1.4rem',
+                      fontWeight: 700,
+                      color: isScrolled ? theme.primary : '#FFFFFF',
+                      letterSpacing: '-0.02em',
+                      display: 'block',
+                      lineHeight: 1.1,
+                      textShadow: isScrolled ? 'none' : '0 2px 10px rgba(0, 0, 0, 0.75)',
+                      transition: 'color 0.3s ease',
+                    }}
+                  >
+                    {storeSettings.storeName}
+                  </span>
+                </div>
+                <span
+                  className="brand-sub-text"
+                  style={{
+                    fontSize: '0.68rem',
+                    color: isScrolled ? '#8C7D73' : 'rgba(255, 255, 255, 0.85)',
+                    letterSpacing: '0.04em',
+                    fontWeight: 600,
+                    textShadow: isScrolled ? 'none' : '0 1px 4px rgba(0, 0, 0, 0.7)',
                     transition: 'color 0.3s ease',
                   }}
                 >
-                  {storeSettings.storeName}
+                  {storeSettings.storeTagline}
                 </span>
               </div>
-              <span
-                className="brand-sub-text"
-                style={{
-                  fontSize: '0.68rem',
-                  color: isScrolled ? '#8C7D73' : 'rgba(255, 255, 255, 0.85)',
-                  letterSpacing: '0.04em',
-                  fontWeight: 600,
-                  textShadow: isScrolled ? 'none' : '0 1px 4px rgba(0, 0, 0, 0.7)',
-                  transition: 'color 0.3s ease',
-                }}
-              >
-                {storeSettings.storeTagline}
-              </span>
             </div>
-          </div>
 
-          {/* Center: Navigation Menu Links */}
-          <nav
-            style={{
-              display: 'none',
-              alignItems: 'center',
-              gap: '2.25rem',
-            }}
-            className="desktop-nav"
-          >
-            {[
-              { label: 'Home', ref: heroRef },
-              { label: 'Shop All', ref: productsRef },
-              { label: 'Categories', ref: categoriesRef },
-              { label: 'Best Sellers', ref: bestSellersRef },
-              { label: 'Contact', ref: footerRef },
-            ].map((link, idx) => (
+            {/* Center: Navigation Menu Links */}
+            <nav
+              style={{
+                display: 'none',
+                alignItems: 'center',
+                gap: '2.25rem',
+              }}
+              className="desktop-nav"
+            >
+              {[
+                { label: 'Home', ref: heroRef },
+                { label: 'Shop All', ref: productsRef },
+                { label: 'Categories', ref: categoriesRef },
+                { label: 'Best Sellers', ref: bestSellersRef },
+                { label: 'Contact', ref: footerRef },
+              ].map((link, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => scrollTo(link.ref)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '0.96rem',
+                    fontWeight: 600,
+                    color: isScrolled ? theme.primary : '#FFFFFF',
+                    cursor: 'pointer',
+                    padding: '0.35rem 0',
+                    whiteSpace: 'nowrap',
+                    letterSpacing: '0.01em',
+                    transition: 'all 0.2s ease',
+                    position: 'relative',
+                    textShadow: isScrolled ? 'none' : '0 1px 6px rgba(0, 0, 0, 0.7)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = isScrolled ? theme.primaryHover : '#F4C472';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = isScrolled ? theme.primary : '#FFFFFF';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  {link.label}
+                </button>
+              ))}
+            </nav>
+
+            {/* Right: Search, Wishlist, Cart, Mobile Toggle */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+              {/* Search */}
               <button
-                key={idx}
-                onClick={() => scrollTo(link.ref)}
+                onClick={() => setSearchModalOpen(true)}
+                className="header-icon-btn"
                 style={{
                   background: 'none',
                   border: 'none',
-                  fontSize: '0.96rem',
-                  fontWeight: 600,
-                  color: isScrolled ? theme.primary : '#FFFFFF',
+                  color: isScrolled ? '#2C1810' : '#FFFFFF',
+                  padding: '0.45rem',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
                   cursor: 'pointer',
-                  padding: '0.35rem 0',
-                  whiteSpace: 'nowrap',
-                  letterSpacing: '0.01em',
-                  transition: 'all 0.2s ease',
-                  position: 'relative',
-                  textShadow: isScrolled ? 'none' : '0 1px 6px rgba(0, 0, 0, 0.7)',
+                  transition: 'color 0.3s ease',
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = isScrolled ? theme.primaryHover : '#F4C472';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = isScrolled ? theme.primary : '#FFFFFF';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
+                title="Search products"
               >
-                {link.label}
+                <Search size={21} strokeWidth={1.8} />
               </button>
-            ))}
-          </nav>
 
-          {/* Right: Search, Wishlist, Cart, Mobile Toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-            {/* Search */}
-            <button
-              onClick={() => setSearchModalOpen(true)}
-              className="header-icon-btn"
-              style={{
-                background: 'none',
-                border: 'none',
-                color: isScrolled ? '#2C1810' : '#FFFFFF',
-                padding: '0.45rem',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-                transition: 'color 0.3s ease',
-              }}
-              title="Search products"
-            >
-              <Search size={21} strokeWidth={1.8} />
-            </button>
+              {/* Wishlist */}
+              <button
+                onClick={() => setWishlistDrawerOpen(true)}
+                className="desktop-nav-icon"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: isScrolled ? '#2C1810' : '#FFFFFF',
+                  padding: '0.45rem',
+                  borderRadius: '50%',
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  transition: 'color 0.3s ease',
+                }}
+                title="Saved items"
+              >
+                <Heart size={21} strokeWidth={1.8} />
+                {wishlist.length > 0 && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: '2px',
+                      right: '2px',
+                      backgroundColor: isScrolled ? theme.primary : '#C58F58',
+                      color: '#ffffff',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                    }}
+                  >
+                    {wishlist.length}
+                  </span>
+                )}
+              </button>
 
-            {/* Wishlist */}
-            <button
-              onClick={() => setWishlistDrawerOpen(true)}
-              className="desktop-nav-icon"
-              style={{
-                background: 'none',
-                border: 'none',
-                color: isScrolled ? '#2C1810' : '#FFFFFF',
-                padding: '0.45rem',
-                borderRadius: '50%',
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-                transition: 'color 0.3s ease',
-              }}
-              title="Saved items"
-            >
-              <Heart size={21} strokeWidth={1.8} />
-              {wishlist.length > 0 && (
+              {/* Shopping Bag / Cart */}
+              <button
+                onClick={() => {
+                  setCartDrawerOpen(true);
+                  setCheckoutStep('cart');
+                }}
+                className="desktop-nav-icon"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: isScrolled ? '#2C1810' : '#FFFFFF',
+                  padding: '0.45rem',
+                  borderRadius: '50%',
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  transition: 'color 0.3s ease',
+                }}
+                title="Shopping Bag"
+              >
+                <ShoppingBag size={21} strokeWidth={1.8} />
                 <span
                   style={{
                     position: 'absolute',
@@ -1386,76 +1431,31 @@ export default function UserStorePage({
                     boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
                   }}
                 >
-                  {wishlist.length}
+                  {itemsCount}
                 </span>
-              )}
-            </button>
+              </button>
 
-            {/* Shopping Bag / Cart */}
-            <button
-              onClick={() => {
-                setCartDrawerOpen(true);
-                setCheckoutStep('cart');
-              }}
-              className="desktop-nav-icon"
-              style={{
-                background: 'none',
-                border: 'none',
-                color: isScrolled ? '#2C1810' : '#FFFFFF',
-                padding: '0.45rem',
-                borderRadius: '50%',
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-                transition: 'color 0.3s ease',
-              }}
-              title="Shopping Bag"
-            >
-              <ShoppingBag size={21} strokeWidth={1.8} />
-              <span
+              {/* Mobile Nav Toggle */}
+              <button
+                onClick={() => setMobileMenuOpen(true)}
                 style={{
-                  position: 'absolute',
-                  top: '2px',
-                  right: '2px',
-                  backgroundColor: isScrolled ? theme.primary : '#C58F58',
-                  color: '#ffffff',
-                  fontSize: '0.68rem',
-                  fontWeight: 700,
-                  width: '18px',
-                  height: '18px',
-                  borderRadius: '50%',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                  background: 'none',
+                  border: 'none',
+                  padding: '0.4rem',
+                  cursor: 'pointer',
+                  color: isScrolled ? '#2C1810' : '#FFFFFF',
+                  transition: 'color 0.3s ease',
                 }}
+                className="mobile-nav-toggle header-icon-btn"
+                aria-label="Open menu"
               >
-                {itemsCount}
-              </span>
-            </button>
-
-            {/* Mobile Nav Toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              style={{
-                display: 'flex',
-                background: 'none',
-                border: 'none',
-                padding: '0.4rem',
-                cursor: 'pointer',
-                color: isScrolled ? '#2C1810' : '#FFFFFF',
-                transition: 'color 0.3s ease',
-              }}
-              className="mobile-nav-toggle header-icon-btn"
-              aria-label="Open menu"
-            >
-              <Menu size={24} />
-            </button>
+                <Menu size={24} />
+              </button>
+            </div>
           </div>
-        </div>
 
-        <style>{`
+          <style>{`
           @media (min-width: 900px) {
             .desktop-nav { display: flex !important; }
             .desktop-nav-icon { display: flex !important; }
@@ -1465,7 +1465,7 @@ export default function UserStorePage({
             .desktop-nav-icon { display: none !important; }
           }
         `}</style>
-      </header>
+        </header>
       </div>
 
       {/* ================================================================= */}
@@ -1860,66 +1860,66 @@ export default function UserStorePage({
       {/* ================================================================= */}
       <ScrollRevealSection direction="right">
         <section className="section-social-commerce">
-            <div
-              style={{
-                background: theme.promoBg || '#2C1810',
-              }}
-              className="social-commerce-card"
-            >
-              <div className="social-commerce-avatar-wrap">
-                <div
-                  className="social-commerce-avatar"
-                  style={{
-                    backgroundColor: theme.primary || '#4A0826',
+          <div
+            style={{
+              background: theme.promoBg || '#2C1810',
+            }}
+            className="social-commerce-card"
+          >
+            <div className="social-commerce-avatar-wrap">
+              <div
+                className="social-commerce-avatar"
+                style={{
+                  backgroundColor: theme.primary || '#4A0826',
+                }}
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80"
+                  alt="Verified Direct Store"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&q=80';
                   }}
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80"
-                    alt="Verified Direct Store"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&q=80';
-                    }}
-                  />
-                </div>
-                <div
-                  className="social-commerce-avatar-badge"
-                  style={{
-                    color: theme.primary || '#5C3A21',
-                  }}
-                >
-                  <span>📦 Open Parcel Verified</span>
-                </div>
+                />
               </div>
-
-              <div className="social-commerce-content">
-                <span className="social-commerce-pill">
-                  SOCIAL COMMERCE DIRECT STORE
-                </span>
-
-                <h2 className="font-serif social-commerce-title">
-                  Buy Direct With Guaranteed Open Parcel Delivery
-                </h2>
-
-                <p className="social-commerce-desc">
-                  Linked here from Facebook Marketplace, Daraz, or Instagram? Enjoy zero marketplace hidden fees,
-                  100% verified genuine products, and instant cash on delivery at your doorstep.
-                </p>
-
-                <button
-                  onClick={() => scrollTo(productsRef)}
-                  className="social-commerce-btn"
-                  style={{
-                    color: theme.primary || '#5C3A21',
-                  }}
-                >
-                  <span>Browse Full Catalog</span>
-                  <ArrowRight size={16} />
-                </button>
+              <div
+                className="social-commerce-avatar-badge"
+                style={{
+                  color: theme.primary || '#5C3A21',
+                }}
+              >
+                <span>📦 Open Parcel Verified</span>
               </div>
             </div>
-          </section>
-        </ScrollRevealSection>
+
+            <div className="social-commerce-content">
+              <span className="social-commerce-pill">
+                SOCIAL COMMERCE DIRECT STORE
+              </span>
+
+              <h2 className="font-serif social-commerce-title">
+                Buy Direct With Guaranteed Open Parcel Delivery
+              </h2>
+
+              <p className="social-commerce-desc">
+                Linked here from Facebook Marketplace, Daraz, or Instagram? Enjoy zero marketplace hidden fees,
+                100% verified genuine products, and instant cash on delivery at your doorstep.
+              </p>
+
+              <button
+                onClick={() => scrollTo(productsRef)}
+                className="social-commerce-btn"
+                style={{
+                  color: theme.primary || '#5C3A21',
+                }}
+              >
+                <span>Browse Full Catalog</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+        </section>
+      </ScrollRevealSection>
 
       {/* ================================================================= */}
       {/* 6. FEATURED COLLECTION (Shows Admin Products & Filter Tabs)        */}
@@ -2701,11 +2701,9 @@ export default function UserStorePage({
                       <div
                         className="clay-testimonial-card"
                         style={{
-                          padding: '1.85rem 1.65rem',
                           display: 'flex',
                           flexDirection: 'column',
                           height: '100%',
-                          minHeight: '275px',
                         }}
                       >
                         {/* Rating Stars & Verified Badge */}
@@ -4703,269 +4701,273 @@ export default function UserStorePage({
       {/* MOBILE MENU */}
       {mobileMenuOpen && (
         <div className="drawer-backdrop" onClick={() => setMobileMenuOpen(false)}>
-                    <div
-                      className="drawer-panel"
-                      onClick={(e) => e.stopPropagation()}
-                      style={{
-                        padding: '1.5rem 1.25rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', borderBottom: '1px solid #EFE7DC', paddingBottom: '0.85rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                            {storeSettings.storeLogo && (
-                              <img
-                                src={storeSettings.storeLogo}
-                                alt={storeSettings.storeName}
-                                style={{ height: '34px', width: '34px', borderRadius: '8px', objectFit: 'contain' }}
-                              />
-                            )}
-                            <span className="font-serif" style={{ fontSize: '1.25rem', fontWeight: 700, color: theme.primary }}>
-                              {storeSettings.storeName}
-                            </span>
-                          </div>
-                          <button onClick={() => setMobileMenuOpen(false)} style={{ background: '#F8FAFC', border: 'none', borderRadius: '8px', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748B' }}>
-                            <X size={20} />
-                          </button>
-                        </div>
-
-                        {/* Quick Wishlist Access in Burger Menu */}
-                        <button
-                          onClick={() => {
-                            setMobileMenuOpen(false);
-                            setWishlistDrawerOpen(true);
-                          }}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            width: '100%',
-                            backgroundColor: '#FDFBF7',
-                            border: '1.5px solid #EFE7DC',
-                            borderRadius: '12px',
-                            padding: '0.75rem 0.95rem',
-                            cursor: 'pointer',
-                            marginBottom: '1.25rem',
-                            textAlign: 'left',
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                            <div
-                              style={{
-                                width: '34px',
-                                height: '34px',
-                                borderRadius: '8px',
-                                backgroundColor: '#ffffff',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: '#DC2626',
-                                boxShadow: '0 2px 6px rgba(220, 38, 38, 0.15)',
-                              }}
-                            >
-                              <Heart size={18} fill="#DC2626" />
-                            </div>
-                            <div>
-                              <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#2C1810' }}>
-                                My Wishlist
-                              </div>
-                              <div style={{ fontSize: '0.72rem', color: '#8C7D73' }}>
-                                {wishlist.length === 0 ? 'No items saved yet' : `${wishlist.length} ${wishlist.length === 1 ? 'item' : 'items'} saved`}
-                              </div>
-                            </div>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                            {wishlist.length > 0 && (
-                              <span
-                                style={{
-                                  backgroundColor: theme.primary,
-                                  color: '#ffffff',
-                                  fontSize: '0.72rem',
-                                  fontWeight: 800,
-                                  padding: '0.15rem 0.55rem',
-                                  borderRadius: '999px',
-                                }}
-                              >
-                                {wishlist.length}
-                              </span>
-                            )}
-                            <span style={{ fontSize: '0.95rem', color: '#8C7D73', fontWeight: 700 }}>→</span>
-                          </div>
-                        </button>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                          {[
-                            { label: 'Home', ref: heroRef },
-                            { label: 'Shop All Products', ref: productsRef },
-                            { label: 'Browse Categories', ref: categoriesRef },
-                            { label: 'Best Sellers', ref: bestSellersRef },
-                            {
-                              label: `❤️ Saved Wishlist (${wishlist.length})`,
-                              action: () => {
-                                setMobileMenuOpen(false);
-                                setWishlistDrawerOpen(true);
-                              },
-                            },
-                            { label: '🚚 Track Order Status', action: () => { setMobileMenuOpen(false); setTrackingModalOpen(true); } },
-                            { label: 'Contact Seller', ref: footerRef },
-                          ].map((link, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => (link.action ? link.action() : scrollTo(link.ref))}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                textAlign: 'left',
-                                fontSize: '1rem',
-                                fontWeight: 700,
-                                color: theme.primary,
-                                cursor: 'pointer',
-                                padding: '0.35rem 0',
-                              }}
-                            >
-                              {link.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                        {/* Mobile Menu Bottom Branding & Quick WhatsApp */}
-                        <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid #EFE7DC', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                          <a
-                            href={`https://wa.me/${(storeSettings.whatsapp || '+923065779097').replace(/[^0-9]/g, '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: '0.5rem',
-                              backgroundColor: '#16A34A',
-                              color: '#ffffff',
-                              padding: '0.65rem 1rem',
-                              borderRadius: '10px',
-                              fontWeight: 700,
-                              fontSize: '0.85rem',
-                              textDecoration: 'none',
-                              boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)',
-                            }}
-                          >
-                            <MessageCircle size={16} />
-                            <span>WhatsApp Helpline</span>
-                          </a>
-
-                    <div style={{ fontSize: '0.72rem', color: '#8C7D73', textAlign: 'center', lineHeight: 1.4 }}>
-                      🚚 100% Cash on Delivery<br />📦 Open Parcel Delivery Across Pakistan
-                    </div>
-                  </div>
+          <div
+            className="drawer-panel"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              padding: '1.5rem 1.25rem',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', borderBottom: '1px solid #EFE7DC', paddingBottom: '0.85rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  {storeSettings.storeLogo && (
+                    <img
+                      src={storeSettings.storeLogo}
+                      alt={storeSettings.storeName}
+                      style={{ height: '34px', width: '34px', borderRadius: '8px', objectFit: 'contain' }}
+                    />
+                  )}
+                  <span className="font-serif" style={{ fontSize: '1.25rem', fontWeight: 700, color: theme.primary }}>
+                    {storeSettings.storeName}
+                  </span>
                 </div>
-              </div>
-      )}
-
-              {/* Floating AI Stylist & Shopping Assistant */}
-              <div className="floating-ai-btn-wrap" style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 99 }}>
-                <button
-                  onClick={() => setAiModalOpen(true)}
-                  className="clay-floating-ai"
-                  style={{
-                    backgroundColor: theme.primary,
-                    color: '#ffffff',
-                    padding: '0.85rem 1.4rem',
-                    borderRadius: '999px',
-                    fontSize: '0.88rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                  }}
-                >
-                  <Sparkles size={18} />
-                  <span>AI Shop Assistant</span>
+                <button onClick={() => setMobileMenuOpen(false)} style={{ background: '#F8FAFC', border: 'none', borderRadius: '8px', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748B' }}>
+                  <X size={20} />
                 </button>
               </div>
 
-              {/* Customer Mobile Bottom Navigation Bar with Floating Notch & Hopping Paper Disc */}
-              <nav className="mobile-bottom-nav" aria-label="Mobile Bottom Navigation">
-                {/* Moving Floating Notch and Hopping Paper Disc */}
-                <div
-                  className="mobile-notch-slider"
-                  style={{
-                    left: `calc(${activeBottomTab * 20}% + 10%)`,
-                  }}
-                >
-                  {/* Curved Cutout Notch SVG */}
-                  <svg
-                    className="mobile-notch-svg"
-                    viewBox="0 0 94 30"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M0 0 C 18 0, 22 24, 47 24 C 72 24, 76 0, 94 0 L 0 0 Z"
-                      fill="var(--bg-app, #FAF7F2)"
-                    />
-                    <path
-                      d="M0 0.75 C 18 0.75, 22 24.5, 47 24.5 C 72 24.5, 76 0.75, 94 0.75"
-                      stroke="var(--border-color, #EFE7DC)"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      fill="none"
-                    />
-                  </svg>
-
-                  {/* Tactile Floating Paper Disc (Hops on Notch) */}
+              {/* Quick Wishlist Access in Burger Menu */}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setWishlistDrawerOpen(true);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  backgroundColor: '#FDFBF7',
+                  border: '1.5px solid #EFE7DC',
+                  borderRadius: '12px',
+                  padding: '0.75rem 0.95rem',
+                  cursor: 'pointer',
+                  marginBottom: '1.25rem',
+                  textAlign: 'left',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                   <div
-                    className={`mobile-paper-disc ${isDiscHopping ? 'hopping' : ''}`}
-                    onClick={() => MOBILE_NAV_TABS[activeBottomTab].action()}
-                    title={MOBILE_NAV_TABS[activeBottomTab].label}
                     style={{
-                      color: theme.primary || '#5C3A21',
+                      width: '34px',
+                      height: '34px',
+                      borderRadius: '8px',
+                      backgroundColor: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#DC2626',
+                      boxShadow: '0 2px 6px rgba(220, 38, 38, 0.15)',
                     }}
                   >
-                    <span className="paper-disc-icon">
-                      {MOBILE_NAV_TABS[activeBottomTab].activeIcon}
-                    </span>
-                    {MOBILE_NAV_TABS[activeBottomTab].badge && (
-                      <span className="mobile-disc-badge">
-                        {MOBILE_NAV_TABS[activeBottomTab].badge}
-                      </span>
-                    )}
+                    <Heart size={18} fill="#DC2626" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#2C1810' }}>
+                      My Wishlist
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#8C7D73' }}>
+                      {wishlist.length === 0 ? 'No items saved yet' : `${wishlist.length} ${wishlist.length === 1 ? 'item' : 'items'} saved`}
+                    </div>
                   </div>
                 </div>
-
-                {/* 5 Bottom Navigation Tab Buttons */}
-                <div className="mobile-bottom-tabs-row">
-                  {MOBILE_NAV_TABS.map((tab, idx) => {
-                    const isActive = activeBottomTab === idx;
-                    return (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        className={`mobile-bottom-tab ${isActive ? 'active' : ''}`}
-                        onClick={() => handleBottomTabClick(idx, tab.action)}
-                        aria-label={tab.label}
-                      >
-                        <div className={`tab-icon-wrap ${isActive ? 'hidden' : ''}`}>
-                          {tab.icon}
-                          {tab.badge && !isActive && (
-                            <span className="mobile-bottom-badge">{tab.badge}</span>
-                          )}
-                        </div>
-
-                        <span className={`tab-label ${isActive ? 'active-label' : ''}`}>
-                          {tab.label}
-                        </span>
-                      </button>
-                    );
-                  })}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  {wishlist.length > 0 && (
+                    <span
+                      style={{
+                        backgroundColor: theme.primary,
+                        color: '#ffffff',
+                        fontSize: '0.72rem',
+                        fontWeight: 800,
+                        padding: '0.15rem 0.55rem',
+                        borderRadius: '999px',
+                      }}
+                    >
+                      {wishlist.length}
+                    </span>
+                  )}
+                  <span style={{ fontSize: '0.95rem', color: '#8C7D73', fontWeight: 700 }}>→</span>
                 </div>
-              </nav>
+              </button>
 
-              {aiModalOpen && <AiAssistantModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)} />}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {[
+                  { label: 'Home', ref: heroRef },
+                  { label: 'Shop All Products', ref: productsRef },
+                  { label: 'Browse Categories', ref: categoriesRef },
+                  { label: 'Best Sellers', ref: bestSellersRef },
+                  {
+                    label: `❤️ Saved Wishlist (${wishlist.length})`,
+                    action: () => {
+                      setMobileMenuOpen(false);
+                      setWishlistDrawerOpen(true);
+                    },
+                  },
+                  { label: '🚚 Track Order Status', action: () => { setMobileMenuOpen(false); setTrackingModalOpen(true); } },
+                  { label: 'Contact Seller', ref: footerRef },
+                ].map((link, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => (link.action ? link.action() : scrollTo(link.ref))}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      textAlign: 'left',
+                      fontSize: '1rem',
+                      fontWeight: 700,
+                      color: theme.primary,
+                      cursor: 'pointer',
+                      padding: '0.35rem 0',
+                    }}
+                  >
+                    {link.label}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {/* Mobile Menu Bottom Branding & Quick WhatsApp */}
+            <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid #EFE7DC', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <a
+                href={`https://wa.me/${(storeSettings.whatsapp || '+923065779097').replace(/[^0-9]/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  backgroundColor: '#16A34A',
+                  color: '#ffffff',
+                  padding: '0.65rem 1rem',
+                  borderRadius: '10px',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  textDecoration: 'none',
+                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)',
+                }}
+              >
+                <MessageCircle size={16} />
+                <span>WhatsApp Helpline</span>
+              </a>
+
+              <div style={{ fontSize: '0.72rem', color: '#8C7D73', textAlign: 'center', lineHeight: 1.4 }}>
+                🚚 100% Cash on Delivery<br />📦 Open Parcel Delivery Across Pakistan
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+              {/* Floating AI Robot Shopping Assistant */}
+              <div
+                className="floating-ai-btn-wrap"
+                style={{
+                  position: 'fixed',
+                  bottom: '24px',
+                  right: '24px',
+                  zIndex: 99,
+                }}
+              >
+                <button
+                  onClick={() => setAiModalOpen(true)}
+                  className="clay-floating-ai"
+                  title="AI Shopping Assistant"
+                  aria-label="AI Shopping Assistant"
+                  style={{
+                    backgroundColor: theme.primary,
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                    border: 'none',
+                  }}
+                >
+                  <Bot size={24} strokeWidth={2.2} className="ai-robot-icon" />
+                  <span className="ai-robot-status-dot" />
+                </button>
+              </div>
+
+      {/* Customer Mobile Bottom Navigation Bar with Floating Notch & Hopping Paper Disc */}
+      <nav className="mobile-bottom-nav" aria-label="Mobile Bottom Navigation">
+        {/* Moving Floating Notch and Hopping Paper Disc */}
+        <div
+          className="mobile-notch-slider"
+          style={{
+            left: `calc(${activeBottomTab * 20}% + 10%)`,
+          }}
+        >
+          {/* Curved Cutout Notch SVG */}
+          <svg
+            className="mobile-notch-svg"
+            viewBox="0 0 94 30"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M0 0 C 18 0, 22 24, 47 24 C 72 24, 76 0, 94 0 L 0 0 Z"
+              fill="var(--bg-app, #FAF7F2)"
+            />
+            <path
+              d="M0 0.75 C 18 0.75, 22 24.5, 47 24.5 C 72 24.5, 76 0.75, 94 0.75"
+              stroke="var(--border-color, #EFE7DC)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              fill="none"
+            />
+          </svg>
+
+          {/* Tactile Floating Paper Disc (Hops on Notch) */}
+          <div
+            className={`mobile-paper-disc ${isDiscHopping ? 'hopping' : ''}`}
+            onClick={() => MOBILE_NAV_TABS[activeBottomTab].action()}
+            title={MOBILE_NAV_TABS[activeBottomTab].label}
+            style={{
+              color: theme.primary || '#5C3A21',
+            }}
+          >
+            <span className="paper-disc-icon">
+              {MOBILE_NAV_TABS[activeBottomTab].activeIcon}
+            </span>
+            {MOBILE_NAV_TABS[activeBottomTab].badge && (
+              <span className="mobile-disc-badge">
+                {MOBILE_NAV_TABS[activeBottomTab].badge}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* 5 Bottom Navigation Tab Buttons */}
+        <div className="mobile-bottom-tabs-row">
+          {MOBILE_NAV_TABS.map((tab, idx) => {
+            const isActive = activeBottomTab === idx;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                className={`mobile-bottom-tab ${isActive ? 'active' : ''}`}
+                onClick={() => handleBottomTabClick(idx, tab.action)}
+                aria-label={tab.label}
+              >
+                <div className={`tab-icon-wrap ${isActive ? 'hidden' : ''}`}>
+                  {tab.icon}
+                  {tab.badge && !isActive && (
+                    <span className="mobile-bottom-badge">{tab.badge}</span>
+                  )}
+                </div>
+
+                <span className={`tab-label ${isActive ? 'active-label' : ''}`}>
+                  {tab.label}
+                </span>
+              </button>
             );
+          })}
+        </div>
+      </nav>
+
+      {aiModalOpen && <AiAssistantModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)} />}
+    </div>
+  );
 }
