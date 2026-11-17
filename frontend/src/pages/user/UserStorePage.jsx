@@ -4254,22 +4254,116 @@ export default function UserStorePage({
             ) : (
               <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 {wishlist.map((item) => (
-                  <div key={item._id} style={{ display: 'flex', gap: '0.75rem', padding: '0.65rem', backgroundColor: '#FDFBF7', borderRadius: '10px' }}>
-                    <img src={item.image} alt={item.title} style={{ width: '56px', height: '56px', borderRadius: '6px', objectFit: 'cover' }} />
-                    <div style={{ flex: 1 }}>
-                      <h4 style={{ fontSize: '0.85rem', fontWeight: 600, margin: 0 }}>{item.title}</h4>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: theme.primary, margin: '0.2rem 0' }}>{formatPrice(item.price)}</div>
+                  <div
+                    key={item._id}
+                    style={{
+                      display: 'flex',
+                      gap: '0.75rem',
+                      padding: '0.75rem',
+                      backgroundColor: '#FDFBF7',
+                      borderRadius: '12px',
+                      border: '1px solid #EFE7DC',
+                      position: 'relative',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      style={{
+                        width: '58px',
+                        height: '58px',
+                        borderRadius: '8px',
+                        objectFit: 'cover',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <div style={{ flex: 1, minWidth: 0, paddingRight: '1.75rem' }}>
+                      <h4
+                        style={{
+                          fontSize: '0.88rem',
+                          fontWeight: 600,
+                          margin: 0,
+                          color: '#2C1810',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {item.title}
+                      </h4>
+                      <div
+                        style={{
+                          fontSize: '0.88rem',
+                          fontWeight: 700,
+                          color: theme.primary,
+                          margin: '0.2rem 0 0.45rem',
+                        }}
+                      >
+                        {formatPrice(item.price)}
+                      </div>
                       <button
                         onClick={() => {
                           addToCart(item, 1);
                           setWishlistDrawerOpen(false);
                           setCartDrawerOpen(true);
                         }}
-                        style={{ backgroundColor: theme.primary, color: '#fff', border: 'none', padding: '0.3rem 0.65rem', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
+                        style={{
+                          backgroundColor: theme.primary,
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '0.35rem 0.8rem',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'opacity 0.2s',
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+                        onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
                       >
                         Add to Bag
                       </button>
                     </div>
+
+                    {/* Cross (Remove from Favorites) Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleWishlist(item, e);
+                      }}
+                      title="Remove from favorites"
+                      aria-label={`Remove ${item.title} from favorites`}
+                      style={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                        width: '26px',
+                        height: '26px',
+                        borderRadius: '50%',
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #EAE0D5',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#8C7D73',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#FEE2E2';
+                        e.currentTarget.style.borderColor = '#FCA5A5';
+                        e.currentTarget.style.color = '#DC2626';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#FFFFFF';
+                        e.currentTarget.style.borderColor = '#EAE0D5';
+                        e.currentTarget.style.color = '#8C7D73';
+                      }}
+                    >
+                      <X size={14} strokeWidth={2.4} />
+                    </button>
                   </div>
                 ))}
               </div>
