@@ -129,6 +129,8 @@ body {
 
 .hero-video-section video {
   pointer-events: none;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 
 h1,

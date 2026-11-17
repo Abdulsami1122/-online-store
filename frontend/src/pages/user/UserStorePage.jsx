@@ -1481,21 +1481,21 @@ export default function UserStorePage({
             height: '100%',
             objectFit: 'cover',
             zIndex: 1,
-            filter: 'brightness(0.78) contrast(1.08)',
-            transform: 'scale(1.02)',
+            filter: 'none',
+            transform: 'none',
             transition: 'opacity 0.6s ease',
           }}
         >
           <source src={HERO_SCENES[activeSceneIdx].videoUrl} type="video/mp4" />
         </video>
 
-        {/* Ambient Dark & Warm Luxury Scrim Overlay for 100% Crisp Centered Legibility */}
+        {/* Crisp & Clear Ambient Overlay - Minimal Scrim so Video is 100% Sharp, Vibrant & Crystal Clear */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
             background:
-              'linear-gradient(180deg, rgba(20, 10, 6, 0.65) 0%, rgba(20, 10, 6, 0.78) 50%, rgba(20, 10, 6, 0.88) 100%)',
+              'linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.25) 50%, rgba(0, 0, 0, 0.42) 100%)',
             zIndex: 2,
             pointerEvents: 'none',
           }}
