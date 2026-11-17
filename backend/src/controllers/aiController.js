@@ -68,6 +68,63 @@ const localizedReply = (language, english, romanUrdu, urdu) => {
   return english;
 };
 
+const FALLBACK_PRODUCTS = [
+  {
+    _id: 'prod-honey-1',
+    title: 'Sidr Honey',
+    price: 3500,
+    stock: 10,
+    category: 'Honey & Organics',
+    description: '100% Pure Organic Bery Sidr Honey (1kg Jar). Unfiltered, unpasteurized natural honey.',
+    image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=600&auto=format&fit=crop&q=80',
+  },
+  {
+    _id: 'prod-shirt-1',
+    title: 'shirt',
+    price: 1000,
+    stock: 10,
+    category: 'Fashion & Clothes',
+    description: 'Premium combed cotton regular fit classic shirt. Breathable and durable fabric.',
+    image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&auto=format&fit=crop&q=80',
+  },
+  {
+    _id: 'prod-car-fog-1',
+    title: 'Car Fog light',
+    price: 1200,
+    stock: 100,
+    category: 'General',
+    description: 'High brightness waterproof LED car fog light for clear night visibility.',
+    image: 'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=600&auto=format&fit=crop&q=80',
+  },
+  {
+    _id: 'prod-car-bumper-1',
+    title: 'Honda City Bumper',
+    price: 2000,
+    stock: 20,
+    category: 'Car Accessories',
+    description: 'Durable OEM replacement front bumper for Honda City.',
+    image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&auto=format&fit=crop&q=80',
+  },
+  {
+    _id: 'prod-car-kapra-1',
+    title: 'Car DB kapra',
+    price: 1000,
+    stock: 10,
+    category: 'Car Accessories',
+    description: 'High grade microfiber cleaning cloth and protective cover fabric for cars.',
+    image: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=600&auto=format&fit=crop&q=80',
+  },
+  {
+    _id: 'prod-apple-1',
+    title: 'Apple',
+    price: 100,
+    stock: 10,
+    category: 'Honey & Organics',
+    description: 'Fresh organic apple.',
+    image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=600&auto=format&fit=crop&q=80',
+  },
+];
+
 // ── Controller ───────────────────────────────────────────────────────────────
 
 // @desc    Process customer question with Gemini AI Assistant using store catalog
@@ -85,9 +142,17 @@ export const chatWithAssistant = async (req, res) => {
     const queryLower = query.toLowerCase();
     const replyLanguage = getReplyLanguage(query);
 
-    // 1. Fetch active products from MongoDB
-    const filter = sellerId ? { seller: sellerId } : {};
-    const products = await Product.find(filter).limit(30);
+    // 1. Fetch active products from MongoDB (fallback to catalog if offline or empty)
+    let products = [];
+    try {
+      const filter = sellerId ? { seller: sellerId } : {};
+      products = await Product.find(filter).limit(30);
+    } catch (dbErr) {
+      console.warn('MongoDB products fetch failed:', dbErr.message);
+    }
+    if (!products || products.length === 0) {
+      products = FALLBACK_PRODUCTS;
+    }
 
     // 2. Identify if query matches any specific product to send its photo and card
     let matchedProduct = null;
@@ -95,29 +160,35 @@ export const chatWithAssistant = async (req, res) => {
       const pTitle = prod.title.toLowerCase();
       const pCategory = (prod.category || '').toLowerCase();
 
+      // Check title keywords (3+ letters)
+      const titleWords = pTitle.split(/[\s,.-]+/).filter((w) => w.length >= 3);
+      const matchesTitleWord = titleWords.some((w) => queryLower.includes(w));
+
+      const isShoeQuery = queryLower.includes('shoe') || queryLower.includes('sneaker') || queryLower.includes('jootay') || queryLower.includes('jogger') || queryLower.includes('chappal') || query.includes('جوتے') || query.includes('جوتا');
+      const isShoeProd = pTitle.includes('shoe') || pTitle.includes('sneaker') || pCategory.includes('footwear') || pCategory.includes('shoe');
+
+      const isHoneyQuery = queryLower.includes('honey') || queryLower.includes('shahad') || queryLower.includes('shehad') || queryLower.includes('sidr') || query.includes('شہد');
+      const isHoneyProd = pTitle.includes('honey') || pTitle.includes('sidr') || pCategory.includes('honey');
+
+      const isShirtQuery = queryLower.includes('shirt') || queryLower.includes('tshirt') || queryLower.includes('t-shirt') || queryLower.includes('kurta') || queryLower.includes('kapray') || query.includes('شرٹ') || query.includes('قمیض');
+      const isShirtProd = pTitle.includes('shirt') || pCategory.includes('cloth') || pCategory.includes('fashion');
+
+      const isBagQuery = queryLower.includes('handbag') || queryLower.includes('bag') || queryLower.includes('purse') || queryLower.includes('wallet') || query.includes('بیگ');
+      const isBagProd = pTitle.includes('handbag') || pTitle.includes('bag') || pCategory.includes('bag');
+
+      const isWatchQuery = queryLower.includes('watch') || queryLower.includes('ghari') || queryLower.includes('gharee') || queryLower.includes('analog') || queryLower.includes('quartz') || query.includes('گھڑی');
+      const isWatchProd = pTitle.includes('watch') || pCategory.includes('watch');
+
       if (
         queryLower.includes(pTitle) ||
-        (pTitle.includes('shirt') && (
-          queryLower.includes('shirt') || queryLower.includes('tshirt') ||
-          queryLower.includes('t-shirt') || queryLower.includes('kurta') ||
-          queryLower.includes('kapray') || query.includes('شرٹ') || query.includes('قمیض')
-        )) ||
-        (pTitle.includes('shoe') && (
-          queryLower.includes('shoe') || queryLower.includes('sneaker') ||
-          queryLower.includes('jootay') || queryLower.includes('jogger') ||
-          query.includes('جوتے') || query.includes('جوتا')
-        )) ||
-        (pTitle.includes('handbag') && (
-          queryLower.includes('handbag') || queryLower.includes('bag') ||
-          queryLower.includes('purse') || queryLower.includes('wallet') ||
-          query.includes('بیگ')
-        )) ||
-        (pTitle.includes('watch') && (
-          queryLower.includes('watch') || queryLower.includes('ghari') ||
-          queryLower.includes('gharee') || queryLower.includes('analog') ||
-          queryLower.includes('quartz') || query.includes('گھڑی')
-        )) ||
-        (pCategory && queryLower.includes(pCategory))
+        pTitle.includes(queryLower) ||
+        matchesTitleWord ||
+        (isShoeQuery && isShoeProd) ||
+        (isHoneyQuery && isHoneyProd) ||
+        (isShirtQuery && isShirtProd) ||
+        (isBagQuery && isBagProd) ||
+        (isWatchQuery && isWatchProd) ||
+        (pCategory && (queryLower.includes(pCategory) || pCategory.includes(queryLower)))
       ) {
         matchedProduct = {
           _id: prod._id,
@@ -146,31 +217,34 @@ export const chatWithAssistant = async (req, res) => {
     // 4. Call Gemini AI with strict store grounding and language enforcement
     let aiReply = null;
     if (process.env.GEMINI_API_KEY) {
-      try {
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const primaryModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+      const candidateModels = [
+        process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
+        'gemini-3.1-flash-lite',
+      ].filter((v, i, a) => a.indexOf(v) === i);
 
-        const catalogContext = products
-          .map(
-            (p) =>
-              `- ${p.title} (${p.category}): Exact Price: Rs. ${p.price.toLocaleString()} | Stock: ${p.stock} units | Description: ${p.description}`
-          )
-          .join('\n');
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-        let orderContext = 'No specific order searched.';
-        if (matchedOrder) {
-          orderContext = `Customer's Searched Order: Order #${matchedOrder.orderNumber} | Status: "${matchedOrder.status}" | Customer Name: ${matchedOrder.customerName} | Total Amount: Rs. ${matchedOrder.totalPrice.toLocaleString()} (Cash on Delivery) | Shipping Address: ${matchedOrder.shippingAddress}`;
-        }
+      const catalogContext = products
+        .map(
+          (p) =>
+            `- ${p.title} (${p.category}): Exact Price: Rs. ${p.price.toLocaleString()} | Stock: ${p.stock} units | Description: ${p.description || ''}`
+        )
+        .join('\n');
 
-        // Map detected language to a clear instruction string
-        const langInstruction =
-          replyLanguage === 'urdu'
-            ? 'You MUST reply in Urdu (Nastaliq script). Do NOT use English or Roman Urdu.'
-            : replyLanguage === 'roman-urdu'
-            ? 'You MUST reply in Roman Urdu (Urdu words written with English/Latin letters). Do NOT use Urdu script or pure English.'
-            : 'You MUST reply in English. Do NOT use Urdu script or Roman Urdu words. The customer wrote in English — reply in English only.';
+      let orderContext = 'No specific order searched.';
+      if (matchedOrder) {
+        orderContext = `Customer's Searched Order: Order #${matchedOrder.orderNumber} | Status: "${matchedOrder.status}" | Customer Name: ${matchedOrder.customerName} | Total Amount: Rs. ${matchedOrder.totalPrice.toLocaleString()} (Cash on Delivery) | Shipping Address: ${matchedOrder.shippingAddress}`;
+      }
 
-        const systemPrompt = `You are a professional AI Shopping Assistant for "My Store", an e-commerce boutique in Pakistan.
+      // Map detected language to a clear instruction string
+      const langInstruction =
+        replyLanguage === 'urdu'
+          ? 'You MUST reply in Urdu (Nastaliq script). Do NOT use English or Roman Urdu.'
+          : replyLanguage === 'roman-urdu'
+          ? 'You MUST reply in Roman Urdu (Urdu words written with English/Latin letters). Do NOT use Urdu script or pure English.'
+          : 'You MUST reply in English. Do NOT use Urdu script or Roman Urdu words. The customer wrote in English — reply in English only.';
+
+      const systemPrompt = `You are a professional AI Shopping Assistant for "TrendBazaar", an e-commerce store in Pakistan.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 LANGUAGE RULE — HIGHEST PRIORITY
@@ -202,32 +276,33 @@ ASSISTANT RULES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 - Be friendly, professional, and concise (1–3 sentences).
 - State exact price and stock from inventory — never invent facts.
-- If a product card is attached below, mention it.
+- If the customer asks about an available product (e.g. Sidr Honey, shirt, Car Fog light, Honda City Bumper, Car DB kapra), mention its exact price, features, and that they can view the card below to add to bag.
+- If the customer asks about an item NOT in the inventory (such as shoes, footwear, watches, mobile, laptop), politely inform them that this item is currently not in stock, and recommend available store items (Sidr Honey, Car Fog light, Honda City Bumper, shirts) with 100% Cash on Delivery across Pakistan.
 - Never switch languages mid-reply.`;
 
-        const model = genAI.getGenerativeModel({
-          model: primaryModel,
-          systemInstruction: systemPrompt,
-        });
+      for (const modelName of candidateModels) {
+        try {
+          const model = genAI.getGenerativeModel({
+            model: modelName,
+            systemInstruction: systemPrompt,
+          });
 
-        // Race with 7.5s timeout
-        const result = await Promise.race([
-          model.generateContent(query),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Gemini API timeout')), 7500)
-          ),
-        ]);
+          // Race with 10s timeout
+          const result = await Promise.race([
+            model.generateContent(query),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error(`Gemini timeout on ${modelName}`)), 10000)
+            ),
+          ]);
 
-        const generatedReply = result?.response?.text()?.trim();
-        if (generatedReply && isReplyInLanguage(generatedReply, replyLanguage)) {
-          aiReply = generatedReply;
-        } else if (generatedReply) {
-          // Language mismatch — still use the reply, it's better than the fallback
-          console.warn(`Gemini language mismatch (expected ${replyLanguage}). Using reply anyway.`);
-          aiReply = generatedReply;
+          const generatedReply = result?.response?.text()?.trim();
+          if (generatedReply) {
+            aiReply = generatedReply;
+            break;
+          }
+        } catch (geminiErr) {
+          console.warn(`Gemini (${modelName}) error:`, geminiErr.message);
         }
-      } catch (geminiErr) {
-        console.warn('Gemini API error (falling back to built-in NLP):', geminiErr.message);
       }
     }
 
@@ -332,9 +407,9 @@ ASSISTANT RULES
       } else if (matchedProduct) {
         aiReply = localizedReply(
           replyLanguage,
-          `The ${matchedProduct.title} costs Rs. ${matchedProduct.price.toLocaleString()}. ${matchedProduct.stock} units in stock. Add it to your bag using the card below.`,
-          `${matchedProduct.title} ki price Rs. ${matchedProduct.price.toLocaleString()} hai. Stock mein ${matchedProduct.stock} units hain. Neeche card se bag mein add karein!`,
-          `${matchedProduct.title} کی قیمت Rs. ${matchedProduct.price.toLocaleString()} ہے۔ اسٹاک میں ${matchedProduct.stock} عدد دستیاب ہیں۔ نیچے کارڈ سے بیگ میں شامل کریں۔`
+          `Here is our ${matchedProduct.title} for Rs. ${matchedProduct.price.toLocaleString()}. ${matchedProduct.description || ''} Stock is available with 100% Cash on Delivery across Pakistan in 3–5 days. You can add it to your bag using the card below!`,
+          `Ji! Hamare paas ${matchedProduct.title} sirf Rs. ${matchedProduct.price.toLocaleString()} mein available hai. Stock available hai aur pure Pakistan mein 100% Cash on Delivery hai. Neeche diye gaye card se "Add to Bag" karein!`,
+          `جی ہاں! ہمارے پاس ${matchedProduct.title} صرف Rs. ${matchedProduct.price.toLocaleString()} میں دستیاب ہے۔ پورے پاکستان میں 100% کیش آن ڈیلیوری دستیاب ہے۔ نیچے کارڈ سے بیگ میں شامل کریں!`
         );
       } else if (
         queryLower.includes('hello') || queryLower.includes('hi') ||
@@ -348,21 +423,48 @@ ASSISTANT RULES
           'وعلیکم السلام! میں آپ کا AI اسٹور اسسٹنٹ ہوں۔ پروڈکٹس کی قیمت، ڈیلیوری، COD یا آرڈر ٹریکنگ کے بارے میں پوچھیں۔'
         );
       } else if (
+        queryLower.includes('shoe') || queryLower.includes('sneaker') ||
+        queryLower.includes('jootay') || queryLower.includes('jogger') ||
+        query.includes('جوتے') || query.includes('جوتا')
+      ) {
+        const availableItems = products.slice(0, 4).map((p) => p.title).join(', ');
+        aiReply = localizedReply(
+          replyLanguage,
+          `We currently do not have shoes in stock. Our store currently offers ${availableItems} with 100% Cash on Delivery across Pakistan in 3–5 days!`,
+          `Filhal shoes hamare store par available nahi hain. Hamare paas ${availableItems} available hain 100% Cash on Delivery ke sath!`,
+          `معذرت، فی الحال جوتے اسٹور پر دستیاب نہیں ہیں۔ ہمارے پاس ${availableItems} کیش آن ڈیلیوری پر دستیاب ہیں!`
+        );
+      } else if (
+        queryLower.includes('product') || queryLower.includes('item') ||
+        queryLower.includes('catalog') || queryLower.includes('kya kya') ||
+        queryLower.includes('list') || queryLower.includes('sab') ||
+        query.includes('چیزیں') || query.includes('پروڈکٹس')
+      ) {
+        const prodList = products.map((p) => `• ${p.title} (Rs. ${p.price.toLocaleString()})`).join('\n');
+        aiReply = localizedReply(
+          replyLanguage,
+          `Here are our available products in store:\n${prodList}\n\n100% Cash on Delivery available all over Pakistan (3–5 days)!`,
+          `Hamare store par yeh products available hain:\n${prodList}\n\nPure Pakistan mein 100% Cash on Delivery (COD) hai!`,
+          `ہمارے اسٹور پر یہ پراڈکٹس دستیاب ہیں:\n${prodList}\n\nپورے پاکستان میں کیش آن ڈیلیوری دستیاب ہے!`
+        );
+      } else if (
         queryLower.includes('discount') || queryLower.includes('offer') ||
         queryLower.includes('sale')
       ) {
+        const prices = products.slice(0, 4).map((p) => `${p.title} Rs. ${p.price.toLocaleString()}`).join(' | ');
         aiReply = localizedReply(
           replyLanguage,
-          'Current prices: T-Shirt Rs. 1,200 | Sneakers Rs. 2,000 | Leather Handbag Rs. 2,500 | Quartz Watch Rs. 3,200. Check product cards for details.',
-          'Current prices: T-Shirt Rs. 1,200 | Sneakers Rs. 2,000 | Leather Handbag Rs. 2,500 | Quartz Watch Rs. 3,200.',
-          'موجودہ قیمتیں: ٹی شرٹ Rs. 1,200 | اسنیکرز Rs. 2,000 | لیدر ہینڈ بیگ Rs. 2,500 | کوارٹز گھڑی Rs. 3,200۔'
+          `Current store prices: ${prices}. We offer free open parcel delivery and 100% Cash on Delivery!`,
+          `Store prices: ${prices}. 100% Cash on Delivery aur Open Parcel check karne ki sahoolat hai!`,
+          `اسٹور کی قیمتیں: ${prices}۔ کیش آن ڈیلیوری اور اوپن پارسل ڈلیوری دستیاب ہے۔`
         );
       } else {
+        const availableItems = products.slice(0, 4).map((p) => `${p.title} (Rs. ${p.price.toLocaleString()})`).join(', ');
         aiReply = localizedReply(
           replyLanguage,
-          'Happy to help! Ask me about product prices, delivery times (3–5 days), Cash on Delivery, or order tracking.',
-          'Main hazir hoon! T-Shirt, Shoes, Handbag, Watch ki price, delivery time, ya COD ke baray mein poochein.',
-          'میں آپ کی مدد کے لیے حاضر ہوں! پروڈکٹس کی قیمت، ڈیلیوری (3–5 دن)، کیش آن ڈیلیوری یا آرڈر ٹریکنگ کے بارے میں پوچھیں۔'
+          `Welcome to TrendBazaar! We currently offer ${availableItems} with 100% Cash on Delivery all across Pakistan (3–5 days). How can I assist you today?`,
+          `TrendBazaar mein khushamdeed! Hamare paas ${availableItems} available hain. Pure Pakistan mein 100% Cash on Delivery hai. Main aapki kya madad kar sakta hoon?`,
+          `ٹرینڈ بازار میں خوش آمدید! ہمارے پاس ${availableItems} دستیاب ہیں۔ پورے پاکستان میں کیش آن ڈیلیوری (3–5 دن) دستیاب ہے۔ فرمائیں میں کیا مدد کر سکتا ہوں؟`
         );
       }
     }

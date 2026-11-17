@@ -84,12 +84,12 @@ export default function AiAssistantModal({ isOpen = true, onClose }) {
   };
 
   const quickChips = [
+    'Show me Sidr Honey',
     'What is the price of the shirt?',
+    'Show me Car Fog light',
     'How long does delivery take?',
-    'Show me shoes',
-    'What are the delivery charges?',
     'Is Cash on Delivery available?',
-    'Track order #10024',
+    'Track my order',
   ];
 
   return (
