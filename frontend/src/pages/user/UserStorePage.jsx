@@ -599,28 +599,6 @@ export default function UserStorePage({
     };
   }, []);
 
-  // Sync scroll position to Home, Categories, Shop bottom tab when not hopping
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const handleScroll = () => {
-      if (trackingModalOpen || cartDrawerOpen || isDiscHopping) return;
-      const scrollPos = window.scrollY + 250;
-      const categoriesTop = categoriesRef.current ? categoriesRef.current.offsetTop : 600;
-      const productsTop = productsRef.current ? productsRef.current.offsetTop : 1200;
-
-      if (scrollPos < categoriesTop) {
-        if (activeBottomTab !== 0) setActiveBottomTab(0);
-      } else if (scrollPos >= categoriesTop && scrollPos < productsTop) {
-        if (activeBottomTab !== 1) setActiveBottomTab(1);
-      } else if (scrollPos >= productsTop) {
-        if (activeBottomTab !== 2) setActiveBottomTab(2);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [activeBottomTab, isDiscHopping, trackingModalOpen, cartDrawerOpen]);
-
   // Keep Track & Bag synchronized with their active overlays
   useEffect(() => {
     if (cartDrawerOpen) {
@@ -4863,32 +4841,32 @@ export default function UserStorePage({
         </div>
       )}
 
-              {/* Floating AI Robot Shopping Assistant */}
-              <div
-                className="floating-ai-btn-wrap"
-                style={{
-                  position: 'fixed',
-                  bottom: '24px',
-                  right: '24px',
-                  zIndex: 99,
-                }}
-              >
-                <button
-                  onClick={() => setAiModalOpen(true)}
-                  className="clay-floating-ai"
-                  title="AI Shopping Assistant"
-                  aria-label="AI Shopping Assistant"
-                  style={{
-                    backgroundColor: theme.primary,
-                    color: '#ffffff',
-                    cursor: 'pointer',
-                    border: 'none',
-                  }}
-                >
-                  <Bot size={24} strokeWidth={2.2} className="ai-robot-icon" />
-                  <span className="ai-robot-status-dot" />
-                </button>
-              </div>
+      {/* Floating AI Robot Shopping Assistant */}
+      <div
+        className="floating-ai-btn-wrap"
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          zIndex: 99,
+        }}
+      >
+        <button
+          onClick={() => setAiModalOpen(true)}
+          className="clay-floating-ai"
+          title="AI Shopping Assistant"
+          aria-label="AI Shopping Assistant"
+          style={{
+            backgroundColor: theme.primary,
+            color: '#ffffff',
+            cursor: 'pointer',
+            border: 'none',
+          }}
+        >
+          <Bot size={24} strokeWidth={2.2} className="ai-robot-icon" />
+          <span className="ai-robot-status-dot" />
+        </button>
+      </div>
 
       {/* Customer Mobile Bottom Navigation Bar with Floating Notch & Hopping Paper Disc */}
       <nav className="mobile-bottom-nav" aria-label="Mobile Bottom Navigation">
